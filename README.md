@@ -1,6 +1,6 @@
 # 3D Printing Learning Materials
 
-> Andy 哥 3D 打印学习资料合集 — 42 个 HTML 互动教程  
+> Andy 哥 3D 打印学习资料合集 — 43 个 HTML 互动教程  
 > 全是单文件 HTML（零依赖双击即开），覆盖 KLP1 / K1 Max / Voron / ERCF / F360 / 调平校准 / 耗材工艺全链路
 
 ## 📚 目录索引（42 个文件，按主题分组）
@@ -71,21 +71,22 @@
 | 35 | [大鱼SPA4色机评估.html](./大鱼SPA4色机评估.html) | 大鱼 SPA 评估 |
 | 36 | [闲鱼4Z轴3D打印机调研_20260613.html](./闲鱼4Z轴3D打印机调研_20260613.html) | 闲鱼 4Z 调研 |
 
-### 🎨 耗材 / 工艺 / 热端（3 个）
+### 🎨 耗材 / 工艺 / 热端（4 个）
 
 | # | 文件 | 主题 |
 |---|---|---|
-| 37 | [3D打印热端发展史+2026最新技术.html](./3D打印热端发展史+2026最新技术.html) | 热端发展史 + 2026 技术 |
-| 38 | [AD5X喷嘴vs2026最新.html](./AD5X喷嘴vs2026最新.html) | AD5X 喷嘴 |
-| 39 | [PETG温度塔完全指南_Andy哥.html](./PETG温度塔完全指南_Andy哥.html) | PETG 温度塔 |
+| 38 | [拓竹自动耗材流量校准完整原理.html](./拓竹自动耗材流量校准完整原理.html) | 拓竹 X1/P1 vs A1/H2D 双系统对比 ⭐ |
+| 39 | [3D打印热端发展史+2026最新技术.html](./3D打印热端发展史+2026最新技术.html) | 热端发展史 + 2026 技术 |
+| 40 | [AD5X喷嘴vs2026最新.html](./AD5X喷嘴vs2026最新.html) | AD5X 喷嘴 |
+| 41 | [PETG温度塔完全指南_Andy哥.html](./PETG温度塔完全指南_Andy哥.html) | PETG 温度塔 |
 
 ### 🏭 主板 / 决策 / 调试（3 个）
 
 | # | 文件 | 主题 |
 |---|---|---|
-| 40 | [3d_printer_mainboard_history_2008_2026.html](./3d_printer_mainboard_history_2008_2026.html) | 主板发展史 2008-2026 |
-| 41 | [3D打印决策指南动画.html](./3D打印决策指南动画.html) | 选型决策树 |
-| 42 | [3D打印机出厂调试指南.html](./3D打印机出厂调试指南.html) | 出厂调试流程 |
+| 42 | [3d_printer_mainboard_history_2008_2026.html](./3d_printer_mainboard_history_2008_2026.html) | 主板发展史 2008-2026 |
+| 43 | [3D打印决策指南动画.html](./3D打印决策指南动画.html) | 选型决策树 |
+| 44 | [3D打印机出厂调试指南.html](./3D打印机出厂调试指南.html) | 出厂调试流程 |
 
 ## 🚀 使用方法
 
@@ -106,7 +107,7 @@ cd 3D-Printing-Learning-Materials
 
 - **作者**：FullPeak andy
 - **创建日期**：2026-06-16
-- **文件数**：42 个 HTML 互动教程
+- **文件数**：43 个 HTML 互动教程
 - **适配机器**：KLP1 V2.2 / K1 Max / K1 SE / Voron 2.4 / Anycubic Kobra 2 Max / 大鱼 SPA
 - **适配材料**：PLA / PETG / ABS / TPU
 - **风格**：单文件 HTML 互动动画 + 图表可视化 + 实战 SOP

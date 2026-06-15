@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>拓竹自动耗材流量校准完整原理（X1/P1 vs A1/H2D 双系统）</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #0a0e1a; color: #e8e8e8; line-height: 1.6; }
+.wrap { max-width: 1400px; margin: 0 auto; padding: 20px; }
+h1 { font-size: 28px; color: #4dd0e1; text-align: center; margin: 20px 0 8px; font-weight: 700; }
+.subtitle { text-align: center; color: #8aa; margin-bottom: 24px; font-size: 14px; }
+.tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+.tab { padding: 10px 18px; background: #1a2332; color: #8aa; border: 1px solid #2a3a4e; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-size: 14px; }
+.tab:hover { background: #2a3a4e; color: #fff; }
+.tab.active { background: linear-gradient(135deg, #4dd0e1, #26a69a); color: #0a0e1a; font-weight: 600; }
+.panel { display: none; background: #131a2a; border: 1px solid #2a3a4e; border-radius: 10px; padding: 24px; margin-bottom: 20px; }
+.panel.active { display: block; animation: fadeIn 0.3s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+h2 { color: #4dd0e1; font-size: 22px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #2a3a4e; }
+h3 { color: #80cbc4; font-size: 17px; margin: 18px 0 10px; }
+p { color: #c5cae9; margin-bottom: 10px; font-size: 14px; }
+table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13px; }
+th, td { padding: 10px; text-align: left; border: 1px solid #2a3a4e; }
+th { background: #1a2332; color: #4dd0e1; font-weight: 600; }
+tr:nth-child(even) { background: rgba(77, 208, 225, 0.03); }
+tr:hover { background: rgba(77, 208, 225, 0.08); }
+.highlight { background: linear-gradient(135deg, #ff6b6b22, #ffa72622); border-left: 4px solid #ffa726; padding: 12px 16px; border-radius: 6px; margin: 14px 0; font-size: 14px; }
+.green-box { background: linear-gradient(135deg, #26a69a22, #4dd0e122); border-left: 4px solid #26a69a; padding: 12px 16px; border-radius: 6px; margin: 14px 0; font-size: 14px; }
+.warn-box { background: linear-gradient(135deg, #ef535022, #ff704322); border-left: 4px solid #ef5350; padding: 12px 16px; border-radius: 6px; margin: 14px 0; font-size: 14px; }
+.code { background: #0d1421; color: #4dd0e1; padding: 12px 16px; border-radius: 6px; font-family: "Consolas", "Monaco", monospace; font-size: 13px; margin: 10px 0; overflow-x: auto; }
+.slider-block { background: #0d1421; border: 1px solid #2a3a4e; border-radius: 8px; padding: 20px; margin: 16px 0; }
+.slider-label { display: flex; justify-content: space-between; color: #4dd0e1; margin-bottom: 8px; font-size: 14px; }
+.slider-value { color: #ffa726; font-weight: 700; font-size: 18px; }
+input[type=range] { width: 100%; height: 8px; background: #1a2332; border-radius: 4px; outline: none; -webkit-appearance: none; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; background: linear-gradient(135deg, #4dd0e1, #26a69a); border-radius: 50%; cursor: pointer; box-shadow: 0 2px 8px rgba(77, 208, 225, 0.4); }
+input[type=range]::-moz-range-thumb { width: 22px; height: 22px; background: linear-gradient(135deg, #4dd0e1, #26a69a); border-radius: 50%; cursor: pointer; border: none; }
+.canvas { display: block; margin: 12px auto; background: #0a0e1a; border: 1px solid #2a3a4e; border-radius: 6px; }
+.btn-group { display: flex; gap: 8px; margin: 12px 0; flex-wrap: wrap; }
+.btn { padding: 8px 16px; background: #1a2332; color: #4dd0e1; border: 1px solid #4dd0e1; border-radius: 4px; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+.btn:hover { background: #4dd0e1; color: #0a0e1a; }
+.btn.active { background: linear-gradient(135deg, #4dd0e1, #26a69a); color: #0a0e1a; font-weight: 600; }
+.tag { display: inline-block; padding: 2px 8px; background: #2a3a4e; color: #4dd0e1; border-radius: 3px; font-size: 12px; margin-right: 6px; }
+.tag-green { background: #1b5e20; color: #a5d6a7; }
+.tag-red { background: #b71c1c; color: #ef9a9a; }
+.tag-yellow { background: #f57f17; color: #fff59d; }
+.footer { text-align: center; color: #607d8b; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #1a2332; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🖨️ 拓竹自动耗材流量校准完整原理</h1>
+<div class="subtitle">X1/P1 vs A1/H2D 两套独立自动系统深度对比 · 含 K 值交互模拟</div>
+
+<div class="tabs">
+  <div class="tab active" data-panel="p1">📊 核心问题：两类误差</div>
+  <div class="tab" data-panel="p2">🔬 X1/P1（LiDAR 光学）</div>
+  <div class="tab" data-panel="p3">🌀 A1/H2D（涡流压力）</div>
+  <div class="tab" data-panel="p4">⚖️ 方案对比</div>
+  <div class="tab" data-panel="p5">🎛️ K 值交互模拟</div>
+  <div class="tab" data-panel="p6">📦 AMS 联动</div>
+  <div class="tab" data-panel="p7">🔧 硬件配套</div>
+  <div class="tab" data-panel="p8">🌐 术语对照</div>
+</div>
+
+<!-- Tab 1: 核心问题 -->
+<div class="panel active" id="p1">
+  <h2>一、核心问题：流量误差分两类，必须分两步校准</h2>
+  <p>3D 打印的"流量不准"其实是<strong>两个完全独立的物理问题</strong>，用同一组参数修不了，必须分开校准：</p>
+
+  <table>
+    <tr>
+      <th>误差类型</th>
+      <th>现象</th>
+      <th>校准参数</th>
+      <th>性质</th>
+    </tr>
+    <tr>
+      <td><strong>静态流量误差</strong></td>
+      <td>线条整体偏宽/偏窄，壁厚不准，<br>间隙公差偏移</td>
+      <td><span class="tag tag-green">Flow Multiplier</span><br>流量倍率</td>
+      <td>粗调 · 整体出料量</td>
+    </tr>
+    <tr>
+      <td><strong>动态流量误差</strong></td>
+      <td>拐角缺料、堆瘤、拉丝，<br>薄壁边缘质量差</td>
+      <td><span class="tag tag-green">Flow Dynamics K 值</span><br>压力提前 / 压力迟滞补偿</td>
+      <td>细调 · 加减速段压力补偿</td>
+    </tr>
+  </table>
+
+  <div class="highlight">
+    <strong>🔑 关键认知</strong>：静态误差源于<strong>耗材直径偏差 + 挤出齿轮打滑</strong>，动态误差源于<strong>喷嘴内熔体压力对速度变化的响应滞后</strong>。两者原因不同，参数不通用。
+  </div>
+
+  <h3>为什么动态 K 值是"细调"？</h3>
+  <p>高速打印时，喷嘴内熔体压力是<strong>滞后的</strong>：</p>
+  <ul style="margin-left: 24px; color: #c5cae9; font-size: 14px;">
+    <li><strong>加速起点</strong>：电机开始推 → 压力慢慢建立 → 实际出料 < 理论出料 → <span class="tag tag-red">缺料</span></li>
+    <li><strong>减速终点</strong>：电机停止 → 残余压力还在推 → 实际出料 > 理论出料 → <span class="tag tag-red">堆瘤</span></li>
+  </ul>
+  <p style="margin-top: 10px;">K 值 = 挤出电机<strong>提前加料 / 提前减料</strong>的补偿强度，刚好抵消压力滞后，让实际出料 = 理论出料。</p>
+</div>
+
+<!-- Tab 2: X1/P1 LiDAR -->
+<div class="panel" id="p2">
+  <h2>二、X1 / P1 系列方案：Micro LiDAR 光学扫描</h2>
+  <div class="green-box">
+    <strong>🛰️ 硬件核心</strong>：双 7μm 精度激光雷达（Micro LiDAR），在真实打印的测试线上来回扫描
+  </div>
+
+  <h3>1. 静态流量倍率校准流程（Flow Rate）</h3>
+  <table>
+    <tr><th>步骤</th><th>动作</th></tr>
+    <tr><td>① 升温</td><td>机器升温到耗材标准温度 + 实际打印层高</td></tr>
+    <tr><td>② 打测试线</td><td>热床侧边打印多组不同速度、不同挤出量的标准单线</td></tr>
+    <tr><td>③ 雷达扫描</td><td>双显微激光雷达逐行扫每条线，测真实宽/高</td></tr>
+    <tr><td>④ 换算截面积</td><td>实测线条截面积 ÷ 切片理论截面积 = 流量系数</td></tr>
+    <tr><td>⑤ 绑定耗材档案</td><td>系数绑定 耗材+喷嘴 组合，存 AMS 档案</td></tr>
+  </table>
+
+  <div class="code">
+公式：流量系数 = 理论截面积 ÷ 实测截面积
+
+例：耗材偏细 → 实测线条更窄 → 系数 1.05 → 打印时多挤出 5%
+    耗材偏粗 → 系数 < 1 → 减少出料
+  </div>
+
+  <h3>2. 动态 K 值自动校准流程</h3>
+  <table>
+    <tr><th>步骤</th><th>动作</th><th>LiDAR 观测</th></tr>
+    <tr><td>① 打印变速线</td><td>低速 → 极速 → 急停</td><td>—</td></tr>
+    <tr><td>② 加速段</td><td>线条变细</td><td>压力建立慢 → 需<strong>更大 K 值</strong></td></tr>
+    <tr><td>③ 减速段</td><td>线条凸起</td><td>泄压滞后 → 需<strong>更大 K 值</strong></td></tr>
+    <tr><td>④ 拟合曲线</td><td>固件拟合耗材流体响应</td><td>输出专属 K 补偿参数</td></tr>
+    <tr><td>⑤ 实时补偿</td><td>挤出电机提前加/减料</td><td>抵消压力延迟</td></tr>
+  </table>
+
+  <h3>限制</h3>
+  <div class="warn-box">
+    <strong>❌ 透明 / 半透明 / 丝绸反光耗材</strong>：激光反射异常，LiDAR 测不准，需手动校准。
+  </div>
+</div>
+
+<!-- Tab 3: A1/H2D 涡流 -->
+<div class="panel" id="p3">
+  <h2>三、A1 / A1 Mini / H2D 方案：涡流压力传感</h2>
+  <div class="green-box">
+    <strong>🌀 硬件核心</strong>：热端内置高频涡流压力传感器（Eddy-Current Force Sensor），<strong>20kHz 采样</strong>，<strong>无需在热床打测试线</strong>
+  </div>
+
+  <h3>1. 动态 K 值校准核心流程</h3>
+  <table>
+    <tr><th>步骤</th><th>动作</th></tr>
+    <tr><td>① 移动到吐料仓</td><td>喷头移到侧边吐料槽</td></tr>
+    <tr><td>② 反复加减速</td><td>持续往复加速、减速挤出耗材</td></tr>
+    <tr><td>③ 高频采样</td><td>传感器实时采集：推送阻力 + 熔体压力波动（20kHz）</td></tr>
+    <tr><td>④ 拟合 K 值</td><td>捕捉加速段阻力上升慢 / 减速段残余压力推料的迟滞曲线</td></tr>
+    <tr><td>⑤ 输出参数</td><td>直接拟合最优 K 补偿值，无需占用热床、无废线条</td></tr>
+  </table>
+
+  <h3>2. 静态流量倍率怎么校准？</h3>
+  <div class="warn-box">
+    <strong>⚠️ A1 / A1 Mini / H2D 没有激光雷达，静态流量倍率只能手动调整。</strong><br>
+    只能校准动态 K 值（自动涡流），静态 Flow Multiplier（耗材直径/打滑误差）需要用户手动补偿。
+  </div>
+
+  <h3>优点</h3>
+  <ul style="margin-left: 24px; color: #c5cae9; font-size: 14px;">
+    <li>✅ 不占热床、不打废线条</li>
+    <li>✅ 校准速度快（纯传感采样）</li>
+    <li>✅ 透明/反光耗材 <span class="tag tag-green">完全不受影响</span></li>
+    <li>✅ 真实工况（直接在喷嘴内测压力）</li>
+  </ul>
+</div>
+
+<!-- Tab 4: 对比表 -->
+<div class="panel" id="p4">
+  <h2>四、两套方案对比</h2>
+  <table>
+    <tr>
+      <th>维度</th>
+      <th>X1 / P1 系列</th>
+      <th>A1 / A1 Mini / H2D</th>
+    </tr>
+    <tr>
+      <td><strong>校准方式</strong></td>
+      <td>在热床打印测试线</td>
+      <td>在吐料仓，无打印</td>
+    </tr>
+    <tr>
+      <td><strong>硬件</strong></td>
+      <td>双 Micro LiDAR 激光雷达</td>
+      <td>涡流压力传感器（20kHz）</td>
+    </tr>
+    <tr>
+      <td><strong>静态流量（Flow Multiplier）</strong></td>
+      <td>✅ <span class="tag tag-green">LiDAR 全自动</span></td>
+      <td>❌ <span class="tag tag-red">手动</span></td>
+    </tr>
+    <tr>
+      <td><strong>动态 K 值（压力提前）</strong></td>
+      <td>✅ LiDAR 全自动</td>
+      <td>✅ <span class="tag tag-green">涡流传感全自动</span></td>
+    </tr>
+    <tr>
+      <td><strong>校准耗时</strong></td>
+      <td>慢（要打多组线条）</td>
+      <td>快（纯传感采样）</td>
+    </tr>
+    <tr>
+      <td><strong>透明耗材</strong></td>
+      <td>❌ 激光反射异常</td>
+      <td>✅ 正常</td>
+    </tr>
+    <tr>
+      <td><strong>反光耗材</strong></td>
+      <td>❌ 激光反射异常</td>
+      <td>✅ 正常</td>
+    </tr>
+    <tr>
+      <td><strong>废料</strong></td>
+      <td>有（热床侧边的测试线）</td>
+      <td>无（全在吐料仓）</td>
+    </tr>
+    <tr>
+      <td><strong>校准数据真实度</strong></td>
+      <td>看线条宽度（间接）</td>
+      <td>看熔体压力（直接）</td>
+    </tr>
+  </table>
+
+  <h3>选型建议</h3>
+  <div class="highlight">
+    <strong>主力打印透明/反光耗材</strong> → A1/H2D（涡流方案完胜）<br>
+    <strong>主力打印常规 PLA/PETG/ABS</strong> → X1/P1（LiDAR 全自动省心）<br>
+    <strong>经常切耗材 + 切喷嘴</strong> → X1（双耗材自动校准体系成熟）
+  </div>
+</div>
+
+<!-- Tab 5: K 值交互模拟 -->
+<div class="panel" id="p5">
+  <h2>五、K 值交互模拟（拖动滑块看效果）</h2>
+  <p>下面用 Canvas 实时模拟 K 值对拐角打印质量的影响。拖动滑块改变 K 值，观察加速段缺料、减速段堆瘤的变化。</p>
+
+  <div class="slider-block">
+    <div class="slider-label">
+      <span>K 值（压力提前补偿强度）</span>
+      <span class="slider-value" id="kValue">1.0</span>
+    </div>
+    <input type="range" id="kSlider" min="0" max="2" step="0.05" value="1.0">
+
+    <div class="slider-label" style="margin-top: 16px;">
+      <span>流量倍率（Flow Multiplier）</span>
+      <span class="slider-value" id="flowValue">1.00</span>
+    </div>
+    <input type="range" id="flowSlider" min="0.8" max="1.2" step="0.01" value="1.0">
+
+    <div class="slider-label" style="margin-top: 16px;">
+      <span>打印速度</span>
+      <span class="slider-value" id="speedValue">150 mm/s</span>
+    </div>
+    <input type="range" id="speedSlider" min="50" max="300" step="10" value="150">
+
+    <div class="btn-group">
+      <div class="btn active" data-pattern="corner">拐角</div>
+      <div class="btn" data-pattern="thinwall">薄壁</div>
+      <div class="btn" data-pattern="bridge">桥接</div>
+    </div>
+
+    <canvas id="simCanvas" class="canvas" width="1200" height="280"></canvas>
+
+    <div class="green-box" id="explainBox">
+      <strong>K = 1.0 · Flow = 1.00 · 150 mm/s · 拐角</strong><br>
+      当前是<strong>理想状态</strong>：加减速段的挤出补偿刚好抵消压力滞后，线条宽度均匀、无缺料无堆瘤。
+    </div>
+  </div>
+
+  <h3>💡 怎么用这个模拟器</h3>
+  <ul style="margin-left: 24px; color: #c5cae9; font-size: 14px;">
+    <li>把 <strong>K 值降到 0</strong> → 看加速段线条变细、减速段堆瘤（缺补偿）</li>
+    <li>把 <strong>K 值调到 2.0</strong> → 看加速段过补偿（凸起）、减速段凹陷（过抽料）</li>
+    <li>把 <strong>流量倍率调到 0.9</strong> → 看整体线条变细（缺料）</li>
+    <li>把 <strong>流量倍率调到 1.2</strong> → 看整体线条变粗（过料）</li>
+    <li><strong>速度越快</strong>，压力滞后越严重，K 值需要更激进</li>
+    <li>切换"薄壁"和"桥接"看 K 值对不同特征的影响差异</li>
+  </ul>
+</div>
+
+<!-- Tab 6: AMS 联动 -->
+<div class="panel" id="p6">
+  <h2>六、AMS 多耗材联动逻辑</h2>
+  <table>
+    <tr>
+      <th>机制</th>
+      <th>说明</th>
+    </tr>
+    <tr>
+      <td><strong>独立料仓档案</strong></td>
+      <td>每个 AMS 料仓记录独立的流量倍率 + K 值</td>
+    </tr>
+    <tr>
+      <td><strong>耗材区分</strong></td>
+      <td>区分不同品牌的 PLA / PETG / ABS / 尼龙 / TPU</td>
+    </tr>
+    <tr>
+      <td><strong>换料自动加载</strong></td>
+      <td>打印换料时，读取对应耗材档案自动加载校准参数</td>
+    </tr>
+    <tr>
+      <td><strong>触发重测</strong></td>
+      <td>更换喷嘴 / 切换耗材类型 → 机器自动提示重新执行流量校准</td>
+    </tr>
+    <tr>
+      <td><strong>运行模式</strong></td>
+      <td>支持 "每次打印自动重测" 或 "保存参数复用" 两种</td>
+    </tr>
+  </table>
+
+  <div class="highlight">
+    <strong>实战经验</strong>：4 槽 AMS 全装不同品牌 PLA 时，参数差异可达 ±8%，校准一次值得；同品牌同批次耗材可复用，强制每次重测会浪费时间。
+  </div>
+</div>
+
+<!-- Tab 7: 硬件配套 -->
+<div class="panel" id="p7">
+  <h2>七、底层硬件配套（保证校准数据真实）</h2>
+  <table>
+    <tr>
+      <th>硬件</th>
+      <th>作用</th>
+    </tr>
+    <tr>
+      <td><strong>PMSM 伺服挤出闭环</strong></td>
+      <td>20kHz 电流/位置闭环，精准控制挤出步进，微量挤出无打滑</td>
+    </tr>
+    <tr>
+      <td><strong>全域温度闭环</strong></td>
+      <td>热端、密闭舱恒温，消除温度波动导致的熔体粘度变化</td>
+    </tr>
+    <tr>
+      <td><strong>六轴陀螺仪</strong></td>
+      <td>校准过程抑制机身共振，避免线条宽窄测量失真</td>
+    </tr>
+    <tr>
+      <td><strong>HMS 整机健康监测</strong></td>
+      <td>识别皮带松弛 / 喷嘴堵塞 / 耗材受潮，异常时中断校准并告警</td>
+    </tr>
+  </table>
+
+  <h3>为什么硬件配套这么重要？</h3>
+  <p>校准的本质是<strong>建立"真实物理量 ↔ 切片理论值"的对应关系</strong>。如果挤出打滑、温度漂移、机身振动这些"噪声"不消除，LiDAR 测出的线条宽度本身就是错的，算出来的 K 值也是错的。</p>
+
+  <div class="green-box">
+    <strong>开源 Klipper 对照</strong>：KLP1 用开源 Klipper，<strong>没有 PMSM 闭环、没有六轴陀螺仪、没有 HMS</strong>，流量校准只能靠 PA (Pressure Advance) + 手动调 E-steps + 手动测线宽。这就是为什么拓竹能全自动校准而 KLP1 要手动校准。
+  </div>
+</div>
+
+<!-- Tab 8: 术语对照 -->
+<div class="panel" id="p8">
+  <h2>八、英文术语对照（适配英文资料查询）</h2>
+  <table>
+    <tr>
+      <th>中文</th>
+      <th>English</th>
+    </tr>
+    <tr><td>激光雷达静态流量倍率校准</td><td>Micro LiDAR Flow Rate Calibration</td></tr>
+    <tr><td>涡流传感动态流量校准</td><td>Eddy-Current Dynamic Flow Calibration</td></tr>
+    <tr><td>流量倍率 / 挤出系数</td><td>Flow Multiplier / Extrusion Multiplier</td></tr>
+    <tr><td>动态流量补偿 K 值（压力提前）</td><td>Flow Dynamics K-Value</td></tr>
+    <tr><td>喷嘴压力迟滞补偿</td><td>Pressure Lag Compensation</td></tr>
+    <tr><td>AMS 耗材校准参数库</td><td>AMS Filament Parameter Database</td></tr>
+    <tr><td>吐料仓无打印式校准</td><td>Purge Chamber Calibration</td></tr>
+    <tr><td>涡流压力传感器</td><td>Eddy-Current Force Sensor</td></tr>
+    <tr><td>7μm 精度激光雷达</td><td>7μm Micro LiDAR</td></tr>
+    <tr><td>挤出倍率 / 流量系数</td><td>Flow Coefficient</td></tr>
+  </table>
+
+  <h3>一句话总结</h3>
+  <div class="highlight">
+    <strong>拓竹双系统核心</strong>：X1/P1 是"看着线条校准"（LiDAR 光学、全自动、怕反光），A1/H2D 是"摸着压力校准"（涡流传感、动态全自动、静态手动、不怕反光）。K 值 = 加减速段挤出电机提前加料 / 减料的强度。
+  </div>
+
+  <h3>开源 Klipper 对照表</h3>
+  <table>
+    <tr>
+      <th>拓竹</th>
+      <th>Klipper（KLP1）</th>
+      <th>差异</th>
+    </tr>
+    <tr>
+      <td>Flow Multiplier（自动）</td>
+      <td>Extrusion Multiplier（手动）</td>
+      <td>Klipper 没有 LiDAR/涡流，全靠手动测</td>
+    </tr>
+    <tr>
+      <td>Flow Dynamics K 值（自动）</td>
+      <td>Pressure Advance（手动标定）</td>
+      <td>Klipper 用 PA ≈ 拓竹的 K 值，但要手动画 PA 塔测</td>
+    </tr>
+    <tr>
+      <td>AMS 耗材档案</td>
+      <td>手动改 printer.cfg 的耗材 section</td>
+      <td>Klipper 没有自动换料参数库</td>
+    </tr>
+    <tr>
+      <td>HMS 健康监测</td>
+      <td>无（靠肉眼 + M112 紧急停止）</td>
+      <td>Klipper 缺乏整机健康监测层</td>
+    </tr>
+  </table>
+</div>
+
+<div class="footer">
+📚 拓竹自动耗材流量校准完整原理 · X1/P1 vs A1/H2D 双系统<br>
+单文件 HTML · 零依赖双击即开 · 适配 KLP1 开源玩家理解对照
+</div>
+</div>
+
+<script>
+// Tab 切换
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.panel).classList.add('active');
+  });
+});
+
+// K 值交互模拟
+const kSlider = document.getElementById('kSlider');
+const flowSlider = document.getElementById('flowSlider');
+const speedSlider = document.getElementById('speedSlider');
+const kValue = document.getElementById('kValue');
+const flowValue = document.getElementById('flowValue');
+const speedValue = document.getElementById('speedValue');
+const explainBox = document.getElementById('explainBox');
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+let currentPattern = 'corner';
+
+document.querySelectorAll('[data-pattern]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-pattern]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentPattern = btn.dataset.pattern;
+    drawSim();
+  });
+});
+
+[kSlider, flowSlider, speedSlider].forEach(s => s.addEventListener('input', drawSim));
+
+function drawSim() {
+  const k = parseFloat(kSlider.value);
+  const flow = parseFloat(flowSlider.value);
+  const speed = parseInt(speedSlider.value);
+  kValue.textContent = k.toFixed(2);
+  flowValue.textContent = flow.toFixed(2);
+  speedValue.textContent = speed + ' mm/s';
+
+  ctx.fillStyle = '#0a0e1a';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // 网格
+  ctx.strokeStyle = '#1a2332';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < canvas.width; i += 40) {
+    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+  }
+
+  const baseY = canvas.height / 2;
+  const lineLen = 1100;
+  const startX = 50;
+
+  if (currentPattern === 'corner') {
+    // 拐角图案：直线 → 90° 拐角 → 直线
+    ctx.strokeStyle = '#4dd0e1';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(startX, baseY);
+    ctx.lineTo(startX + 400, baseY);
+    ctx.lineTo(startX + 400, baseY - 120);
+    ctx.stroke();
+
+    // 模拟打印线条宽度
+    const baselineW = 8 * flow;
+    const pressureLag = 0.04 * (speed / 150); // 压力滞后程度
+    const kComp = (k - 1.0) * 12; // K 值补偿强度
+
+    // 直线 1 段（速度稳定）
+    drawLine(ctx, startX, baseY - 4, 400, 8 * flow, '#26a69a');
+
+    // 加速段
+    for (let i = 0; i < 60; i++) {
+      const x = startX + 60 - i;
+      const w = baselineW + (i / 60) * (pressureLag * baselineW) - kComp * (i / 60);
+      ctx.fillStyle = i < 20 ? '#ef5350' : (i < 40 ? '#ffa726' : '#26a69a');
+      ctx.fillRect(x, baseY - w/2, 2, w);
+    }
+
+    // 拐角区域（堆瘤 / 缺料核心区）
+    for (let i = 0; i < 40; i++) {
+      const x = startX + 60 + i;
+      const w = baselineW + (1 - i/40) * (pressureLag * baselineW * 1.5) - kComp * (1 - i/40);
+      ctx.fillStyle = i < 15 ? '#ef5350' : (i < 30 ? '#ffa726' : '#26a69a');
+      ctx.fillRect(x, baseY - w/2, 2, w);
+    }
+
+    // 拐角连接段
+    ctx.fillStyle = k > 1.2 ? '#ef5350' : (k < 0.8 ? '#ef5350' : '#26a69a');
+    ctx.fillRect(startX + 100, baseY - 20, 6, 40);
+    ctx.fillRect(startX + 100, baseY - 30, 6, 60);
+
+    // 拐角后直线（垂直）
+    for (let y = 0; y < 120; y++) {
+      const w = baselineW;
+      ctx.fillStyle = '#26a69a';
+      ctx.fillRect(startX + 400 - w/2, baseY - y - 2, w, 2);
+    }
+
+    // 图例
+    drawLegend(ctx, [
+      { color: '#26a69a', text: '理想宽度' },
+      { color: '#ffa726', text: '偏差 ±10%' },
+      { color: '#ef5350', text: '缺料/堆瘤' }
+    ]);
+
+  } else if (currentPattern === 'thinwall') {
+    // 薄壁
+    const baselineW = 4 * flow;
+    const kComp = (k - 1.0) * 6;
+
+    for (let i = 0; i < 5; i++) {
+      const x = startX + i * 220;
+      const w = baselineW + (i % 2 === 0 ? kComp : -kComp);
+      ctx.fillStyle = Math.abs(w - baselineW) < 1 ? '#26a69a' : (Math.abs(w - baselineW) < 2 ? '#ffa726' : '#ef5350');
+      ctx.fillRect(x, baseY - 60, w, 120);
+    }
+
+    drawLegend(ctx, [
+      { color: '#26a69a', text: '薄壁均匀' },
+      { color: '#ffa726', text: 'K 值偏差' },
+      { color: '#ef5350', text: '薄壁塌陷/堆料' }
+    ]);
+
+  } else if (currentPattern === 'bridge') {
+    // 桥接
+    const bridgeLen = 600;
+    const baselineW = 5 * flow;
+    const kComp = (k - 1.0) * 4;
+
+    // 桥起点
+    for (let i = 0; i < 30; i++) {
+      const w = baselineW + (i / 30) * kComp;
+      ctx.fillStyle = w > baselineW + 1 ? '#ef5350' : '#26a69a';
+      ctx.fillRect(startX + i, baseY - 4, 2, 8);
+    }
+    // 桥中段
+    for (let i = 0; i < bridgeLen - 60; i++) {
+      ctx.fillStyle = '#26a69a';
+      ctx.fillRect(startX + 30 + i, baseY - 2, 1, 4);
+    }
+    // 桥终点
+    for (let i = 0; i < 30; i++) {
+      const w = baselineW - (i / 30) * kComp;
+      ctx.fillStyle = w < baselineW - 1 ? '#ef5350' : '#26a69a';
+      ctx.fillRect(startX + bridgeLen - 30 + i, baseY - 4, 2, 8);
+    }
+
+    drawLegend(ctx, [
+      { color: '#26a69a', text: '桥接均匀' },
+      { color: '#ef5350', text: 'K 过补偿导致下垂' }
+    ]);
+  }
+
+  // 解释文本
+  let status = '';
+  if (k < 0.5) status = '<span class="tag tag-red">K 值严重不足</span> 加速段大量缺料、减速段堆瘤明显';
+  else if (k < 0.85) status = '<span class="tag tag-yellow">K 值偏低</span> 拐角轻微缺料';
+  else if (k < 1.15) status = '<span class="tag tag-green">K 值理想</span> 压力补偿恰到好处';
+  else if (k < 1.5) status = '<span class="tag tag-yellow">K 值偏高</span> 加速段过补偿、减速段过抽料';
+  else status = '<span class="tag tag-red">K 值严重过补偿</span> 出现反相缺料/堆料';
+
+  let flowStatus = '';
+  if (flow < 0.92) flowStatus = '<span class="tag tag-red">流量不足</span> 线条偏细';
+  else if (flow < 0.98) flowStatus = '<span class="tag tag-yellow">流量略低</span>';
+  else if (flow < 1.02) flowStatus = '<span class="tag tag-green">流量准确</span>';
+  else if (flow < 1.08) flowStatus = '<span class="tag tag-yellow">流量略高</span>';
+  else flowStatus = '<span class="tag tag-red">流量过大</span> 线条偏粗';
+
+  explainBox.innerHTML = `<strong>K = ${k.toFixed(2)} · Flow = ${flow.toFixed(2)} · ${speed} mm/s · ${currentPattern === 'corner' ? '拐角' : (currentPattern === 'thinwall' ? '薄壁' : '桥接')}</strong><br>${status} · ${flowStatus}`;
+}
+
+function drawLine(ctx, x, y, w, h, color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, w, h);
+}
+
+function drawLegend(ctx, items) {
+  const x = 50, y = 250;
+  ctx.font = '12px monospace';
+  items.forEach((item, i) => {
+    ctx.fillStyle = item.color;
+    ctx.fillRect(x + i * 200, y - 8, 12, 12);
+    ctx.fillStyle = '#e8e8e8';
+    ctx.fillText(item.text, x + i * 200 + 18, y + 2);
+  });
+}
+
+drawSim();
+</script>
+</body>
+</html>
