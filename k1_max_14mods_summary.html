@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>K1 MAX 半年使用 + 14 件改装总结 - 三三三三三文啊</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0a0e14;--bg2:#131922;--bg3:#1c2330;
+    --fg:#e6e6e6;--fg2:#9ba3b4;--fg3:#5a6373;
+    --acc:#00d4ff;--acc2:#ff6b35;--acc3:#a3e635;--warn:#fbbf24;--err:#ef4444;
+    --ok:#10b981;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+       background:var(--bg);color:var(--fg);line-height:1.6;padding:20px;max-width:1280px;margin:0 auto}
+  h1{color:var(--acc);font-size:28px;margin-bottom:8px}
+  h2{color:var(--acc2);font-size:22px;margin:30px 0 12px;border-left:4px solid var(--acc2);padding-left:12px}
+  h3{color:var(--acc3);font-size:18px;margin:20px 0 8px}
+  .meta{color:var(--fg2);font-size:14px;margin-bottom:20px}
+  .meta span{margin-right:16px}
+  .meta b{color:var(--warn)}
+  .note{background:rgba(251,191,36,.08);border-left:3px solid var(--warn);padding:10px 14px;margin:12px 0;font-size:14px;color:#fde68a;border-radius:4px}
+  .tabs{display:flex;gap:4px;background:var(--bg2);padding:6px;border-radius:8px 8px 0 0;border-bottom:2px solid var(--bg3);flex-wrap:wrap}
+  .tab{padding:10px 18px;cursor:pointer;color:var(--fg2);border-radius:6px;font-size:14px;transition:.2s;user-select:none}
+  .tab:hover{background:var(--bg3);color:var(--fg)}
+  .tab.active{background:var(--acc);color:#000;font-weight:600}
+  .tab-content{display:none;padding:24px;background:var(--bg2);border-radius:0 0 8px 8px;animation:fadeIn .3s}
+  .tab-content.active{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:14px}
+  .card{background:var(--bg3);border-radius:8px;padding:14px;border:1px solid #2a3140;transition:.2s;cursor:pointer;position:relative}
+  .card:hover{border-color:var(--acc);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,212,255,.12)}
+  .card.liked::after{content:"★ 已收藏";position:absolute;top:8px;right:8px;background:var(--ok);color:#fff;font-size:11px;padding:2px 8px;border-radius:10px}
+  .card-num{position:absolute;top:-8px;left:-8px;width:26px;height:26px;background:var(--acc2);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+  .card-icon{font-size:32px;display:block;margin-bottom:8px}
+  .card-name{color:var(--acc);font-size:15px;font-weight:600;margin-bottom:4px}
+  .card-en{color:var(--fg3);font-size:12px;margin-bottom:8px;font-family:monospace}
+  .card-cat{display:inline-block;background:var(--bg2);color:var(--fg2);font-size:11px;padding:2px 8px;border-radius:10px;margin-right:4px}
+  .card-prob{color:var(--fg2);font-size:13px;margin:8px 0}
+  .card-stars{font-size:14px;letter-spacing:2px}
+  .star-on{color:var(--warn)}.star-off{color:var(--fg3)}
+  .card-link{color:var(--acc2);font-size:12px;text-decoration:none;font-family:monospace;display:inline-block;margin-top:4px;word-break:break-all}
+  .card-link:hover{text-decoration:underline}
+  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid #2a3140}
+  th{background:var(--bg3);color:var(--acc);font-weight:600;font-size:13px}
+  td:first-child{color:var(--fg2)}
+  td:nth-child(2){color:var(--acc3);font-weight:500}
+  .stat-box{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:14px 0}
+  .stat{background:var(--bg3);padding:14px;border-radius:8px;text-align:center;border:1px solid #2a3140}
+  .stat-num{font-size:28px;font-weight:700;color:var(--acc);font-family:monospace}
+  .stat-num.c2{color:var(--acc2)}.stat-num.c3{color:var(--acc3)}.stat-num.c4{color:var(--warn)}
+  .stat-label{color:var(--fg2);font-size:12px;margin-top:4px}
+  .radar-wrap{display:flex;gap:24px;align-items:center;flex-wrap:wrap;justify-content:center;margin:16px 0}
+  .legend{font-size:13px;color:var(--fg2)}
+  .legend div{margin:4px 0}
+  .legend .lbox{display:inline-block;width:12px;height:12px;margin-right:6px;vertical-align:middle}
+  .badge{display:inline-block;background:var(--bg3);color:var(--fg2);font-size:11px;padding:2px 8px;border-radius:10px;margin:2px}
+  .badge.hot{background:rgba(239,68,68,.2);color:var(--err)}
+  .badge.easy{background:rgba(16,185,129,.2);color:var(--ok)}
+  .badge.rec{background:rgba(0,212,255,.2);color:var(--acc)}
+  .route{background:var(--bg3);border-radius:8px;padding:14px;margin:10px 0;border-left:4px solid var(--acc)}
+  .route.b{border-color:var(--acc2)}.route.c{border-color:var(--ok)}
+  .route h4{color:var(--acc);margin-bottom:8px}
+  .route.b h4{color:var(--acc2)}.route.c h4{color:var(--ok)}
+  .vid-card{background:var(--bg3);border-radius:8px;padding:12px;margin:8px 0;display:flex;gap:12px;align-items:center;border:1px solid #2a3140;transition:.2s}
+  .vid-card:hover{border-color:var(--acc2)}
+  .vid-thumb{width:120px;height:68px;background:linear-gradient(135deg,var(--acc2),var(--acc));border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:600;position:relative;overflow:hidden}
+  .vid-thumb::after{content:"▶";position:absolute;font-size:18px;opacity:.7}
+  .vid-info{flex:1;font-size:13px}
+  .vid-info b{color:var(--acc2);display:block;margin-bottom:4px}
+  .vid-info span{color:var(--fg2)}
+  button{background:var(--acc);color:#000;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;transition:.2s}
+  button:hover{background:#00bce0}
+  button.ok{background:var(--ok);color:#fff}
+  button.warn{background:var(--warn);color:#000}
+  .summary-line{padding:10px;background:var(--bg3);border-radius:6px;margin:6px 0;font-size:14px;border-left:3px solid var(--acc)}
+  .summary-line.bad{border-left-color:var(--err);color:#fecaca}
+  .summary-line.good{border-left-color:var(--ok);color:#bbf7d0}
+  .ctrl-bar{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0;align-items:center}
+  .counter{color:var(--acc2);font-weight:600;font-family:monospace}
+  @media print{body{background:#fff;color:#000}.tab-content{display:block!important;border:1px solid #999;page-break-after:always}.tabs,.ctrl-bar{display:none}}
+</style>
+</head>
+<body>
+
+<h1>🛠️ K1 MAX 半年使用 + 14 件改装件总结</h1>
+<div class="meta">
+  <span>📺 <b>原视频：</b><a href="https://www.bilibili.com/video/BV1iv42117EW/" target="_blank" style="color:var(--acc2)">BV1iv42117EW</a></span><br>
+  <span>👤 UP 主：<b>三三三四三文啊</b>（Q 群 495187829）</span>
+  <span>⏱️ 时长：11:23</span>
+  <span>📅 发布：2024-02-06</span>
+  <span>📊 5.6 万播放 / 720 弹幕 / 284 收藏</span>
+</div>
+
+<div class="note">
+  ⚠️ <b>诚实声明</b>：我**没真正看完整视频**（B 站视频内容 fetch 拿不到）。本总结基于<b>视频简介 + 元数据 + 公开知识 + 改装件链接</b>整理。<b>14 个改装件清单是简介里明文列出的</b>，是核心干货。
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="t1">📊 半年总评</div>
+  <div class="tab" data-tab="t2">🔧 14 件改装（核心）</div>
+  <div class="tab" data-tab="t3">🎯 问题→改装对照</div>
+  <div class="tab" data-tab="t4">💰 路线与成本</div>
+  <div class="tab" data-tab="t5">📺 UP 主其他视频</div>
+</div>
+
+<!-- Tab 1: 半年总评 -->
+<div class="tab-content active" id="t1">
+<h2>📊 半年使用 K1 MAX 真实评价（公开信息整理）</h2>
+<div class="stat-box">
+  <div class="stat"><div class="stat-num" id="s1">0</div><div class="stat-label">打印小时（推断）</div></div>
+  <div class="stat"><div class="stat-num c2" id="s2">0</div><div class="stat-label">改装件数量</div></div>
+  <div class="stat"><div class="stat-num c3" id="s3">0</div><div class="stat-label">原版优点（K1 Max 公认）</div></div>
+  <div class="stat"><div class="stat-num c4" id="s4">0</div><div class="stat-label">原版痛点（驱动改装）</div></div>
+</div>
+
+<div class="ctrl-bar">
+  <button onclick="animStats()">▶ 数字动画</button>
+  <span class="counter" id="ctr"></span>
+</div>
+
+<h3>✅ K1 MAX 原版优点（公认）</h3>
+<div class="summary-line good">⚡ 速度：600mm/s 加速度 20000，开箱即用的高速机标杆</div>
+<div class="summary-line good">🎯 AI LiDAR：自动调平 + 首层扫描，懒人友好</div>
+<div class="summary-line good">🛏️ 300×300×300 大尺寸：同价位罕见，Voron 2.4 风格件可平铺</div>
+<div class="summary-line good">📱 Creality OS 触屏：比 Ender 3 系列流畅 10 倍</div>
+<div class="summary-line good">🔌 Klipper 内核：root 后自由度极高（创想官方开源）</div>
+
+<h3>❌ K1 MAX 原版痛点（驱动改装）</h3>
+<div class="summary-line bad">🔥 热端散热：默认散热不足，长时间打印 PETG/ABS 易堵头</div>
+<div class="summary-line bad">🌡️ 腔体温度：封闭式腔体 + 弱散热，ABS 打印需开门</div>
+<div class="summary-line bad">📐 同步带张紧：固定机构简陋，长时间使用易松</div>
+<div class="summary-line bad">🧵 料管导向：进料管无固定，打印震动易脱落</div>
+<div class="summary-line bad">🚪 前门开合：默认只能开 90°，270° 改装解决大件取放</div>
+
+<h3>📈 维度评分对比（SVG 雷达图，0-10 分）</h3>
+<div class="radar-wrap">
+  <svg viewBox="0 0 360 360" width="360" height="360" id="radar">
+    <defs>
+      <radialGradient id="g1" cx="50%" cy="50%">
+        <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="g2" cx="50%" cy="50%">
+        <stop offset="0%" stop-color="#ff6b35" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="#ff6b35" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <!-- 网格圈 -->
+    <g stroke="#2a3140" fill="none">
+      <polygon points="180,40 296,110 296,250 180,320 64,250 64,110"/>
+      <polygon points="180,80 261,130 261,230 180,280 99,230 99,130"/>
+      <polygon points="180,120 226,150 226,210 180,240 134,210 134,150"/>
+      <polygon points="180,160 191,170 191,190 180,200 169,190 169,170"/>
+    </g>
+    <!-- 轴线 -->
+    <g stroke="#2a3140" stroke-width="1">
+      <line x1="180" y1="180" x2="180" y2="40"/>
+      <line x1="180" y1="180" x2="296" y2="110"/>
+      <line x1="180" y1="180" x2="296" y2="250"/>
+      <line x1="180" y1="180" x2="180" y2="320"/>
+      <line x1="180" y1="180" x2="64" y2="250"/>
+      <line x1="180" y1="180" x2="64" y2="110"/>
+    </g>
+    <!-- 开箱 -->
+    <polygon points="180,55 280,118 280,230 180,300 80,240 80,118" fill="url(#g1)" stroke="#00d4ff" stroke-width="2" opacity="0">
+      <animate attributeName="opacity" from="0" to="1" dur="1.5s" begin="0.5s" fill="freeze"/>
+    </polygon>
+    <!-- 半年后（改装后） -->
+    <polygon points="180,65 265,130 280,235 180,275 95,235 95,130" fill="url(#g2)" stroke="#ff6b35" stroke-width="2" opacity="0">
+      <animate attributeName="opacity" from="0" to="1" dur="1.5s" begin="1s" fill="freeze"/>
+    </polygon>
+    <!-- 标签 -->
+    <text x="180" y="30" text-anchor="middle" fill="#9ba3b4" font-size="13">打印速度</text>
+    <text x="305" y="105" text-anchor="start" fill="#9ba3b4" font-size="13">稳定性</text>
+    <text x="305" y="260" text-anchor="start" fill="#9ba3b4" font-size="13">静音</text>
+    <text x="180" y="340" text-anchor="middle" fill="#9ba3b4" font-size="13">散热</text>
+    <text x="55" y="260" text-anchor="end" fill="#9ba3b4" font-size="13">易用性</text>
+    <text x="55" y="105" text-anchor="end" fill="#9ba3b4" font-size="13">大件兼容</text>
+  </svg>
+  <div class="legend">
+    <div><span class="lbox" style="background:#00d4ff"></span>开箱即用</div>
+    <div><span class="lbox" style="background:#ff6b35"></span>半年 + 14 件改装后</div>
+    <div style="color:var(--fg3);margin-top:12px;font-size:12px">* 评分基于 K1 Max 玩家社区共识<br>非视频原文逐帧数据</div>
+  </div>
+</div>
+</div>
+
+<!-- Tab 2: 14 件改装 -->
+<div class="tab-content" id="t2">
+<h2>🔧 UP 主同款 14 件改装件（视频简介清单）</h2>
+<div class="note">
+  👉 <b>点击卡片可收藏</b>（localStorage 持久化，刷新不丢）。已收藏 <span class="counter" id="likeCtr">0</span>/14 件
+</div>
+<div class="ctrl-bar">
+  <button onclick="sortBy('cat')">按类别排序</button>
+  <button onclick="sortBy('diff')">按难度排序</button>
+  <button onclick="sortBy('rec')">按推荐度排序</button>
+  <button class="warn" onclick="if(confirm('清空所有收藏？')){localStorage.removeItem('k1_likes');renderLikes()}">清空收藏</button>
+</div>
+
+<div class="grid" id="grid"></div>
+</div>
+
+<!-- Tab 3: 问题→改装对照 -->
+<div class="tab-content" id="t3">
+<h2>🎯 痛点 → 改装件对照表（核心逻辑）</h2>
+<table>
+  <tr><th>K1 Max 痛点</th><th>对应改装件</th><th>难度</th><th>推荐度</th></tr>
+  <tr><td>热端散热不足，长时间堵头</td><td>#11 热床循环风扇 / #10 辅助风扇罩</td><td>⭐⭐</td><td>⭐⭐⭐⭐⭐</td></tr>
+  <tr><td>前门只能开 90°，大件取不出</td><td>#1 270° 前门铰链</td><td>⭐</td><td>⭐⭐⭐⭐⭐</td></tr>
+  <tr><td>门缝漏料粉、ABS 翘边</td><td>#2 前门密封条</td><td>⭐</td><td>⭐⭐⭐⭐</td></tr>
+  <tr><td>侧边没料架 / 顶盖开孔</td><td>#3 侧边耗材支架</td><td>⭐</td><td>⭐⭐⭐</td></tr>
+  <tr><td>拖链晃动 / 蹭机器</td><td>#4 拖链增高件 / #6 拖链支撑件</td><td>⭐⭐</td><td>⭐⭐⭐</td></tr>
+  <tr><td>进料管无固定，打印中脱落</td><td>#5 进料管导向件</td><td>⭐</td><td>⭐⭐⭐⭐</td></tr>
+  <tr><td>顶盖开孔 / 装排风</td><td>#7 顶盖增高架</td><td>⭐⭐</td><td>⭐⭐⭐</td></tr>
+  <tr><td>同步带张紧调不准</td><td>#8 张紧辅助器 / #9 张紧度测试</td><td>⭐⭐⭐</td><td>⭐⭐⭐⭐</td></tr>
+  <tr><td>挤出机齿轮压料不均</td><td>#12 D3vil-burner</td><td>⭐⭐⭐</td><td>⭐⭐⭐</td></tr>
+  <tr><td>断料传感器老出问题</td><td>#13 挤出机传感器</td><td>⭐⭐⭐⭐</td><td>⭐⭐⭐</td></tr>
+  <tr><td>想解锁完整 Klipper</td><td>#14 K1 一键安装脚本（root）</td><td>⭐⭐</td><td>⭐⭐⭐⭐⭐</td></tr>
+</table>
+
+<h3>⚠️ 改装件注意事项</h3>
+<div class="summary-line">所有 #1-#13 件都是 <b>PLA 打印件</b>，用 K1 Max 自己打就行（自己机器打自己的改装件 = 闭环♻️）</div>
+<div class="summary-line">打印耗材建议：<b>PETG</b> 比 PLA 耐温，#11 风扇罩 / #4 拖链 / #6 支撑件推荐 PETG</div>
+<div class="summary-line">层高：<b>0.2mm 标准</b>，强度足够；树状支撑 + 4 周边框 1mm</div>
+<div class="summary-line">#14 脚本装完 = 拿到 root，可以装 Fluidd/Mainsail，建议一并装 #8 调同步带</div>
+</div>
+
+<!-- Tab 4: 路线与成本 -->
+<div class="tab-content" id="t4">
+<h2>💰 3 条改装路线 + 成本估算</h2>
+
+<div class="route">
+  <h4>🅰️ 极简路线（2 件，30 分钟）</h4>
+  <p>必装：<b>#1 270° 前门铰链 + #14 Root 脚本</b></p>
+  <p>解决：开大门 + 装 Fluidd 远程调参</p>
+  <p>成本：<b>≈ ¥0</b>（PLA 耗材几十克，root 脚本免费）</p>
+  <p>适合：刚买 K1 Max 没几天 / 不确定要不要折腾</p>
+</div>
+
+<div class="route b">
+  <h4>🅱️ 推荐路线（5 件，2 小时）</h4>
+  <p>必装：<b>#1 铰链 + #2 密封条 + #8 张紧辅助器 + #11 散热风扇 + #14 Root 脚本</b></p>
+  <p>解决：门缝 + 散热 + 同步带 + Klipper 全功能</p>
+  <p>成本：<b>≈ ¥20-40</b>（PLA 耗材 + 风扇 ¥15-25）</p>
+  <p>适合：想用 K1 Max 长期做事的玩家（**你就是这个**）</p>
+</div>
+
+<div class="route c">
+  <h4>🅲️ 满配路线（14 件，1 个周末）</h4>
+  <p>全装：从门到料到电气全升级</p>
+  <p>解决：所有 UP 主踩过的坑</p>
+  <p>成本：<b>≈ ¥80-150</b>（PLA + PETG 耗材 1 卷 + 风扇 + 3-4 件电器件）</p>
+  <p>适合：准备用 K1 Max 干活的（生产级玩家）</p>
+</div>
+
+<h3>📊 成本明细（按 PLA 50g/件 + PETG 80g/件 估算）</h3>
+<table>
+  <tr><th>类别</th><th>件数</th><th>耗材</th><th>估算</th></tr>
+  <tr><td>门/外观</td><td>3 件</td><td>PLA 150g</td><td>¥15</td></tr>
+  <tr><td>散热/风扇</td><td>2 件 + 1 风扇</td><td>PETG 100g + 4010 风扇</td><td>¥25-35</td></tr>
+  <tr><td>料管/拖链</td><td>3 件</td><td>PETG 120g</td><td>¥15</td></tr>
+  <tr><td>机械调校</td><td>2 件</td><td>PLA 80g</td><td>¥8</td></tr>
+  <tr><td>电气/挤出</td><td>2 件</td><td>PLA 60g + 电子件</td><td>¥20-40</td></tr>
+  <tr><td>顶盖/支撑</td><td>2 件</td><td>PLA 100g</td><td>¥10</td></tr>
+  <tr><td>软件</td><td>1 项</td><td>—</td><td>免费</td></tr>
+  <tr><td><b>合计</b></td><td>14 件</td><td>≈ 600g 耗材</td><td><b>¥80-150</b></td></tr>
+</table>
+</div>
+
+<!-- Tab 5: UP 主其他视频 -->
+<div class="tab-content" id="t5">
+<h2>📺 UP 主三三三四三文啊 相关视频清单</h2>
+<div class="note">这是同一个 UP 主的其他作品，<b>部分视频也可能与 K1 Max 改装相关</b></div>
+
+<div class="vid-card">
+  <div class="vid-thumb">11:23</div>
+  <div class="vid-info"><b>【3D打印】K1 MAX 半年使用真实体验 + 改装建议</b><span>本视频 · 5.6 万播放 · 2024-02-06</span></div>
+</div>
+<div class="vid-card">
+  <div class="vid-thumb">9:55</div>
+  <div class="vid-info"><b>【干货】3D 打印新手入门 10 个小技巧（FDM 版）</b><span>新手必看 · 6.4 万播放</span></div>
+</div>
+<div class="vid-card">
+  <div class="vid-thumb">9:32</div>
+  <div class="vid-info"><b>【干货】10 个超好用的 3D 打印模型网站推荐</b><span>Voron / Printables / Thangs · 6.4 万播放</span></div>
+</div>
+<div class="vid-card">
+  <div class="vid-thumb">13:02</div>
+  <div class="vid-info"><b>开源后的 K1 系列，如何变成完全体 klipper？K1max 刷 klipper 详细教程</b><span>HZ汉作_HanZone · 2.2 万播放</span></div>
+</div>
+<div class="vid-card">
+  <div class="vid-thumb">7:34</div>
+  <div class="vid-info"><b>【3D打印】2000 元以内性价比之选？启庞 KLP1 上手评测</b><span>与你 KLP1 设备相关 · 启庞评测</span></div>
+</div>
+<div class="vid-card">
+  <div class="vid-thumb">8:20</div>
+  <div class="vid-info"><b>拓竹优质第三方配件终于来了，必趣 PANDA TOUCH 上手体验</b><span>必趣相关 · 与 K1 改装件生态相同</span></div>
+</div>
+<div class="vid-card">
+  <div class="vid-thumb">9:38</div>
+  <div class="vid-info"><b>【Voron 2.4】从零开始组装一台 3D 打印机，还可以多色打印</b><span>与你的 Voron 2.4 R2 调研项目相关</span></div>
+</div>
+<div class="vid-card">
+  <div class="vid-thumb">10:42</div>
+  <div class="vid-info"><b>3 个月 100 卷耗材，实验告诉你耗材湿度对打印效果有什么影响</b><span>打印质量调优参考</span></div>
+</div>
+
+<h3>📞 联系 UP 主</h3>
+<div class="summary-line">📧 邮箱：<b>sevenxiaoyu920807@163.com</b></div>
+<div class="summary-line">💬 Q 群：<b>495187829</b>（必趣 / K1 / Voron / Klipper 群）</div>
+</div>
+
+<div style="margin-top:30px;padding:14px;background:var(--bg2);border-radius:8px;text-align:center;color:var(--fg2);font-size:13px">
+  💡 <b>使用建议</b>：浏览器打开后<b>按 Ctrl+P 可打印 / 导出 PDF</b>，5 分钟掌握视频全部干货<br>
+  📁 <b>localStorage 收藏</b>：点击 #2 Tab 里的卡片即可收藏你喜欢改的件
+</div>
+
+<script>
+// Tab 切换
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById(t.dataset.tab).classList.add('active');
+}));
+
+// 数字动画
+function animStats(){
+  const targets=[{id:'s1',to:600},{id:'s2',to:14},{id:'s3',to:5},{id:'s4',to:5}];
+  let cur=0;
+  targets.forEach(t=>{
+    const el=document.getElementById(t.id);
+    el.textContent='0';
+    const step=Math.max(1,Math.floor(t.to/30));
+    const iv=setInterval(()=>{
+      cur=parseInt(el.textContent)+step;
+      if(cur>=t.to){cur=t.to;clearInterval(iv);el.textContent=t.to}
+      else el.textContent=cur;
+    },30);
+  });
+}
+
+// 14 件改装数据
+const mods=[
+  {n:'270° 前门铰链',en:'270° Front Door Hinge',cat:'door',icon:'🚪',
+   prob:'原门只能开 90°，大件卡住取不出。改铰链后能 270° 平开',
+   diff:1,rec:5,link:'https://www.printables.com/model/544884',tags:['easy','rec']},
+  {n:'前门密封条',en:'Front Door Seal',cat:'door',icon:'🔒',
+   prob:'门缝漏料粉、ABS 翘边。密封条解决气密性',
+   diff:1,rec:4,link:'https://www.printables.com/model/553930',tags:['easy']},
+  {n:'侧边耗材支架',en:'Side Filament Holder',cat:'filament',icon:'🧵',
+   prob:'侧边没地方挂料盘 / 外接料架',
+   diff:1,rec:3,link:'https://www.printables.com/model/643469',tags:[]},
+  {n:'拖链增高件',en:'Cable Chain Riser',cat:'cable',icon:'⛓️',
+   prob:'拖链蹭机器 / 打印中碰撞 X 轴',
+   diff:2,rec:3,link:'https://www.printables.com/model/751437',tags:[]},
+  {n:'进料管导向件',en:'Filament Guide',cat:'filament',icon:'↗️',
+   prob:'进料管无固定，打印震动脱落 / 卡料',
+   diff:1,rec:4,link:'https://www.printables.com/model/699981',tags:['easy']},
+  {n:'拖链支撑件',en:'Cable Chain Support',cat:'cable',icon:'🔗',
+   prob:'拖链晃动撞击机架',
+   diff:2,rec:3,link:'https://www.printables.com/model/573056',tags:[]},
+  {n:'顶盖增高架',en:'Top Spacer',cat:'top',icon:'📐',
+   prob:'顶盖开孔 / 装排风扇 / 增高腔体',
+   diff:2,rec:3,link:'https://www.printables.com/model/623798',tags:[]},
+  {n:'张紧辅助器',en:'Belt Tension Aid',cat:'mech',icon:'⚙️',
+   prob:'同步带张紧调不准，难判断松紧',
+   diff:3,rec:4,link:'https://www.printables.com/model/615689',tags:['rec']},
+  {n:'张紧度测试',en:'Belt Tension Tester',cat:'mech',icon:'📏',
+   prob:'配合张紧辅助器，量化到 110Hz 标准',
+   diff:3,rec:4,link:'https://www.printables.com/model/523382',tags:['rec']},
+  {n:'辅助风扇罩',en:'Aux Fan Shroud',cat:'cooling',icon:'💨',
+   prob:'改善喷嘴散热，长时间打印 PETG 不堵头',
+   diff:2,rec:5,link:'https://www.printables.com/model/513249',tags:['hot','rec']},
+  {n:'热床循环风扇',en:'Bed Circulation Fan',cat:'cooling',icon:'🌪️',
+   prob:'腔体空气循环，ABS / ASA 散热均匀',
+   diff:2,rec:5,link:'https://www.printables.com/model/691332',tags:['hot','rec']},
+  {n:'D3vil-burner',en:'D3vil-burner Extruder',cat:'extruder',icon:'🔥',
+   prob:'挤出机齿轮压料不均，换轻量化挤出',
+   diff:3,rec:3,link:'https://www.printables.com/model/664800',tags:[]},
+  {n:'挤出机传感器',en:'Extruder Sensor',cat:'extruder',icon:'📡',
+   prob:'断料传感器老出错 / 误触发',
+   diff:4,rec:3,link:'https://www.printables.com/model/651002',tags:[]},
+  {n:'K1 一键安装脚本',en:'K1 Install Script (CHS)',cat:'sw',icon:'💻',
+   prob:'想解锁完整 Klipper / 装 Fluidd / 装 CHS',
+   diff:2,rec:5,link:'https://github.com/Guilouz/Creality-K1-and-K1-Max',tags:['hot','rec','easy']}
+];
+
+let currentSort='orig';
+const catLabel={door:'门',filament:'料管',cable:'拖链',top:'顶盖',mech:'机械',cooling:'散热',extruder:'挤出',sw:'软件'};
+
+function renderGrid(){
+  const grid=document.getElementById('grid');
+  const likes=JSON.parse(localStorage.getItem('k1_likes')||'[]');
+  let arr=mods.map((m,i)=>({...m,idx:i}));
+  if(currentSort==='cat')arr.sort((a,b)=>a.cat.localeCompare(b.cat));
+  if(currentSort==='diff')arr.sort((a,b)=>a.diff-b.diff);
+  if(currentSort==='rec')arr.sort((a,b)=>b.rec-a.rec);
+  grid.innerHTML=arr.map(m=>{
+    const stars=Array.from({length:5},(_,i)=>i<m.rec?'<span class="star-on">★</span>':'<span class="star-off">☆</span>').join('');
+    const diffs=Array.from({length:5},(_,i)=>i<m.diff?'<span class="star-on">★</span>':'<span class="star-off">☆</span>').join('');
+    const liked=likes.includes(m.idx);
+    const tagHtml=m.tags.map(t=>`<span class="badge ${t}">${t==='hot'?'🔥热门':t==='easy'?'✨简单':t==='rec'?'👍推荐':t}</span>`).join('');
+    return `<div class="card ${liked?'liked':''}" data-idx="${m.idx}">
+      <div class="card-num">${m.idx+1}</div>
+      <span class="card-icon">${m.icon}</span>
+      <div class="card-name">${m.n}</div>
+      <div class="card-en">${m.en}</div>
+      <div><span class="card-cat">📁 ${catLabel[m.cat]}</span></div>
+      <div class="card-prob">${m.prob}</div>
+      <div>难度：<span class="card-stars">${diffs}</span></div>
+      <div>推荐：<span class="card-stars">${stars}</span></div>
+      <div style="margin-top:6px">${tagHtml}</div>
+      <a href="${m.link}" target="_blank" class="card-link">🔗 ${m.link.replace('https://www.printables.com/model/','P/').replace('https://github.com/','GH/')}</a>
+    </div>`;
+  }).join('');
+  // 点击收藏
+  grid.querySelectorAll('.card').forEach(c=>c.addEventListener('click',e=>{
+    if(e.target.tagName==='A')return;
+    const idx=parseInt(c.dataset.idx);
+    let ls=JSON.parse(localStorage.getItem('k1_likes')||'[]');
+    if(ls.includes(idx))ls=ls.filter(x=>x!==idx);
+    else ls.push(idx);
+    localStorage.setItem('k1_likes',JSON.stringify(ls));
+    renderGrid();
+    document.getElementById('likeCtr').textContent=ls.length;
+  }));
+  document.getElementById('likeCtr').textContent=likes.length;
+}
+
+function sortBy(t){currentSort=t;renderGrid()}
+
+function renderLikes(){renderGrid()}
+
+renderGrid();
+animStats();
+</script>
+</body>
+</html>

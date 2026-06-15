@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Jabberwocky 工具头 CAD 拆解 · 2026 多色顶配</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);color:#e0e0e0;min-height:100vh;padding:20px}
+.wrap{max-width:1100px;margin:0 auto}
+h1{font-size:28px;text-align:center;margin:20px 0;background:linear-gradient(90deg,#ff6b6b,#4ecdc4,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
+.subtitle{text-align:center;color:#999;font-size:14px;margin-bottom:20px}
+.tabs{display:flex;gap:6px;background:rgba(0,0,0,.3);border-radius:14px;padding:6px;margin-bottom:20px;flex-wrap:wrap}
+.tab{flex:1;min-width:120px;padding:12px 8px;text-align:center;border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;transition:all .3s;color:#aaa;background:transparent}
+.tab.active{background:linear-gradient(135deg,#ff6b6b,#ee5a6f);color:#fff;box-shadow:0 4px 16px rgba(238,90,111,.4)}
+.tab:hover:not(.active){background:rgba(255,255,255,.08);color:#fff}
+.panel{display:none;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:24px;backdrop-filter:blur(10px);animation:fadeIn .4s}
+.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.section{margin-bottom:24px}
+.section h2{font-size:20px;color:#4ecdc4;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section h2::before{content:"▎";color:#ff6b6b;font-size:24px}
+.section p{line-height:1.8;color:#ccc;font-size:14px;margin-bottom:8px}
+.tag{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;margin:3px}
+.tag-r{background:rgba(255,107,107,.2);color:#ff8888;border:1px solid rgba(255,107,107,.4)}
+.tag-g{background:rgba(78,205,196,.2);color:#4ecdc4;border:1px solid rgba(78,205,196,.4)}
+.tag-y{background:rgba(255,193,7,.2);color:#ffd54f;border:1px solid rgba(255,193,7,.4)}
+.tag-b{background:rgba(167,139,250,.2);color:#a78bfa;border:1px solid rgba(167,139,250,.4)}
+.card{background:rgba(0,0,0,.3);border-radius:12px;padding:16px;margin:12px 0;border-left:4px solid #4ecdc4}
+.card.warn{border-left-color:#ff6b6b}
+.card.good{border-left-color:#4ecdc4}
+.card.gold{border-left-color:#ffd54f}
+.spec-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+.spec-table th{background:rgba(78,205,196,.2);color:#4ecdc4;padding:10px;text-align:left;border-bottom:2px solid rgba(78,205,196,.3)}
+.spec-table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.08);color:#ccc}
+.spec-table tr:hover td{background:rgba(255,255,255,.04)}
+.highlight{color:#ffd54f;font-weight:700}
+.price{color:#ff8888;font-weight:700}
+.green{color:#4ecdc4;font-weight:700}
+.cta-box{background:linear-gradient(135deg,rgba(255,107,107,.15),rgba(78,205,196,.15));border:2px solid rgba(78,205,196,.4);border-radius:16px;padding:20px;margin-top:20px;text-align:center}
+.cta-box h3{color:#4ecdc4;margin-bottom:10px;font-size:18px}
+.btn{display:inline-block;padding:10px 24px;background:linear-gradient(135deg,#ff6b6b,#ee5a6f);color:#fff;border-radius:24px;text-decoration:none;font-weight:600;margin:4px;font-size:14px;transition:transform .2s;cursor:pointer;border:none}
+.btn:hover{transform:scale(1.05)}
+.btn.ghost{background:transparent;border:2px solid #4ecdc4;color:#4ecdc4}
+.timeline{position:relative;padding-left:30px;margin:20px 0}
+.timeline::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,#ff6b6b,#4ecdc4,#a78bfa)}
+.timeline-item{position:relative;margin-bottom:18px;padding-left:24px}
+.timeline-item::before{content:"";position:absolute;left:-6px;top:6px;width:14px;height:14px;border-radius:50%;background:#ff6b6b;box-shadow:0 0 10px #ff6b6b}
+.timeline-item h4{color:#4ecdc4;font-size:14px;margin-bottom:4px}
+.timeline-item p{font-size:13px;color:#aaa;line-height:1.5}
+.compare-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:16px 0}
+.compare-card{background:rgba(0,0,0,.3);border-radius:10px;padding:14px;border-top:3px solid #4ecdc4}
+.compare-card.budget{border-top-color:#4ecdc4}
+.compare-card.mid{border-top-color:#ffd54f}
+.compare-card.high{border-top-color:#ff6b6b}
+.compare-card.ultra{border-top-color:#a78bfa}
+.compare-card h4{color:#4ecdc4;font-size:14px;margin-bottom:8px}
+.compare-card .price-tag{font-size:20px;font-weight:900;color:#ff8888;margin:6px 0}
+.compare-card ul{list-style:none;font-size:12px;color:#bbb;line-height:1.8}
+.compare-card li::before{content:"✓ ";color:#4ecdc4;font-weight:bold}
+.compare-card li.no::before{content:"✗ ";color:#ff6b6b}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🐉 Jabberwocky 工具头 · CAD 拆解</h1>
+<p class="subtitle">B 站兔子多色团拆解 · Voron 系多色打印顶配 · 2026 路线定位</p>
+
+<div class="tabs">
+<div class="tab active" onclick="showPanel(0)">🔍 识别这张图</div>
+<div class="tab" onclick="showPanel(1)">⚙️ JBW 是什么</div>
+<div class="tab" onclick="showPanel(2)">🗺️ 2026 多色路线</div>
+<div class="tab" onclick="showPanel(3)">🎯 和你的关系</div>
+</div>
+
+<!-- Tab 1 识别 -->
+<div class="panel active" id="p0">
+<div class="section">
+<h2>📂 这是什么文件？</h2>
+<p>这是 <span class="highlight">B 站"兔子多色团"UP 主</span> 做的 <span class="highlight">Jabberwocky（炸脖龙）Voron 工具头 CAD 拆解分析</span> 视频截图，源文件在 <span class="highlight">Autodesk Fusion 360</span> 中打开。</p>
+
+<div class="card good">
+<p><strong>标题：</strong>Jabberwocky - Assembly Instruction CAD V7 v1* (sunny)</p>
+<p><strong>中文副标题：</strong>兔子多色团专为多色打印设计的工具头挤出机 JBW 结构拆解分析</p>
+<p><strong>文件名：</strong>jabberwocky voron toolhead_</p>
+<p><strong>视频来源：</strong>B 站兔子多色团拆解视频</p>
+</div>
+
+<p>画面展示的是 <span class="highlight">挤出机子装配（1. Extruder）</span> 的 CAD 爆炸图，可看到 Bondtech 双驱动齿轮（橙黄色大齿轮）+ LDO Orbiter 行星减速齿轮（黑色斜齿）+ N52 强磁铁 + 料管快插（ECAS）等关键件。</p>
+</div>
+
+<div class="section">
+<h2>📋 Fusion 树视图里看到的硬件清单</h2>
+<table class="spec-table">
+<tr><th>类别</th><th>部件</th><th>作用</th></tr>
+<tr><td>打印件</td><td>Front_Body / Front_Body_Diffuser / Filametrix_Lever_Arm</td><td>前壳 / 灯条扩散 / 切刀张紧臂</td></tr>
+<tr><td>热熔</td><td>Heat Set (3)</td><td>铜热熔螺母（装工具板）</td></tr>
+<tr><td>滑块</td><td>LDO T-NUT (4)</td><td>LDO V 型滑块螺母（Voron 标配）</td></tr>
+<tr><td>轴承</td><td>MR84-ZZ (2) / F682ZZ</td><td>齿轮支撑 / 切刀支撑</td></tr>
+<tr><td>齿轮</td><td>SnarkGears</td><td>行星减速齿轮（Bondtech 风格）</td></tr>
+<tr><td>磁铁</td><td>6×3 N52_Magnet</td><td>N52 钕铁硼强磁（切刀/料管定位）</td></tr>
+<tr><td>销钉</td><td>M4×18mm / M4×16mm Pin</td><td>齿轮轴 / 张紧臂轴</td></tr>
+<tr><td>螺丝</td><td>M3×10_BHCS / M3×6 FHCS / M3×20 SHCS</td><td>内六角圆头 / 平头 / 圆头</td></tr>
+<tr><td>快插</td><td>ECAS</td><td>料管快插接头（Pneufit 风格）</td></tr>
+<tr><td>张紧</td><td>Captive Tensioner</td><td>免工具张紧器（铰链式挤出机核心）</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>🎬 视频在讲什么？</h2>
+<p>右下字幕"然后一个 LGX 的大齿轮"——UP 主正在逐个介绍 <span class="highlight">Bondtech LGX 大齿轮</span>（Bondtech 复合双齿轮中的一片），这是 Jabberwocky 与官方 Stealthburner 最大的设计差异：</p>
+<ul style="line-height:1.9;color:#ccc;font-size:14px;padding-left:24px">
+<li><strong>Stealthburner CW2</strong>：单 BMG 齿轮（motor-on-shaft）</li>
+<li><strong>Jabberwocky</strong>：Bondtech 双齿轮 + 双 LDO Orbiter 行星减速，<span class="highlight">接触面积大、抓料力强、抗 FCU 高频换料磨损</span></li>
+</ul>
+</div>
+</div>
+
+<!-- Tab 2 JBW 是什么 -->
+<div class="panel" id="p1">
+<div class="section">
+<h2>🐉 Jabberwocky 项目背景</h2>
+<p>Jabberwocky（炸脖龙）取自 Lewis Carroll《爱丽丝梦游仙境》中的怪兽，Voron 生态里 <span class="highlight">专为多色打印设计的高端工具头</span>。</p>
+
+<div class="card">
+<p><strong>设计者：</strong>kinematicdigit（GitHub: kinematicdigit/Jabberwocky）</p>
+<p><strong>代工/销售：</strong>LDO Systems 2025 年开始量产</p>
+<p><strong>目标用户：</strong>Voron 装机党 + 多色打印农场</p>
+<p><strong>设计目标：</strong>扛住 FCU（换料器）每天几百次换料的高频推送</p>
+</div>
+</div>
+
+<div class="section">
+<h2>🧩 核心组件规格</h2>
+<table class="spec-table">
+<tr><th>组件</th><th>规格</th><th>亮点</th></tr>
+<tr><td>热端</td><td>Phaetus Conch</td><td>35 mm³/s 高流速，多色切换无压力</td></tr>
+<tr><td>挤出</td><td>Bondtech 复合双齿轮 + 双 LDO Orbiter 行星</td><td>抓料力强、抗磨损</td></tr>
+<tr><td>电机</td><td>LDO NEMA14 8T 36mm</td><td>8T 短齿高扭矩，专用 FCU</td></tr>
+<tr><td>工具板</td><td>Nitehawk 36</td><td>USB 直连 Klipper，36mm 紧凑</td></tr>
+<tr><td>切刀</td><td>全刀片 + 支撑轴承</td><td>每根料切一刀，避免串色</td></tr>
+<tr><td>冷却</td><td>双 3010 高静压 + 2510 散热</td><td>大流量冷却，桥接/悬空稳</td></tr>
+<tr><td>料检测</td><td>双料传感器</td><td>冗余防断料</td></tr>
+<tr><td>灯</td><td>状态 LED + 喷嘴灯</td><td>夜间监控直观</td></tr>
+<tr><td>维护</td><td>免工具铰链设计</td><td>清堵/换料秒开</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>💰 价格矩阵（2026 全球）</h2>
+<div class="compare-grid">
+<div class="compare-card budget">
+<h4>BASIC（基础）</h4>
+<div class="price-tag">$63.99<br><span style="font-size:14px">≈ ¥460</span></div>
+<ul>
+<li>不含 Conch 热端</li>
+<li>不含 Nitehawk 工具板</li>
+<li>不含打印件</li>
+<li>需自配齐</li>
+</ul>
+</div>
+<div class="compare-card mid">
+<h4>Non-Assembled（自组装套件）</h4>
+<div class="price-tag">$87<br><span style="font-size:14px">≈ ¥630</span></div>
+<ul>
+<li>含全部硬件 + Conch</li>
+<li>需自打打印件</li>
+<li>动手能力强</li>
+</ul>
+</div>
+<div class="compare-card high">
+<h4>Assembled（已组装）</h4>
+<div class="price-tag">€150<br><span style="font-size:14px">≈ ¥1180</span></div>
+<ul>
+<li>LDO 厂内组装</li>
+<li>含全部打印件</li>
+<li>到手即装</li>
+<li class="no">目前厂家暂停供应</li>
+</ul>
+</div>
+<div class="compare-card ultra">
+<h4>国内复刻/二手</h4>
+<div class="price-tag">¥300-600<br><span style="font-size:14px">闲鱼/3D 打印农场</span></div>
+<ul>
+<li>开源项目，国内 B 站 UP 主复刻</li>
+<li>自己打印件 + 配硬件</li>
+<li>性价比首选</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2>🎯 它解决了什么问题？</h2>
+<div class="card warn">
+<p><strong>普通工具头在 FCU 换料下的痛点：</strong></p>
+<ul style="margin-top:8px;line-height:1.8;padding-left:20px">
+<li>单 BMG 齿轮抓料力不足，FCU 退料时打滑</li>
+<li>切刀位置偏远，残料长</li>
+<li>流速不够，多色打印 4-5 色慢到爆</li>
+<li>堵头后拆装麻烦</li>
+</ul>
+</div>
+<p style="margin-top:12px">Jabberwocky 用 <span class="highlight">Bondtech 双齿轮 + 行星减速 + Conch 35mm³/s</span> 把这些问题全解决了。代价是：贵、重（~350g）、需要 Voron 平台。</p>
+</div>
+</div>
+
+<!-- Tab 3 2026 多色路线 -->
+<div class="panel" id="p2">
+<div class="section">
+<h2>🗺️ 2026 多色打印 8 大方案对比</h2>
+<p>从手动到全自动，Andy 哥你正在规划打印农场，必须先看懂整张地图：</p>
+<table class="spec-table">
+<tr><th>方案</th><th>颜色数</th><th>原理</th><th>成本</th><th>废料</th><th>难度</th><th>适合</th></tr>
+<tr><td>① 手动换料</td><td>不限</td><td>切片软件加 PAUSE</td><td><span class="green">¥0</span></td><td>几乎 0</td><td>⭐</td><td>KLP1 你现在的玩法</td></tr>
+<tr><td>② 拓竹 AMS</td><td>4 色</td><td>单头 + 切刀 + 切接</td><td>¥1400</td><td>中等</td><td>⭐⭐</td><td>拓竹 A1/P1/X1 用户</td></tr>
+<tr><td>③ Prusa MMU3</td><td>5 色</td><td>单头 + 切刀 + Selector</td><td>¥2000+</td><td>中</td><td>⭐⭐⭐</td><td>Prusa MK4 用户</td></tr>
+<tr><td>④ ERCF 兔子 V2</td><td>N 色</td><td>单头 + 切刀 + 缓冲器</td><td>¥1000-1500</td><td>低</td><td>⭐⭐⭐⭐</td><td>Voron 改装党</td></tr>
+<tr><td>⑤ <span class="highlight">Jabberwocky 工具头</span></td><td>配合换料器</td><td>Bondtech + 切刀 + Conch</td><td>¥460-1180</td><td>低</td><td>⭐⭐⭐⭐</td><td>Voron StealthChanger</td></tr>
+<tr><td>⑥ Toolchanger</td><td>5+ 色</td><td>多个独立工具头切换</td><td>¥5000+</td><td>几乎 0</td><td>⭐⭐⭐⭐⭐</td><td>Prusa XL / Voron StealthChanger</td></tr>
+<tr><td>⑦ 拓竹 H2C Vortek</td><td>6 热端</td><td>无线通讯换整个热端</td><td>¥15000+</td><td>几乎 0</td><td>⭐</td><td>不差钱 + 拓竹生态</td></tr>
+<tr><td>⑧ 双独立喷嘴（H2D/X2D）</td><td>25 色</td><td>左右独立喷嘴 + 纯机械触发</td><td>¥13000+</td><td>几乎 0</td><td>⭐</td><td>拓竹高端线</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>🏆 2026 多色技术 3 大新趋势</h2>
+<div class="timeline">
+<div class="timeline-item">
+<h4>2025-09 Snapmaker U1 众筹爆 $1400 万</h4>
+<p>便宜版 Toolchanger 出圈，把多色门槛拉到消费级</p>
+</div>
+<div class="timeline-item">
+<h4>2025-12 拓竹 H2D 拆解：永磁伺服 + AI 回抽</h4>
+<p>废料从 150mm 减到 20mm，<span class="highlight">省料 87%</span>——双独立喷嘴系统的核心壁垒</p>
+</div>
+<div class="timeline-item">
+<h4>2025-12 Bondtech INDX 发布</h4>
+<p>Prusa 路线用被动 + 感应加热，对抗 Vortek</p>
+</div>
+<div class="timeline-item">
+<h4>2026-04 拓竹 X2D 上市</h4>
+<p>25 色 + 双独立喷嘴 + 256×256×260mm 主动腔温控制</p>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2>🐉 JBW 在 Voron 生态的位置</h2>
+<p>Jabberwocky 是 <span class="highlight">Voron StealthChanger</span> 兼容的"Wide" 档工具头：</p>
+<table class="spec-table">
+<tr><th>工具头</th><th>码头宽度</th><th>250mm 最多工具</th><th>300mm</th><th>350mm</th></tr>
+<tr><td><span class="highlight">JabberWocky</span></td><td>Wide</td><td>3</td><td>4</td><td>5</td></tr>
+<tr><td>StealthBurner</td><td>Wide</td><td>3</td><td>4</td><td>5</td></tr>
+<tr><td>Mini StealthBurner</td><td>Standard</td><td>4</td><td>5</td><td>6</td></tr>
+<tr><td>Anthead</td><td>Standard</td><td>4</td><td>5</td><td>6</td></tr>
+<tr><td>DragonBurner</td><td>Standard</td><td>4</td><td>5</td><td>6</td></tr>
+</table>
+<p style="margin-top:8px;color:#999">Wide 码头 = 工具头更宽，挤压力大、稳定性高，但数量少；Standard 码头 = 工具头窄，可放更多但每个推力小。Jabberwocky 选 Wide 是因为它本身宽（含切刀）但抗 FCU 推送能力强。</p>
+</div>
+</div>
+
+<!-- Tab 4 和 Andy 的关系 -->
+<div class="panel" id="p3">
+<div class="section">
+<h2>🎯 这个工具头和你 3 台机的关系</h2>
+
+<div class="card warn">
+<p><strong>1. KLP1（Klipper 手动多色）</strong></p>
+<p>现在的玩法：切片加 PAUSE + 手动换料 + 擦料塔。已经验证可行（你自己写过教程）。<br>
+<span class="highlight">Jabberwocky 不适合 KLP1</span>——KLP1 是 i3 悬臂结构，重量预算紧，JBW 的 ~350g 重量 + Voron 安装接口都不匹配。</p>
+</div>
+
+<div class="card good">
+<p><strong>2. K1 改造机（Creality 改 Voron 风格）</strong></p>
+<p>改造思路：换主板 + 上 Klipper + 加线性滑轨。是否能加 JBW？<br>
+<span class="highlight">理论上能</span>，但需要：</p>
+<ul style="margin-top:8px;line-height:1.8;padding-left:20px">
+<li>加 StealthChanger 套件（多码头 + 切刀）</li>
+<li>或单 JBW 工具头 + 兔子 V2 换料器（成本 ¥1500+）</li>
+<li>打印床要扩到 ≥250mm（K1 改最大 220mm，刚够）</li>
+</ul>
+</div>
+
+<div class="card gold">
+<p><strong>3. 大鱼 SPA 4 色机（¥366 那个）</strong></p>
+<p>这是 Voron 系多色方案的低成本入门版！</p>
+<ul style="margin-top:8px;line-height:1.8;padding-left:20px">
+<li>已经有木子 AMS-LITE 4 色（拓竹 AMS 兼容）</li>
+<li>已经有 FZ 工具头（Voron 风格轻量）</li>
+<li><span class="highlight">如果上 JBW 替代 FZ 工具头 = 直接进入 Voron 多色顶配</span></li>
+<li>但 150mm 打印尺寸 + 12V 主板限制了上限</li>
+</ul>
+</div>
+</div>
+
+<div class="section">
+<h2>💡 给你的 3 条建议</h2>
+<div class="compare-grid">
+<div class="compare-card budget">
+<h4>🥉 短期（0-3 月）</h4>
+<div class="price-tag" style="font-size:16px;color:#4ecdc4">¥0</div>
+<ul>
+<li>看完 B 站拆解视频学习 JBW 设计思路</li>
+<li>用 KLP1 跑通手动多色流程</li>
+<li>大鱼 SPA 入手后跑 4 色实测</li>
+<li>不投入任何 JBW 硬件</li>
+</ul>
+</div>
+<div class="compare-card mid">
+<h4>🥈 中期（3-6 月）</h4>
+<div class="price-tag" style="font-size:16px;color:#4ecdc4">¥600-1500</div>
+<ul>
+<li>K1 改造机上：换 Nitehawk 36 工具板</li>
+<li>考虑 ERCF 兔子 V2 换料器（¥1000-1500）</li>
+<li>保留大鱼 SPA 做 4 色学习机</li>
+<li>不上 JBW 套件</li>
+</ul>
+</div>
+<div class="compare-card high">
+<h4>🥇 长期（6-12 月）</h4>
+<div class="price-tag" style="font-size:16px;color:#4ecdc4">¥3000+</div>
+<ul>
+<li>攒够预算上 Voron 2.4 / StealthChanger 整机</li>
+<li>JBW 工具头作为换料端的标配</li>
+<li>或攒钱上拓竹 H2C Vortek（¥15000+）</li>
+<li>直接绕过 Voron DIY 阶段</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="cta-box">
+<h3>📂 关键资源</h3>
+<p style="margin:8px 0;font-size:13px">
+<a href="https://github.com/kinematicdigit/Jabberwocky" target="_blank" style="color:#4ecdc4;text-decoration:underline">GitHub 项目</a> · 
+<a href="https://west3d.com/products/jabberwocky-complete-toolhead-with-filament-cutter-and-extruder-for-3d-printers-and-multi-filament-setups" target="_blank" style="color:#4ecdc4;text-decoration:underline">West3D 销售页</a> · 
+<a href="https://stealthchanger.com/hardware/toolheads/" target="_blank" style="color:#4ecdc4;text-decoration:underline">StealthChanger 兼容列表</a> · 
+<a href="https://voronldo.com/guides/voron-stealthburner-build-guide/" target="_blank" style="color:#4ecdc4;text-decoration:underline">Voron Stealthburner 指南</a>
+</p>
+<p style="margin-top:10px;color:#aaa;font-size:12px">💬 Andy 哥：Jabberwocky 是 Voron 多色顶配，但你现阶段直接看 B 站拆解视频学设计思路更划算——硬件等 K1 改造机跑通了再上。</p>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+function showPanel(n){
+document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===n));
+document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('active',i===n));
+}
+</script>
+</body>
+</html>

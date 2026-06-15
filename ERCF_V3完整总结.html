@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>🥕 ERCF V3 完整总结 · Carrot Collective</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, "Microsoft YaHei", "PingFang SC", sans-serif;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ff6b35 100%);
+  color: #2d1810;
+  min-height: 100vh;
+  padding: 20px;
+}
+.container { max-width: 1200px; margin: 0 auto; }
+
+header {
+  text-align: center;
+  padding: 40px 20px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+.title { font-size: 42px; color: #d35400; margin-bottom: 10px; font-weight: 800; }
+.subtitle { color: #e67e22; font-size: 18px; margin-bottom: 8px; }
+.tagline { color: #7f5539; font-size: 14px; }
+
+.section {
+  background: rgba(255,255,255,0.95);
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+.section h2 { color: #d35400; font-size: 24px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 3px solid #f39c12; }
+.section h3 { color: #e67e22; font-size: 18px; margin: 18px 0 10px; }
+.section p, .section li { line-height: 1.7; color: #34495e; }
+.section ul, .section ol { padding-left: 22px; }
+.section code { background: #fdf2e9; padding: 2px 6px; border-radius: 4px; color: #d35400; font-family: "Cascadia Code", monospace; font-weight: 600; }
+.section strong { color: #c0392b; }
+
+.quote-box {
+  background: linear-gradient(135deg, #fff5e6, #ffe4cc);
+  border-left: 5px solid #d35400;
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin: 15px 0;
+  font-style: italic;
+  color: #6e2c00;
+  line-height: 1.7;
+}
+
+.feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 15px; }
+.feature {
+  background: linear-gradient(135deg, #fff5e6, #ffe4cc);
+  border-radius: 10px;
+  padding: 15px;
+  border-left: 4px solid #f39c12;
+}
+.feature .icon { font-size: 24px; margin-bottom: 5px; }
+.feature .title { font-weight: 700; color: #d35400; margin-bottom: 5px; font-size: 14px; }
+.feature .desc { font-size: 13px; color: #6e2c00; line-height: 1.5; }
+
+.sub-project {
+  background: linear-gradient(135deg, #fff8dc, #ffeaa7);
+  border: 2px solid #f39c12;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.sub-project .icon { font-size: 36px; flex-shrink: 0; }
+.sub-project .name { font-size: 18px; font-weight: 700; color: #d35400; margin-bottom: 5px; }
+.sub-project .desc { font-size: 13px; color: #5d4037; line-height: 1.5; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 14px;
+}
+th { background: #d35400; color: white; padding: 12px; text-align: left; font-weight: 700; }
+td { padding: 10px 12px; border-bottom: 1px solid #f5e6d3; color: #34495e; }
+tr:hover td { background: #fff5e6; }
+td code { background: #fdf2e9; padding: 1px 5px; border-radius: 3px; color: #d35400; font-size: 12px; }
+
+.price-tag {
+  display: inline-block;
+  background: #27ae60;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 13px;
+  margin: 3px 3px;
+}
+
+.andy-decision {
+  background: linear-gradient(135deg, #2c3e50, #34495e);
+  color: white;
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 20px;
+}
+.andy-decision h2 { color: #f39c12; border-bottom-color: #f39c12; }
+.andy-decision p, .andy-decision li { color: #ecf0f1; }
+.andy-decision strong { color: #f39c12; }
+.andy-decision code { background: rgba(0,0,0,0.4); color: #f39c12; }
+
+.verdict { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 15px; }
+.verdict-card {
+  background: rgba(0,0,0,0.3);
+  border-radius: 10px;
+  padding: 15px;
+  border-left: 4px solid;
+}
+.verdict-card.yes { border-color: #27ae60; }
+.verdict-card.no { border-color: #e74c3c; }
+.verdict-card.warn { border-color: #f39c12; }
+.verdict-card h4 { font-size: 14px; margin-bottom: 5px; color: #fff; }
+.verdict-card.yes h4 { color: #2ecc71; }
+.verdict-card.no h4 { color: #e74c3c; }
+.verdict-card.warn h4 { color: #f39c12; }
+.verdict-card p { font-size: 12px; color: #bdc3c7; line-height: 1.5; }
+
+footer { text-align: center; color: #5d4037; font-size: 12px; margin-top: 30px; padding: 15px; background: rgba(255,255,255,0.8); border-radius: 10px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="title">🥕 ERCF V3 完整总结</div>
+  <div class="subtitle">Enraged Rabbit Carrot Feeder V3 — Voron 多色 MMU 之王</div>
+  <div class="tagline">Carrot-collective · 1,200+ stars · GPL-3.0 · Klipper 必备</div>
+</header>
+
+<div class="section">
+  <h2>📖 一句话定位</h2>
+  <div class="quote-box">
+    ERCF V3 是 Voron 圈最成熟的开源<strong>多色换料器（MMU）</strong>，给单直驱工具头（Stealthburner）提供 8 通道（可扩 12 色）自动换料。<strong>ERCF v1.1 → v2 → v3</strong>三代演进，从 Ette 一个人维护变成 Carrot Collective 社区团队主导，是当前 Voron + Klipper 多色方案的事实标准。
+  </div>
+  <p><strong>GitHub：</strong><a href="https://github.com/Carrot-collective/ERCF_v3" target="_blank">https://github.com/Carrot-collective/ERCF_v3</a></p>
+  <p><strong>协议：</strong>GPL-3.0（完全开源可商用）</p>
+  <p><strong>团队：</strong>Carrot Collective（兔子多色团）· <strong>原作者 Ette 背书</strong></p>
+</div>
+
+<div class="section">
+  <h2>🏗️ 项目架构（4 大子模块）</h2>
+
+  <div class="sub-project">
+    <div class="icon">🥕</div>
+    <div>
+      <div class="name">ERCF（Enraged Rabbit Carrot Feeder）主换料器</div>
+      <div class="desc">8 通道（标准）/ 12 通道（扩展）多色换料主机。多进单出，<strong>单直驱工具头</strong>配合。集成选择器 + 编码器 + 弹簧伺服。是整个系统的核心。</div>
+    </div>
+  </div>
+
+  <div class="sub-project">
+    <div class="icon">🐇</div>
+    <div>
+      <div class="name">ERCT（Enraged Rabbit Cotton Tail）集成缓冲器</div>
+      <div class="desc">集成式被动料丝缓冲器，直接装在 ERCF V2/V3 出口。空间优化 + 路径阻力降低 + 内置预门传感器 + 每路独立 NeoPixel 状态灯（"bling"）。</div>
+    </div>
+  </div>
+
+  <div class="sub-project">
+    <div class="icon">✂️</div>
+    <div>
+      <div class="name">ERF（Enraged Rabbit Filametrix）工具头切刀</div>
+      <div class="desc">装在 Stealthburner 工具头上的切刀，退料时直接切掉问题料尖。免去 tip-forming（料尖成型）的调参噩梦。每次切出干净料尖，零堵塞。</div>
+    </div>
+  </div>
+
+  <div class="sub-project">
+    <div class="icon">🧹</div>
+    <div>
+      <div class="name">ERPS（Pellet Purge）颗粒料清除系统</div>
+      <div class="desc">用颗粒料（pellet）清除系统，免去擦料塔（wipe tower）。目前仅支持 Voron V2 框架。持续开发中。</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>✨ V3.0 相对 V1.1 的 11 大核心升级</h2>
+
+  <div class="feature-grid">
+    <div class="feature">
+      <div class="icon">🦴</div>
+      <div class="title">1. 坚固骨架</div>
+      <div class="desc">不再弯曲变形，机械稳定性提升</div>
+    </div>
+    <div class="feature">
+      <div class="icon">⚙️</div>
+      <div class="title">2. 自定义编码器</div>
+      <div class="desc">可靠的编码器设计，进料反馈闭环</div>
+    </div>
+    <div class="feature">
+      <div class="icon">🔧</div>
+      <div class="title">3. 弹簧伺服</div>
+      <div class="desc">取代可调顶帽，免维护</div>
+    </div>
+    <div class="feature">
+      <div class="icon">🧲</div>
+      <div class="title">4. 料丝陷阱块</div>
+      <div class="desc">创新设计，取代磁性门</div>
+    </div>
+    <div class="feature">
+      <div class="icon">🔀</div>
+      <div class="title">5. 正式料丝旁路</div>
+      <div class="desc">跳过 MMU 直送工具头（清洗/单色打印）</div>
+    </div>
+    <div class="feature">
+      <div class="icon">🛡️</div>
+      <div class="title">6. 加强齿轮箱</div>
+      <div class="desc">长寿命高负载</div>
+    </div>
+    <div class="feature">
+      <div class="icon">📖</div>
+      <div class="title">7. 精美图解手册</div>
+      <div class="desc">手把手分步图解，新手友好</div>
+    </div>
+    <div class="feature">
+      <div class="icon">📐</div>
+      <div class="title">8. 高质量分步 CAD</div>
+      <div class="desc">分文件夹对应手册步骤</div>
+    </div>
+    <div class="feature">
+      <div class="icon">🐇</div>
+      <div class="title">9. ERCT 集成缓冲</div>
+      <div class="desc">Cotton Tail 被动缓冲，集成预门传感器</div>
+    </div>
+    <div class="feature">
+      <div class="icon">✂️</div>
+      <div class="title">10. Filametrix 切刀</div>
+      <div class="desc">完美切料尖，免去 tip-forming 调参</div>
+    </div>
+    <div class="feature">
+      <div class="icon">💡</div>
+      <div class="title">11. LED 状态指示</div>
+      <div class="desc">功能 + 装饰双用，可视化状态</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>🆕 V3.0 相对 V2.0 的 10 项增量改进</h2>
+  <ol>
+    <li><strong>全新直驱电机系统</strong> — 优化扭矩和易用性</li>
+    <li><strong>重新设计齿轮箱</strong> — 支持老用户旧齿轮选项（v1/v2 升级友好）</li>
+    <li><strong>重新设计高约束料丝块</strong> — 预门传感器为默认</li>
+    <li><strong>大量 QoL 改进</strong> — 改进编码器 + 选择器推车</li>
+    <li><strong>可选微动开关 PCB</strong> — 免焊接安装</li>
+    <li><strong>可选 LED PCB</strong> — 免焊接安装</li>
+    <li><strong>详细 MMB v1.1 / v2.0 接线图</strong> — 主流控制板全覆盖</li>
+    <li><strong>主流控制板软件设置文档</strong> — MMB / EasyBRD / ERB</li>
+    <li><strong>GitHub 正式分板块</strong> — User Mods / Mounting / PCBS（社区可贡献）</li>
+    <li><strong>主流控制板电子盒</strong> — MMBv1 / v2、EasyBRD、ERB 全部支持</li>
+  </ol>
+</div>
+
+<div class="section">
+  <h2>🧠 固件生态（Happy Hare 驱动）</h2>
+
+  <p>ERCF V3 <strong>必须配合 Happy Hare 固件</strong>使用，这是 moggieuk 开发的 Klipper MMU 通用驱动。</p>
+
+  <h3>Happy Hare 核心功能</h3>
+  <ul>
+    <li><strong>工具头传感器支持</strong> + 无传感器加载/卸载</li>
+    <li><strong>同步运动</strong> — 挤出机 + 齿轮电机一起移动</li>
+    <li><strong>EndlessSpool</strong> — 自动识别空门并重新映射工具（不会中断打印）</li>
+    <li><strong>改进的日志</strong> — 控制台 + 独立 <code>mmu.log</code> 文件</li>
+    <li><strong>可视化</strong> — 加载/卸载序列动画</li>
+    <li><strong>运行时配置</strong> — 新命令在运行时改配置</li>
+    <li><strong>Spoolman 集成</strong> — 耗材管理</li>
+    <li><strong>Klipperscreen / Mainsail / Fluidd UI</strong></li>
+    <li><strong>支持几乎所有 MMU</strong>：ERCF / Tradrack / Box Turtle / Angry Beaver / Night Owl / 3MS / KMS / Open AMS / PicoMMU / MMX / Custom</li>
+  </ul>
+
+  <h3>安装命令（Klipper 主机）</h3>
+  <div class="quote-box">
+    cd ~<br>
+    git clone https://github.com/moggieuk/ERCF-Software-V3.git<br>
+    cd ERCF-Software-V3<br>
+    ./install.sh -i
+  </div>
+</div>
+
+<div class="section">
+  <h2>🔧 硬件兼容性</h2>
+
+  <table>
+    <tr>
+      <th>类别</th>
+      <th>支持型号</th>
+    </tr>
+    <tr>
+      <td>3D 打印机</td>
+      <td>Voron Switchwire / Trident / 2.4 R2 / 其他 CoreXY + Klipper（潜在 RRF）</td>
+    </tr>
+    <tr>
+      <td>工具头</td>
+      <td>Voron Stealthburner（必装 Filametrix 切刀位）</td>
+    </tr>
+    <tr>
+      <td>控制板</td>
+      <td>MMB v1.1 / v2.0、EasyBRD、ERB、SKR 系列、Octopus</td>
+    </tr>
+    <tr>
+      <td>驱动</td>
+      <td>TMC2209 / TMC5160（推荐 UART 模式）</td>
+    </tr>
+    <tr>
+      <td>通道数</td>
+      <td>4 / 6 / 8 / 9 / 12（推荐 8 通道）</td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>💰 商业套件参考价（2026）</h2>
+  <p>自己打印件 + 采购硬件 ≈ $400-600。直接买套件：</p>
+  <div>
+    <span class="price-tag">Trianglelab 8 通道套件 $164.70 (含 MMB Board + Filamentalist)</span>
+    <span class="price-tag">West3D 8 通道套件 $219 (含 ERCT + ERF + THS)</span>
+    <span class="price-tag">FYSETEC 6 工具头 $199 / 9 工具头 $300</span>
+    <span class="price-tag">BTT MMB CAN V1.0 控制板 $32 起</span>
+  </div>
+  <p style="margin-top: 15px;"><strong>说明</strong>：所有商业套件都不含 3D 打印件（需自打 STL）。国际运费 + 关税另算。</p>
+</div>
+
+<div class="section">
+  <h2>📊 性能对比（实测数据）</h2>
+  <table>
+    <tr>
+      <th>系统</th>
+      <th>平均换料时间</th>
+      <th>污染率</th>
+      <th>失败率</th>
+    </tr>
+    <tr>
+      <td>🥕 <strong>ERCF V2/V3</strong></td>
+      <td>2.1 ± 0.4 秒</td>
+      <td>0.3%</td>
+      <td>1 / 142 次</td>
+    </tr>
+    <tr>
+      <td>🟡 Bambu Lab AMS</td>
+      <td>5.8 ± 1.6 秒</td>
+      <td>1.9%</td>
+      <td>4 / 140 次</td>
+    </tr>
+    <tr>
+      <td>🔵 Prusa MMU3S</td>
+      <td>11.7 ± 2.9 秒</td>
+      <td>4.1%</td>
+      <td>9 / 138 次</td>
+    </tr>
+    <tr>
+      <td>🔴 自制 DIY Bowden</td>
+      <td>N/A</td>
+      <td>&gt;15%</td>
+      <td>27 / 80 次</td>
+    </tr>
+  </table>
+  <p style="margin-top: 10px; font-size: 13px; color: #7f5539;">数据来源：FYSETEC 套件实装测试（[AliExpress 评测文章](https://www.aliexpress.com/s/wiki-ssr/article/erf2-amazon)）</p>
+</div>
+
+<div class="andy-decision">
+  <h2>🎯 给 Andy 哥的判断</h2>
+
+  <div class="verdict">
+    <div class="verdict-card no">
+      <h4>❌ KLP1 完全装不上</h4>
+      <p>KLP1 是 i3 + Marlin 架构，ERCF 是给 CoreXY + Klipper 设计的。机械结构（CoreXY 运动学）、固件（Klipper）、通道数（8 路）都跟 i3 不兼容。</p>
+    </div>
+    <div class="verdict-card no">
+      <h4>❌ 大鱼 SPA 也不兼容</h4>
+      <p>大鱼 SPA 4 色机是 i3 + Z 轴料塔式（4 个挤出头上下切换），跟 ERCF 单直驱+换料器路线完全相反。</p>
+    </div>
+    <div class="verdict-card yes">
+      <h4>✅ K1 改造机能上</h4>
+      <p>CoreXY + 改装 Klipper + 加 Stealthburner 工具头 + ERCF 是 Voron 圈标准玩法。改造成本 +200-500 元（材料 + 控制板 + 切刀），远低于买大鱼 SPA 4 色机。</p>
+    </div>
+    <div class="verdict-card warn">
+      <h4>⚠️ 现阶段不必买</h4>
+      <p>K1 改造机还没定型（Voron 风格 CoreXY 改装方案还在评估），先看 B 站 3-5 个 ERCF 实装视频 + Happy Hare 文档，搞懂原理。</p>
+    </div>
+    <div class="verdict-card yes">
+      <h4>✅ 收藏到 GitHub</h4>
+      <p>这个仓库是 Voron 多色圈的"圣经"，等 K1 改造机成熟后必看。现在先 Star 一下，留着参考。</p>
+    </div>
+    <div class="verdict-card warn">
+      <h4>💡 学设计思路</h4>
+      <p>ERCF 的"单直驱+多通道换料"思路 vs 大鱼 SPA 的"多挤出头+Z 轴切换"思路，都是多色方案经典设计。学思路比买硬件更重要。</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  🥕 ERCF V3 总结 · 数据来自 GitHub README / Trianglelab / West3D / Klipper Discourse · 整理于 2026-06-10
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>KLP1 热端三件套 拆装测试教程</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #e2e8f0;
+  min-height: 100vh;
+  padding: 20px;
+}
+.container { max-width: 1200px; margin: 0 auto; }
+h1 {
+  text-align: center;
+  font-size: 24px;
+  margin: 20px 0 10px;
+  background: linear-gradient(90deg, #fbbf24, #ef4444, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.subtitle { text-align: center; color: #94a3b8; margin-bottom: 24px; font-size: 13px; }
+
+/* Tab 切换 */
+.tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+.tab {
+  padding: 10px 20px;
+  background: #1e293b;
+  border: 2px solid #334155;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+  color: #cbd5e1;
+}
+.tab:hover { border-color: #fbbf24; color: #fff; }
+.tab.active {
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(245,158,11,0.4);
+}
+
+.tab-content { display: none; animation: fadeIn 0.5s; }
+.tab-content.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* 卡片 */
+.card {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid #334155;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+}
+.card h2 { color: #fbbf24; margin-bottom: 16px; font-size: 20px; }
+.card h3 { color: #60a5fa; margin: 16px 0 8px; font-size: 16px; }
+
+/* 步骤列表 */
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 10px;
+  margin: 8px 0;
+  border-left: 4px solid #334155;
+  transition: all 0.3s;
+  opacity: 0;
+  transform: translateX(-20px);
+}
+.step.show { opacity: 1; transform: translateX(0); border-left-color: #fbbf24; }
+.step-num {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  color: #fff;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+.step-body { flex: 1; }
+.step-title { font-weight: bold; color: #fff; margin-bottom: 4px; }
+.step-desc { color: #cbd5e1; font-size: 13px; line-height: 1.6; }
+.step-desc code { background: rgba(59,130,246,0.2); color: #60a5fa; padding:2px 6px; border-radius:4px; font-size:12px; }
+.step-desc strong { color: #34d399; }
+
+/* 组件对比卡 */
+.parts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+.part-card {
+  background: rgba(15, 23, 42, 0.5);
+  border: 2px solid #334155;
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.part-card:hover { border-color: #fbbf24; transform: translateY(-2px); }
+.part-icon { font-size: 32px; margin-bottom: 8px; }
+.part-name { font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 4px; }
+.part-en { font-size: 11px; color: #94a3b8; font-family: monospace; margin-bottom: 8px; }
+.part-spec { font-size: 12px; color: #cbd5e1; line-height: 1.6; }
+.part-spec strong { color: #34d399; }
+
+/* 万用表演示 */
+.meter {
+  background: #fbbf24;
+  color: #000;
+  padding: 16px;
+  border-radius: 12px;
+  font-family: monospace;
+  font-size: 28px;
+  font-weight: bold;
+  text-align: center;
+  margin: 12px 0;
+  letter-spacing: 2px;
+  box-shadow: 0 0 20px rgba(251,191,36,0.3);
+}
+
+/* 表格 */
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+th, td { padding: 10px; text-align: left; border-bottom: 1px solid #334155; }
+th { background: #1e293b; color: #fbbf24; }
+tr:hover td { background: rgba(15,23,42,0.5); }
+.normal { color: #34d399; }
+.abnormal { color: #f87171; }
+
+/* 警告框 */
+.warning {
+  background: rgba(239, 68, 68, 0.15);
+  border: 2px solid #ef4444;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 0;
+}
+.warning-title { color: #f87171; font-weight: bold; margin-bottom: 8px; font-size: 15px; }
+.warning-text { color: #fecaca; font-size: 13px; line-height: 1.6; }
+
+.tip {
+  background: rgba(59, 130, 246, 0.15);
+  border: 2px solid #3b82f6;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 0;
+}
+.tip-title { color: #60a5fa; font-weight: bold; margin-bottom: 8px; }
+.tip-text { color: #cbd5e1; font-size: 13px; line-height: 1.6; }
+
+.button {
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  margin: 8px 4px;
+  transition: transform 0.2s;
+}
+.button:hover { transform: scale(1.05); }
+.button:active { transform: scale(0.95); }
+
+/* SVG 演示 */
+.demo-svg-wrap {
+  display: flex;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 12px 0;
+}
+.demo-svg { max-width: 600px; width: 100%; }
+
+@media (max-width: 768px) {
+  .parts-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🔧 KLP1 热端三件套 拆装测试教程</h1>
+  <p class="subtitle">加热块 · 热敏电阻 · 加热电阻 - 识别、测试、更换</p>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="t1">🔍 三个组件识别</div>
+    <div class="tab" data-tab="t2">🌡️ 热敏电阻测试</div>
+    <div class="tab" data-tab="t3">⚡ 加热电阻测试</div>
+    <div class="tab" data-tab="t4">🔩 加热块拆装</div>
+    <div class="tab" data-tab="t5">⚙️ 完整换装流程</div>
+  </div>
+
+  <!-- Tab 1: 三个组件识别 -->
+  <div id="t1" class="tab-content active">
+    <div class="card">
+      <h2>🔍 三件套识别（看图说话）</h2>
+      <p style="color:#94a3b8; margin-bottom:16px;">你拍的照片里，三个组件从左到右是：</p>
+
+      <div class="parts-grid">
+        <div class="part-card" style="border-color:#8b5cf6;">
+          <div class="part-icon">🔩</div>
+          <div class="part-name">加热块 + 喷嘴 + 喉管</div>
+          <div class="part-en">Heater Block + Nozzle + Throat</div>
+          <div class="part-spec">
+            <strong>位置</strong>：热端正中央主体<br>
+            <strong>材质</strong>：铝合金（加热块）+ 黄铜（喉管）+ 铜/钢（喷嘴）<br>
+            <strong>作用</strong>：<br>
+            • <strong>加热块</strong>：装加热电阻、热敏电阻的载体<br>
+            • <strong>喉管</strong>：引导料从上方进入喷嘴<br>
+            • <strong>喷嘴</strong>：0.4mm 出口，决定打印精度<br>
+            <strong>温度承受</strong>：300°C 持续<br>
+            <strong>价格</strong>：30-100 元（按材质）
+          </div>
+        </div>
+
+        <div class="part-card" style="border-color:#10b981;">
+          <div class="part-icon">🌡️</div>
+          <div class="part-name">热敏电阻</div>
+          <div class="part-en">NTC 100K Thermistor</div>
+          <div class="part-spec">
+            <strong>位置</strong>：插在加热块侧面小孔<br>
+            <strong>外观</strong>：玻璃珠（米黄色） + 2P 白插头<br>
+            <strong>线序</strong>：红线（信号）+ 黑线（GND），<strong>无正负</strong><br>
+            <strong>作用</strong>：测温，告诉主控现在热端多少度<br>
+            <strong>关键参数</strong>：<br>
+            • 25°C 室温：<strong>~100KΩ</strong><br>
+            • 200°C：~0.3KΩ<br>
+            • 250°C：~0.15KΩ<br>
+            <strong>价格</strong>：5-15 元<br>
+            <strong>⚠️ 你的这颗</strong>：<span style="color:#f87171;">已烧焦，必须换</span>
+          </div>
+        </div>
+
+        <div class="part-card" style="border-color:#f59e0b;">
+          <div class="part-icon">⚡</div>
+          <div class="part-name">加热电阻 / 加热棒</div>
+          <div class="part-en">Heater Cartridge</div>
+          <div class="part-spec">
+            <strong>位置</strong>：插在加热块中间大孔<br>
+            <strong>外观</strong>：米黄色陶瓷方块 + 2P/3P 插头<br>
+            <strong>线序</strong>：红/白线（<strong>无极性</strong>）<br>
+            <strong>作用</strong>：电热丝通电发热，把热端升温到 200-260°C<br>
+            <strong>关键参数</strong>：<br>
+            • 电压：<strong>24V DC</strong><br>
+            • 功率：<strong>40-50W</strong><br>
+            • 阻值：<strong>~11-15Ω</strong>（24V/40W=14.4Ω）<br>
+            • 升温：60-90s 到 200°C<br>
+            <strong>价格</strong>：5-20 元<br>
+            <strong>⚠️ 你的这颗</strong>：<span style="color:#f87171;">表面烧焦，建议测阻值</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="warning">
+        <div class="warning-title">⚠️ 三个组件常见连带故障</div>
+        <div class="warning-text">
+          <strong>堵头</strong> → 料挤不出 → 加热持续 → <strong>温度失控</strong> → 热敏电阻烧毁 + 加热电阻外壳烧焦<br><br>
+          <strong>建议：三个一起换</strong>（总共 20-30 元，比单独换省事）
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 2: 热敏电阻测试 -->
+  <div id="t2" class="tab-content">
+    <div class="card">
+      <h2>🌡️ 热敏电阻：万用表测试 + 更换</h2>
+
+      <h3>📋 测试工具</h3>
+      <div class="tip">
+        <div class="tip-title">需要的工具</div>
+        <div class="tip-text">
+          • 万用表（电阻档 <code>Ω</code> 或 <code>200K</code> 档位）<br>
+          • 一杯热水（80°C 左右，不烫手即可）<br>
+          • 一杯常温水（25°C）
+        </div>
+      </div>
+
+      <h3>📝 测试步骤</h3>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">万用表拨到电阻档</div>
+          <div class="step-desc">拨到 <code>200KΩ</code> 或 <code>2MΩ</code> 档。红黑表笔随便插哪根线都行，<strong>热敏电阻无极性</strong>。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">测常温阻值（25°C）</div>
+          <div class="step-desc">玻璃珠放在室温 5 分钟，<strong>正常应该是 95-105KΩ</strong>。偏离这个范围就是坏的。</div>
+          <div class="meter" id="meter-25">~100 KΩ ✅</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">测高温阻值（80°C）</div>
+          <div class="step-desc">把玻璃珠（<strong>只玻璃珠部分</strong>，别把线泡了）放进 80°C 热水 30 秒，<strong>正常应该降到 12-15KΩ</strong>。</div>
+          <div class="meter">~13 KΩ ✅</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">判断好坏</div>
+          <div class="step-desc">
+            ✅ <strong class="normal">正常</strong>：常温 100KΩ，热水中下降 10 倍以上<br>
+            ❌ <strong class="abnormal">开路</strong>：显示 <code>OL</code> 或 <code>1.</code> → 内部断了，<strong>必换</strong><br>
+            ❌ <strong class="abnormal">短路</strong>：显示 0Ω → 内部击穿，<strong>必换</strong><br>
+            ❌ <strong class="abnormal">阻值飘移</strong>：浸泡后阻值不变 → 玻璃珠裂了，<strong>必换</strong>
+          </div>
+        </div>
+      </div>
+
+      <h3>🔄 更换步骤</h3>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">关机断电 + 冷透</div>
+          <div class="step-desc"><strong>热端必须冷到室温</strong>，否则拔玻璃珠会断在里面。KLP1 关机后等 15-20 分钟。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">拔插头</div>
+          <div class="step-desc">从主控板或热端板拔下白色 2P 接头。<strong>压住卡扣再拔</strong>，别硬拉线。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">拔出旧热敏电阻</div>
+          <div class="step-desc">用尖嘴钳夹住玻璃珠（<strong>只夹玻璃部分，别夹线</strong>），直直往外拔。<br>
+          ⚠️ <strong>卡住拔不出</strong>：加热的料把玻璃珠糊在孔里。用电烙铁加热孔周围（200°C）让料软化，再拔。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">清孔 + 装新</div>
+          <div class="step-desc">
+            • 用 <code>2.5mm 钻头</code> 或 <code>细砂纸</code> 轻轻磨孔内壁，去掉碳化料<br>
+            • 孔内挤一点 <strong>导热硅脂</strong>（信越 7762 或随意，2 元一管）<br>
+            • 新的热敏电阻玻璃珠<strong>完全插入到底</strong>，不能留空隙<br>
+            • 多余的线塞回线槽，<strong>别压到喷嘴或加热块</strong>
+          </div>
+        </div>
+      </div>
+
+      <button class="button" onclick="playSteps('t2')">▶️ 演示测试流程</button>
+    </div>
+  </div>
+
+  <!-- Tab 3: 加热电阻测试 -->
+  <div id="t3" class="tab-content">
+    <div class="card">
+      <h2>⚡ 加热电阻：万用表测试 + 更换</h2>
+
+      <h3>📋 测试方法</h3>
+      <div class="tip">
+        <div class="tip-title">万用表拨到电阻档</div>
+        <div class="tip-text">拨到 <code>200Ω</code> 或 <code>2KΩ</code> 档。加热电阻的阻值是 11-15Ω，比较小。</div>
+      </div>
+
+      <h3>📝 测试步骤</h3>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">测冷态阻值</div>
+          <div class="step-desc">万用表表笔接加热电阻两脚（红/白线，无极性）。<strong>正常应该是 11-15Ω</strong>（24V/40W=14.4Ω）。</div>
+          <div class="meter">~13 Ω ✅</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">判断好坏</div>
+          <div class="step-desc">
+            ✅ <strong class="normal">正常</strong>：11-15Ω<br>
+            ❌ <strong class="abnormal">开路</strong>：<code>OL</code> → 内部电热丝烧断，<strong>必换</strong><br>
+            ❌ <strong class="abnormal">短路</strong>：0Ω 或几Ω → 击穿，主控会报<strong>加热异常</strong>，<strong>必换</strong><br>
+            ❌ <strong class="abnormal">外壳变形/烧焦</strong>：绝缘陶瓷坏了，<strong>必换</strong>（你拍的这颗就是这个情况）
+          </div>
+        </div>
+      </div>
+
+      <h3>🔄 更换步骤</h3>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">冷透 + 拔插头</div>
+          <div class="step-desc">等热端完全冷到室温，拔掉加热电阻插头。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">拧松卡箍/卡簧</div>
+          <div class="step-desc">不同机型固定方式不同：<br>
+            • KLP1：<strong>两颗 M3 螺丝</strong>夹紧加热电阻<br>
+            • 用 2.5mm 内六角拧松 1-2 圈即可
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">抽出旧 + 塞新</div>
+          <div class="step-desc">用尖嘴钳夹住加热电阻陶瓷块（<strong>别夹线</strong>）直直抽出。<br>
+            新的加热电阻塞到底，重新拧紧卡箍螺丝（<strong>不要拧太紧</strong>，陶瓷会裂）。
+          </div>
+        </div>
+      </div>
+
+      <div class="warning">
+        <div class="warning-title">⚠️ 安装加热电阻关键细节</div>
+        <div class="warning-text">
+          • <strong>塞到底</strong>：加热电阻头部必须贴合喷嘴座，否则升温慢、温度上不去<br>
+          • <strong>卡箍不要拧太紧</strong>：陶瓷是脆的，拧裂了会漏电<br>
+          • <strong>线不压</strong>：塞回线槽时别让线卡在喷嘴和加热块之间，否则高温烤焦
+        </div>
+      </div>
+
+      <button class="button" onclick="playSteps('t3')">▶️ 演示测试流程</button>
+    </div>
+  </div>
+
+  <!-- Tab 4: 加热块拆装 -->
+  <div id="t4" class="tab-content">
+    <div class="card">
+      <h2>🔩 加热块 + 喷嘴：拆装</h2>
+
+      <h3>📋 工具</h3>
+      <div class="tip">
+        <div class="tip-title">需要的工具</div>
+        <div class="tip-text">
+          • 7mm 套筒扳手 或 棘轮扳手（拆喷嘴）<br>
+          • 1.5mm / 2.5mm 内六角<br>
+          • 尖嘴钳<br>
+          • 旧的喷嘴钻头（0.4mm）或冷拔用耗材（PLA/PETG）
+        </div>
+      </div>
+
+      <h3>📝 拆装步骤</h3>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">预热到 200°C（<strong>必须热拆</strong>）</div>
+          <div class="step-desc">
+            喷嘴座和加热块是<strong>热配合</strong>，冷拆会卡死。<br>
+            操作：<br>
+            • 屏幕：MENU → Temperature → Hotend → 200°C<br>
+            • 或 Klipper 终端：<code>SET_HEATER_TEMPERATURE HEATER=extruder TARGET=200</code><br>
+            • 等温度稳定到 200°C 再继续
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">拧出旧喷嘴</div>
+          <div class="step-desc">
+            用 <strong>7mm 套筒</strong> 套在喷嘴上，<strong>逆时针</strong>拧出。<br>
+            ⚠️ <strong>防烫</strong>：戴隔热手套！<br>
+            ⚠️ <strong>方向</strong>：<code>向下看 KLP1 喷嘴</code>，<strong>逆时针松，顺时针紧</strong>（E3D 标准）
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">检查加热块状态</div>
+          <div class="step-desc">看加热块内孔是否有料堆积、碳化痕迹。用 0.4mm 钻头或针通一下（<strong>小心别断在里面</strong>）。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">装新喷嘴</div>
+          <div class="step-desc">
+            1. <strong>保持 200°C 温度</strong>（让螺纹热胀）<br>
+            2. <strong>手动</strong>把新喷嘴<strong>顺时针拧到底</strong>（不要用工具，用手感觉到贴合）<br>
+            3. 用套筒<strong>再拧 1/4 圈</strong>（约 90°），让密封圈压紧<br>
+            4. <strong>降到 0°C 后再拧 1/8 圈</strong>（冷紧一步，防止漏料）<br>
+            5. 完全冷后复紧 1/8 圈
+          </div>
+        </div>
+      </div>
+
+      <div class="warning">
+        <div class="warning-title">⚠️ 喷嘴更换最容易踩的坑</div>
+        <div class="warning-text">
+          • <strong>冷拧喷嘴</strong>：螺纹咬死，拧下来喷嘴就废了<br>
+          • <strong>拧太紧</strong>：加热块开裂（铝合金的）<br>
+          • <strong>忘了冷紧</strong>：热膨胀时漏料，碳化糊喷嘴<br>
+          • <strong>没预热装热敏电阻</strong>：孔里有料固化，热敏电阻插不进去
+        </div>
+      </div>
+
+      <button class="button" onclick="playSteps('t4')">▶️ 演示拆装流程</button>
+    </div>
+  </div>
+
+  <!-- Tab 5: 完整换装流程 -->
+  <div id="t5" class="tab-content">
+    <div class="card">
+      <h2>⚙️ 完整三件套换装流程</h2>
+      <p style="color:#94a3b8; margin-bottom:16px;">按顺序操作，1-2 小时搞定</p>
+
+      <h3>📦 准备清单</h3>
+      <table>
+        <tr>
+          <th>物品</th>
+          <th>规格</th>
+          <th>价格</th>
+          <th>购买</th>
+        </tr>
+        <tr>
+          <td>加热块（铝合金）</td>
+          <td>E3D V6 通用 20×16×12mm</td>
+          <td class="normal">15-30 元</td>
+          <td>淘宝</td>
+        </tr>
+        <tr>
+          <td>黄铜喷嘴</td>
+          <td>0.4mm（可备 0.6/0.8）</td>
+          <td class="normal">3-8 元/个</td>
+          <td>淘宝</td>
+        </tr>
+        <tr>
+          <td>喉管（Bowden 短）</td>
+          <td>全金属喉管 25mm</td>
+          <td class="normal">5-15 元</td>
+          <td>淘宝</td>
+        </tr>
+        <tr>
+          <td>热敏电阻</td>
+          <td>NTC 100K 玻璃珠</td>
+          <td class="normal">5-10 元</td>
+          <td>淘宝</td>
+        </tr>
+        <tr>
+          <td>加热电阻</td>
+          <td>24V 50W 陶瓷</td>
+          <td class="normal">5-15 元</td>
+          <td>淘宝</td>
+        </tr>
+        <tr>
+          <td>导热硅脂</td>
+          <td>信越 7762（任意都行）</td>
+          <td class="normal">2-5 元</td>
+          <td>淘宝</td>
+        </tr>
+        <tr style="background:rgba(251,191,36,0.1);">
+          <td><strong>合计</strong></td>
+          <td colspan="3"><strong style="color:#fbbf24;">~50-100 元（备件足够用 2-3 次）</strong></td>
+        </tr>
+      </table>
+
+      <h3>🔄 完整 8 步流程</h3>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">关机断电 + 拔电源</div>
+          <div class="step-desc">断 KLP1 电源，等热端<strong>完全冷到室温</strong>（15-20 分钟）。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">拆打印头外壳</div>
+          <div class="step-desc">KLP1 通常是 <strong>2-3 颗螺丝</strong> 固定打印头盖。拧下，露出热端。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">拔所有插头</div>
+          <div class="step-desc">记录每个插头的位置（<strong>建议拍照</strong>），拔下：<br>
+            • 加热电阻 2P/3P<br>
+            • 热敏电阻 2P<br>
+            • 风扇 2P（标记哪个是热端风扇）<br>
+            • 探针（如果有）</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">拆旧加热块（预热到 200°C）</div>
+          <div class="step-desc">
+            1. 开机 → 屏幕设置热端 200°C<br>
+            2. 等到 200°C<br>
+            3. 7mm 套筒逆时针拧出喷嘴<br>
+            4. 松开喉管卡扣，抽出喉管<br>
+            5. 松开加热块固定螺丝，取下加热块
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <div class="step-title">清理料渣</div>
+          <div class="step-desc">
+            • 加热块内孔：0.4mm 钻头<strong>轻轻</strong>通一下<br>
+            • 喉管：用<strong>冷拔</strong>（把料挤到 240°C → 拔料 → 冷却后再拔）<br>
+            • 检查风扇叶片是否被碳化料糊住
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <div class="step-title">装新三件套</div>
+          <div class="step-desc">
+            1. 加热电阻塞到加热块中间孔 → 卡箍轻拧紧<br>
+            2. 热敏电阻孔挤<strong>一点点</strong>导热硅脂 → 玻璃珠<strong>完全插到底</strong><br>
+            3. 喉管从上方插入，<strong>穿过加热块</strong>到底（要看到喉管从喷嘴孔露头）<br>
+            4. <strong>保持 200°C</strong>：手动拧喷嘴顺时针到底 → 套筒再拧 1/4 圈
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">7</div>
+        <div class="step-body">
+          <div class="step-title">冷紧 + 检查</div>
+          <div class="step-desc">
+            1. 关闭加热，让热端自然冷却到室温（<strong>不要风扇吹</strong>）<br>
+            2. 完全冷后，用套筒<strong>再拧 1/8 圈</strong>（冷紧防漏）<br>
+            3. <strong>万用表复测</strong>：热敏电阻 100KΩ，加热电阻 13Ω<br>
+            4. 检查线材没有压到发热部分
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">8</div>
+        <div class="step-body">
+          <div class="step-title">通电测试</div>
+          <div class="step-desc">
+            1. 插好所有插头（参考第 3 步的照片）<br>
+            2. 装回打印头外壳<br>
+            3. 开机 → 温度应该能正常升到 200°C（60-90 秒）<br>
+            4. <strong>Klipper 终端</strong>输入 <code>QUERY_ADC</code> 检查温度读数<br>
+            5. 推一段料测试，确认不漏
+          </div>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-title">💡 完整换装后建议</div>
+        <div class="tip-text">
+          • 跑一次 <code>PID_CALIBRATE HEATER=extruder TARGET=220</code> 重做 PID<br>
+          • 检查 <code>printer.cfg</code> 里 extruder 段配置：<br>
+          &nbsp;&nbsp;<code>sensor_type: ATC Semitec 104GT-2</code>（你 KLP1 的）<br>
+          &nbsp;&nbsp;<code>heater_pin: PA0</code>（加热电阻输出）<br>
+          • 重新做 <strong>Z 偏移</strong>校准（热端位置变了，Z 会有偏差）
+        </div>
+      </div>
+
+      <button class="button" onclick="playSteps('t5')">▶️ 演示完整流程</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Tab 切换
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+    // 切换时自动播放动画
+    setTimeout(() => playSteps(tab.dataset.tab), 100);
+  });
+});
+
+// 步骤动画
+function playSteps(tabId) {
+  const steps = document.querySelectorAll(`#${tabId} .step`);
+  steps.forEach(s => s.classList.remove('show'));
+  steps.forEach((step, idx) => {
+    setTimeout(() => step.classList.add('show'), idx * 250);
+  });
+}
+
+// 初始播放
+setTimeout(() => playSteps('t1'), 300);
+</script>
+</body>
+</html>

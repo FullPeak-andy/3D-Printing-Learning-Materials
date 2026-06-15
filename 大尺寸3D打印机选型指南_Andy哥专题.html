@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大尺寸 3D 打印机选型指南 · 300×300+</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; background: #0a0e1a; color: #e0e6ed; padding: 16px; line-height: 1.6; min-height: 100vh; }
+.container { max-width: 1200px; margin: 0 auto; }
+
+.hero { background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%); border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 8px 32px rgba(30, 64, 175, 0.3); }
+.hero h1 { font-size: 26px; margin-bottom: 8px; }
+.hero .sub { font-size: 14px; opacity: 0.85; margin-bottom: 16px; }
+.hero-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
+.stat-card { background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; text-align: center; }
+.stat-num { font-size: 24px; font-weight: 700; color: #fbbf24; }
+.stat-label { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+
+.tabs { display: flex; gap: 6px; margin: 0 0 0 0; overflow-x: auto; }
+.tab { background: #1a2332; padding: 12px 18px; cursor: pointer; border-radius: 10px 10px 0 0; font-weight: 600; transition: all 0.2s; border: 1px solid #2d3748; border-bottom: none; font-size: 13px; white-space: nowrap; color: #94a3b8; }
+.tab:hover { background: #2d3748; color: #e0e6ed; }
+.tab.active { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #fff; border-color: #3b82f6; }
+.tab-content { display: none; background: #1a2332; padding: 24px; border-radius: 0 12px 12px 12px; border: 1px solid #2d3748; }
+.tab-content.active { display: block; }
+
+.section-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+
+.compare-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+.compare-table th, .compare-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #2d3748; }
+.compare-table th { background: #0f172a; font-weight: 700; color: #60a5fa; font-size: 12px; }
+.compare-table tr:hover { background: #0f172a; }
+.compare-table .price { color: #fbbf24; font-weight: 700; }
+.compare-table .best { background: rgba(16, 185, 129, 0.1); }
+.compare-table .best td:first-child::before { content: "⭐ "; color: #fbbf24; }
+
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin: 16px 0; }
+.card { background: #0f172a; border-radius: 12px; padding: 18px; border: 2px solid #2d3748; transition: all 0.2s; }
+.card:hover { border-color: #3b82f6; transform: translateY(-2px); }
+.card.best { border-color: #10b981; box-shadow: 0 0 16px rgba(16, 185, 129, 0.2); }
+.card-title { font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+.card-tag { background: #3b82f6; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.card-tag.green { background: #10b981; }
+.card-tag.yellow { background: #fbbf24; color: #000; }
+.card-tag.red { background: #ef4444; }
+.card-specs { color: #94a3b8; font-size: 13px; line-height: 1.7; margin: 8px 0; }
+.card-specs strong { color: #cbd5e1; }
+.card-price { font-size: 22px; font-weight: 700; color: #fbbf24; margin: 8px 0; }
+.card-why { background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; padding: 10px 12px; margin-top: 10px; font-size: 13px; color: #cbd5e1; border-radius: 4px; }
+
+.decision { background: #0f172a; border-radius: 12px; padding: 20px; margin: 16px 0; }
+.decision-q { font-weight: 700; color: #60a5fa; margin-bottom: 12px; font-size: 16px; }
+.decision-branches { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.branch { background: #1a2332; padding: 14px; border-radius: 8px; border-left: 3px solid #3b82f6; cursor: pointer; transition: all 0.2s; }
+.branch:hover { background: #2d3748; transform: translateX(4px); }
+.branch.yes { border-left-color: #10b981; }
+.branch.no { border-left-color: #ef4444; }
+.branch.maybe { border-left-color: #fbbf24; }
+.branch-label { font-weight: 700; margin-bottom: 4px; color: #fff; }
+.branch-rec { color: #94a3b8; font-size: 13px; }
+
+.scenario { background: #0f172a; border-radius: 10px; padding: 16px; margin: 12px 0; border: 2px solid transparent; cursor: pointer; transition: all 0.2s; }
+.scenario:hover { border-color: #3b82f6; }
+.scenario.expanded { border-color: #10b981; }
+.scenario-q { font-weight: 700; color: #60a5fa; margin-bottom: 8px; }
+.scenario-a { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid #2d3748; color: #cbd5e1; line-height: 1.7; }
+
+.code { background: #000; color: #10b981; padding: 12px 14px; border-radius: 6px; font-family: "Cascadia Code", monospace; font-size: 13px; margin: 8px 0; border: 1px solid #1e293b; overflow-x: auto; }
+.code .comment { color: #64748b; }
+.code .key { color: #60a5fa; }
+.code .val { color: #fbbf24; }
+
+.tip { background: rgba(16, 185, 129, 0.08); border: 1px solid #10b981; border-radius: 6px; padding: 10px 12px; margin: 8px 0; color: #d1fae5; font-size: 13px; }
+.warn { background: rgba(239, 68, 68, 0.08); border: 1px solid #ef4444; border-radius: 6px; padding: 10px 12px; margin: 8px 0; color: #fecaca; font-size: 13px; }
+.tip-icon, .warn-icon { font-weight: 700; margin-right: 4px; }
+
+.led-card { background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%); border-radius: 12px; padding: 18px; margin-top: 20px; }
+.led-card h3 { color: #fbbf24; margin-bottom: 10px; }
+.led-card p { color: #e0e7ff; font-size: 14px; line-height: 1.7; }
+
+.diagram { background: #0f172a; border-radius: 12px; padding: 20px; margin: 16px 0; text-align: center; }
+
+@keyframes glow { 0%, 100% { box-shadow: 0 0 12px rgba(16, 185, 129, 0.3); } 50% { box-shadow: 0 0 24px rgba(16, 185, 129, 0.6); } }
+.glow { animation: glow 2s infinite; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="hero">
+<h1>🏗️ 大尺寸 3D 打印机选型指南</h1>
+<div class="sub">300×300mm+ 起步 · 闲鱼捡漏 vs DIY 路线 · LED 业务版</div>
+<div class="hero-stats">
+<div class="stat-card">
+<div class="stat-num">8</div>
+<div class="stat-label">候选机型</div>
+</div>
+<div class="stat-card">
+<div class="stat-num">3</div>
+<div class="stat-label">路线选择</div>
+</div>
+<div class="stat-card">
+<div class="stat-num">¥300-7000</div>
+<div class="stat-label">价格区间</div>
+</div>
+<div class="stat-card">
+<div class="stat-num">1</div>
+<div class="stat-label">最终推荐</div>
+</div>
+</div>
+</div>
+
+<div class="tabs">
+<div class="tab active" data-tab="t1">🚀 Tab 1 三条路线</div>
+<div class="tab" data-tab="t2">🛒 Tab 2 闲鱼捡漏</div>
+<div class="tab" data-tab="t3">🔧 Tab 3 DIY 路线</div>
+<div class="tab" data-tab="t4">🌳 Tab 4 决策树</div>
+<div class="tab" data-tab="t5">🎯 Tab 5 Andy 哥专属</div>
+</div>
+
+<!-- Tab 1: 三条路线 -->
+<div class="tab-content active" id="t1">
+<h2 class="section-title">🚀 三条路线 · 速览</h2>
+<p style="color:#94a3b8;margin-bottom:16px;">300×300mm 以上的机器，Andy 哥有 3 条路可走。按"动手程度"和"预算"两条轴划分：</p>
+
+<div class="card-grid">
+<div class="card best glow">
+<div class="card-title">🅰️ 闲鱼捡漏成品机
+<span class="card-tag green">最快</span></div>
+<div class="card-specs">
+<strong>预算：</strong>¥300-2000<br>
+<strong>典型机型：</strong>Sidewinder X2、Kobra Max、CR-10、Ender 3 改<br>
+<strong>动手度：</strong>⭐ 简单（接电即用）<br>
+<strong>上手时间：</strong>1-2 周<br>
+<strong>质量天花板：</strong>中等
+</div>
+<div class="card-price">¥300 - 2000</div>
+<div class="card-why"><strong>适合</strong>：业务急着出货，先用起来再说。Andy 哥现在 KLP1 220×220 装不下大件，最快补一台。</div>
+</div>
+
+<div class="card best">
+<div class="card-title">🅱️ 闲鱼捡漏套件 DIY
+<span class="card-tag yellow">性价比</span></div>
+<div class="card-specs">
+<strong>预算：</strong>¥1500-3500<br>
+<strong>典型机型：</strong>Voron 2.4 350 套件、Trident 套件、BLV Cube<br>
+<strong>动手度：</strong>⭐⭐⭐ 中等（要组装 1-2 周）<br>
+<strong>上手时间：</strong>1-2 月<br>
+<strong>质量天花板：</strong>高
+</div>
+<div class="card-price">¥1500 - 3500</div>
+<div class="card-why"><strong>适合</strong>：Andy 哥有 Klipper 经验 + 改造 K1 的手活，套件 60-70% 已经预组装好，省时省心。</div>
+</div>
+
+<div class="card best">
+<div class="card-title">🅲️ 完全自己 DIY
+<span class="card-tag red">最折腾</span></div>
+<div class="card-specs">
+<strong>预算：</strong>¥3000-7000<br>
+<strong>典型机型：</strong>Voron 2.4 350 全 DIY、CoreXY 自攒、Annex K3<br>
+<strong>动手度：</strong>⭐⭐⭐⭐⭐ 高（设计 + 采购 + 组装 + 调试 2-3 月）<br>
+<strong>质量天花板：</strong>天花板
+</div>
+<div class="card-price">¥3000 - 7000</div>
+<div class="card-why"><strong>适合</strong>：闲鱼捡漏套件也找不到 / 想完全掌控 BOM / 把 3D 打印当长期生意。</div>
+</div>
+</div>
+
+<div class="tip">
+<span class="tip-icon">💡 Andy 哥专属洞察：</span>
+你已经有 KLP1（Klipper）+ 大鱼 SPA（多色学习）+ K1 待改造。**新机应该选 CoreXY 大尺寸 + Klipper**，和 K1 改造走同一条 Voron 路线，技术栈复用。
+</div>
+
+<h3 class="section-title" style="margin-top:24px;">📊 8 款候选机总览</h3>
+<table class="compare-table">
+<thead>
+<tr>
+<th>机型</th>
+<th>尺寸</th>
+<th>价格（二手）</th>
+<th>路线</th>
+<th>Andy 哥适配</th>
+</tr>
+</thead>
+<tbody>
+<tr class="best">
+<td><strong>Voron Trident 350</strong></td>
+<td>350×350×250</td>
+<td class="price">¥3500-5000</td>
+<td>DIY 套件</td>
+<td>⭐⭐⭐⭐⭐ 强烈推荐</td>
+</tr>
+<tr>
+<td>Voron 2.4 350</td>
+<td>350×350×350</td>
+<td class="price">¥4000-7000</td>
+<td>DIY 套件/全 DIY</td>
+<td>⭐⭐⭐⭐ 进阶选择</td>
+</tr>
+<tr class="best">
+<td><strong>Artillery Sidewinder X2</strong></td>
+<td>300×300×400</td>
+<td class="price">¥1200-2000</td>
+<td>闲鱼成品</td>
+<td>⭐⭐⭐⭐⭐ 大尺寸入门首选</td>
+</tr>
+<tr>
+<td>Anycubic Kobra Max</td>
+<td>400×400×450</td>
+<td class="price">¥1500-2500</td>
+<td>闲鱼成品</td>
+<td>⭐⭐⭐⭐ 一次打 9 个</td>
+</tr>
+<tr>
+<td>Creality K1 Max</td>
+<td>300×300×300</td>
+<td class="price">¥2500-3500</td>
+<td>闲鱼成品</td>
+<td>⭐⭐⭐ 已经有 K1 改机</td>
+</tr>
+<tr>
+<td>Tronxy X5S</td>
+<td>330×330×400</td>
+<td class="price">¥800-1500</td>
+<td>闲鱼成品</td>
+<td>⭐⭐⭐ 大尺寸白菜</td>
+</tr>
+<tr>
+<td>CR-10 V2/V3</td>
+<td>300×300×400</td>
+<td class="price">¥1000-2000</td>
+<td>闲鱼成品</td>
+<td>⭐⭐ 老牌但偏慢</td>
+</tr>
+<tr>
+<td>BLV mINI Cube</td>
+<td>300×300×300</td>
+<td class="price">¥2500-4000</td>
+<td>DIY 套件</td>
+<td>⭐⭐⭐ Voron 入门款</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<!-- Tab 2: 闲鱼捡漏 -->
+<div class="tab-content" id="t2">
+<h2 class="section-title">🛒 闲鱼捡漏 · 4 款推荐</h2>
+<p style="color:#94a3b8;margin-bottom:16px;">Andy 哥闲鱼关键词怎么搜 + 怎么鉴别水货 + 怎么砍价：</p>
+
+<div class="card-grid">
+<div class="card best">
+<div class="card-title">🥇 Artillery Sidewinder X2
+<span class="card-tag green">强烈推荐</span></div>
+<div class="card-specs">
+<strong>打印尺寸：</strong>300×300×400mm<br>
+<strong>架构：</strong>龙门式（Cartesian）<br>
+<strong>价格：</strong>闲鱼 ¥1200-2000<br>
+<strong>KLIPPER 支持：</strong>✅ 民间固件支持（Klipper 改造热门机型）<br>
+<strong>LED 业务：</strong>一次能打 1-2 个大尺寸灯罩
+</div>
+<div class="card-price">¥1200 - 2000</div>
+<div class="card-why">
+<strong>为什么选它</strong>：闲鱼最常见的大尺寸之一，配件便宜，**和 K1 是同一架构**（都是 Cartesian），Andy 哥改 K1 的经验直接复用。300×300×400 一次能打 1-2 个大型灯罩。
+</div>
+</div>
+
+<div class="card best">
+<div class="card-title">🥈 Anycubic Kobra Max
+<span class="card-tag yellow">大尺寸代表</span></div>
+<div class="card-specs">
+<strong>打印尺寸：</strong>400×400×450mm<br>
+<strong>架构：</strong>龙门式（Cartesian）<br>
+<strong>价格：</strong>闲鱼 ¥1500-2500<br>
+<strong>Klipper 支持：</strong>✅ 民间固件支持<br>
+<strong>LED 业务：</strong>一次能打 4-6 个中尺寸灯罩
+</div>
+<div class="card-price">¥1500 - 2500</div>
+<div class="card-why">
+<strong>为什么选它</strong>：400×400 是闲鱼"准工业"机型，**最适合 Andy 哥批量打 LED 灯罩**。缺点：体积大，要单独放一张桌子。
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">🥉 Creality K1 Max
+<span class="card-tag">CoreXY 速度</span></div>
+<div class="card-specs">
+<strong>打印尺寸：</strong>300×300×300mm<br>
+<strong>架构：</strong>CoreXY<br>
+<strong>价格：</strong>闲鱼 ¥2500-3500<br>
+<strong>Klipper 支持：</strong>✅ 原生（Creality K1 改 Klipper 简单）<br>
+<strong>LED 业务：</strong>一次能打 1-2 个大尺寸灯罩
+</div>
+<div class="card-price">¥2500 - 3500</div>
+<div class="card-why">
+<strong>为什么选它</strong>：CoreXY 速度比 Cartesian 快 2-3 倍，**Andy 哥已经有 K1 改造机，再入一台 K1 Max 经验完全复用**。但 300×300 不是真"大尺寸"，有点浪费。
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">🏅 Tronxy X5S
+<span class="card-tag green">白菜价</span></div>
+<div class="card-specs">
+<strong>打印尺寸：</strong>330×330×400mm<br>
+<strong>架构：</strong>龙门式（Cartesian）<br>
+<strong>价格：</strong>闲鱼 ¥800-1500<br>
+<strong>Klipper 支持：</strong>✅ 民间固件支持<br>
+<strong>LED 业务：</strong>一次能打 1-2 个大尺寸灯罩
+</div>
+<div class="card-price">¥800 - 1500</div>
+<div class="card-why">
+<strong>为什么选它</strong>：闲鱼白菜价大尺寸，预算紧就选它。缺点：原厂电机/主板质量一般，**预算 ¥1500 建议升级主板**（BTT SKR Mini 配 Klipper）。
+</div>
+</div>
+</div>
+
+<h3 class="section-title" style="margin-top:24px;">🔍 闲鱼捡漏 5 招避坑</h3>
+<div class="scenario" onclick="this.classList.toggle('expanded')">
+<div class="scenario-q">1️⃣ 关键词怎么搜？</div>
+<div class="scenario-a">
+闲鱼搜索关键词（按热度排）：<br>
+• <code style="background:#000;padding:2px 6px;border-radius:3px;color:#fbbf24;">Sidewinder X2</code> + <code>300</code> —— 命中 1-2k<br>
+• <code>Kobra Max 400</code> —— 命中 500-1k<br>
+• <code>K1 Max CoreXY</code> —— 命中 800-1500<br>
+• <code>大尺寸 3D 打印机 二手</code> —— 命中 5k+<br>
+• <code>Voron 套件</code> + <code>350</code> —— 命中 200-500<br>
+• 想要**捡漏价**就加 <code style="background:#000;padding:2px 6px;border-radius:3px;color:#fbbf24;">闲鱼捡漏</code> / <code>急出</code> / <code>搬家</code>
+</div>
+</div>
+
+<div class="scenario" onclick="this.classList.toggle('expanded')">
+<div class="scenario-q">2️⃣ 怎么鉴别水货？</div>
+<div class="scenario-a">
+• 问购买时间 + 保修单<br>
+• 要求发开机视频（看屏幕+主界面）<br>
+• 问耗材库存：原盒/原说明书有没有<br>
+• 看闲鱼历史评价（卖家 100+ 好评 + 90% 好评率基本靠谱）<br>
+• **重点**：问"是否能打 PETG 超过 4 小时不断料"——能打 = 主板+热端+送料没问题
+</div>
+</div>
+
+<div class="scenario" onclick="this.classList.toggle('expanded')">
+<div class="scenario-q">3️⃣ 砍价话术？</div>
+<div class="scenario-a">
+原价的 6-7 折起步砍：<br>
+• "老板我先看装机视频，确认没问题直接拍"<br>
+• "这个价位差不多，但送不送耗材和卷线盘？"<br>
+• "我直接拍，但要你包邮发顺丰到付不要"<br>
+• 闲鱼支持"小刀"功能（自动减 50-200）
+</div>
+</div>
+
+<div class="scenario" onclick="this.classList.toggle('expanded')">
+<div class="scenario-q">4️⃣ 验机重点看什么？</div>
+<div class="scenario-a">
+收到货 1 周内重点验：<br>
+• <strong>XY 轴间隙</strong>：手推喷嘴，能感觉到阻力但不卡 = OK<br>
+• <strong>Z 轴</strong>：看 4 个角升降是否同步<br>
+• <strong>热端</strong>：加热到 240°C 看有没有漏料<br>
+• <strong>热床</strong>：加热到 80°C 看 4 角温度差（差 < 5°C = OK）<br>
+• <strong>送料</strong>：手动挤出 100mm，标记 120mm 位置看准确度
+</div>
+</div>
+
+<div class="scenario" onclick="this.classList.toggle('expanded')">
+<div class="scenario-q">5️⃣ 哪些"坑"要避？</div>
+<div class="scenario-a">
+• ❌ 没有保修单的（无法验证来源）<br>
+• ❌ 卖家描述里"功能正常"但没视频的<br>
+• ❌ 价格远低于市场（钓鱼/水货）<br>
+• ❌ 商家号卖的（往往非个人捡漏价）<br>
+• ❌ 主板/电机是山寨的（看 PCB 印刷和原厂 logo）
+</div>
+</div>
+</div>
+
+<!-- Tab 3: DIY 路线 -->
+<div class="tab-content" id="t3">
+<h2 class="section-title">🔧 DIY 路线 · Voron 系列</h2>
+<p style="color:#94a3b8;margin-bottom:16px;">Andy 哥有 Klipper + CoreXY 经验，**DIY 路线首选 Voron**。从"容易 DIY"到"硬核 DIY"排序：</p>
+
+<div class="card-grid">
+<div class="card best glow">
+<div class="card-title">🥇 Voron Trident 350
+<span class="card-tag green">最推荐</span></div>
+<div class="card-specs">
+<strong>打印尺寸：</strong>350×350×250mm<br>
+<strong>架构：</strong>CoreXY（3 Z 轴电机，固定床）<br>
+<strong>套件价格：</strong>闲鱼 ¥3500-5000（含主板/电机/型材）<br>
+<strong>DIY 难度：</strong>⭐⭐⭐ 中等<br>
+<strong>DIY 时间：</strong>40-60 小时<br>
+<strong>质量：</strong>天花板的 90%
+</div>
+<div class="card-price">¥3500 - 5000 套件</div>
+<div class="card-why">
+<strong>为什么是 Andy 哥首选</strong>：<br>
+• <strong>固定床</strong>（不像 2.4 床要上下动）→ 打印稳定，**最适合 LED 灯罩/外壳这种大批量打**（一打就是 4-8 小时）<br>
+• <strong>3 Z 轴电机方案</strong>比 2.4 的 4 电机龙门简单，Andy 哥 1 周末能装完<br>
+• <strong>350×350 标准 BOM</strong>，闲鱼套件多<br>
+• 已经有 K1 改造机 → Klipper + CoreXY 经验直接复用
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">🥈 Voron 2.4 350
+<span class="card-tag yellow">终极</span></div>
+<div class="card-specs">
+<strong>打印尺寸：</strong>350×350×350mm<br>
+<strong>架构：</strong>CoreXY（4 Z 轴电机，龙门动）<br>
+<strong>套件价格：</strong>闲鱼 ¥4000-7000<br>
+<strong>DIY 难度：</strong>⭐⭐⭐⭐ 高<br>
+<strong>DIY 时间：</strong>60-80 小时<br>
+<strong>质量：</strong>天花板 100%
+</div>
+<div class="card-price">¥4000 - 7000 套件</div>
+<div class="card-why">
+<strong>为什么是终极</strong>：<br>
+• Z 高度比 Trident 多 100mm（350mm vs 250mm）<br>
+• 4 Z 电机同步精度更高<br>
+• 缺点：床要上下动，**打大批量时床速度受限** → 灯罩业务不如 Trident<br>
+• **适合追求极致**的 3D 打印玩家
+</div>
+</div>
+
+<div class="card">
+<div class="card-title">🥉 BLV mINI Cube
+<span class="card-tag">Voron 入门</span></div>
+<div class="card-specs">
+<strong>打印尺寸：</strong>300×300×300mm<br>
+<strong>架构：</strong>CoreXY<br>
+<strong>套件价格：</strong>闲鱼 ¥2500-4000<br>
+<strong>DIY 难度：</strong>⭐⭐ 简单<br>
+<strong>DIY 时间：</strong>30-40 小时<br>
+<strong>质量：</strong>天花板的 80%
+</div>
+<div class="card-price">¥2500 - 4000 套件</div>
+<div class="card-why">
+<strong>为什么是入门</strong>：<br>
+• 老 Voron 方案，BOM 简单<br>
+• 300×300 不是真"大尺寸"<br>
+• **适合预算紧 + 第一次 DIY Voron**
+</div>
+</div>
+</div>
+
+<h3 class="section-title" style="margin-top:24px;">🛠️ Voron Trident 350 DIY 流程（Andy 哥路线）</h3>
+<div class="diagram">
+<svg viewBox="0 0 700 120" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;">
+<defs>
+<linearGradient id="boxGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+<stop offset="0%" stop-color="#3b82f6"/>
+<stop offset="100%" stop-color="#2563eb"/>
+</linearGradient>
+</defs>
+<text x="350" y="20" text-anchor="middle" fill="#60a5fa" font-size="14" font-weight="700">Voron Trident 350 DIY 8 步流程</text>
+<g>
+<rect x="20" y="40" width="80" height="50" rx="6" fill="url(#boxGrad)"/>
+<text x="60" y="60" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">闲鱼选套件</text>
+<text x="60" y="78" text-anchor="middle" fill="#fbbf24" font-size="9">¥3500-5000</text>
+</g>
+<line x1="100" y1="65" x2="120" y2="65" stroke="#60a5fa" stroke-width="2" marker-end="url(#arrow)"/>
+<g>
+<rect x="120" y="40" width="80" height="50" rx="6" fill="url(#boxGrad)"/>
+<text x="160" y="60" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">BOM 核对</text>
+<text x="160" y="78" text-anchor="middle" fill="#fbbf24" font-size="9">缺料补货</text>
+</g>
+<line x1="200" y1="65" x2="220" y2="65" stroke="#60a5fa" stroke-width="2"/>
+<g>
+<rect x="220" y="40" width="80" height="50" rx="6" fill="url(#boxGrad)"/>
+<text x="260" y="60" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">装框架</text>
+<text x="260" y="78" text-anchor="middle" fill="#fbbf24" font-size="9">2-3h</text>
+</g>
+<line x1="300" y1="65" x2="320" y2="65" stroke="#60a5fa" stroke-width="2"/>
+<g>
+<rect x="320" y="40" width="80" height="50" rx="6" fill="url(#boxGrad)"/>
+<text x="360" y="60" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">装 CoreXY</text>
+<text x="360" y="78" text-anchor="middle" fill="#fbbf24" font-size="9">3-4h</text>
+</g>
+<line x1="400" y1="65" x2="420" y2="65" stroke="#60a5fa" stroke-width="2"/>
+<g>
+<rect x="420" y="40" width="80" height="50" rx="6" fill="url(#boxGrad)"/>
+<text x="460" y="60" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">装热端/床</text>
+<text x="460" y="78" text-anchor="middle" fill="#fbbf24" font-size="9">3-4h</text>
+</g>
+<line x1="500" y1="65" x2="520" y2="65" stroke="#60a5fa" stroke-width="2"/>
+<g>
+<rect x="520" y="40" width="80" height="50" rx="6" fill="url(#boxGrad)"/>
+<text x="560" y="60" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">接线 + Klipper</text>
+<text x="560" y="78" text-anchor="middle" fill="#fbbf24" font-size="9">4-6h</text>
+</g>
+<line x1="600" y1="65" x2="620" y2="65" stroke="#60a5fa" stroke-width="2"/>
+<g>
+<rect x="620" y="40" width="60" height="50" rx="6" fill="#10b981"/>
+<text x="650" y="60" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">调试+打</text>
+<text x="650" y="78" text-anchor="middle" fill="#fbbf24" font-size="9">10-20h</text>
+</g>
+</svg>
+</div>
+
+<div class="tip">
+<span class="tip-icon">💡 Voron Trident 350 BOM 速览：</span>
+• 主板：BigTreeTech Octopus Pro（¥350）<br>
+• 步进电机：6× 1.8° 闭环/开环电机（¥800）<br>
+• 直线导轨：MGN12H 350mm ×3 根（¥600）<br>
+• 铝型材：2040 + 2020 各种长度（¥800）<br>
+• 打印件：50+ 件 ABS 打印件（Andy 哥自己打，¥100 耗材）<br>
+• 热端：Mosquito Magnum 或 Revo（¥500）<br>
+• 热床：硅胶加热垫 350×350（¥400）<br>
+• PEI 弹簧钢床面（¥250）<br>
+• 其他：温控、风扇、传感器、线缆（¥500）<br>
+• <strong style="color:#fbbf24;">合计：¥4300-5500</strong>
+</div>
+
+<div class="warn">
+<span class="warn-icon">⚠️ Voron DIY 必须注意：</span>
+• <strong>打印件自己打</strong>：至少 50+ ABS 件，Andy 哥用 KLP1 跑 3-5 天<br>
+• <strong>精度要求高</strong>：CoreXY 同步带张力要一致（误差 < 0.5mm）<br>
+• <strong>工具需求</strong>：内六角扳手套装 + 游标卡尺 + 钳子<br>
+• <strong>不要赶工</strong>：Voron 调试平均 10-20 小时，要有耐心
+</div>
+</div>
+
+<!-- Tab 4: 决策树 -->
+<div class="tab-content" id="t4">
+<h2 class="section-title">🌳 选型决策树</h2>
+<p style="color:#94a3b8;margin-bottom:16px;">Andy 哥按下面 4 个问题回答，最终得出推荐：</p>
+
+<div class="decision">
+<div class="decision-q">❓ Q1: 你现在 KLP1 装得下大件吗？业务急不急？</div>
+<div class="decision-branches">
+<div class="branch yes">
+<div class="branch-label">✅ 装不下 + 急</div>
+<div class="branch-rec">→ 走 🅰️ 闲鱼捡漏成品机<br>Sidewinder X2 ¥1500</div>
+</div>
+<div class="branch no">
+<div class="branch-label">❌ 装得下 + 不急</div>
+<div class="branch-rec">→ 走 🅱️ DIY 套件<br>Voron Trident 350 ¥4500</div>
+</div>
+<div class="branch maybe">
+<div class="branch-label">🤔 装不下 + 不急</div>
+<div class="branch-rec">→ 等 K1 改完看效果<br>然后再决定大尺寸</div>
+</div>
+</div>
+</div>
+
+<div class="decision">
+<div class="decision-q">❓ Q2: 你现在闲鱼捡漏经验丰富吗？</div>
+<div class="decision-branches">
+<div class="branch yes">
+<div class="branch-label">✅ 丰富（避坑 5 招都熟）</div>
+<div class="branch-rec">→ 闲鱼 🅰️ + 🅱️ 都能玩</div>
+</div>
+<div class="branch no">
+<div class="branch-label">❌ 第一次</div>
+<div class="branch-rec">→ 走 🅰️ 闲鱼成品机<br>风险最低</div>
+</div>
+</div>
+</div>
+
+<div class="decision">
+<div class="decision-q">❓ Q3: 你的预算上限？</div>
+<div class="decision-branches">
+<div class="branch yes">
+<div class="branch-label">💰 ¥300-1500</div>
+<div class="branch-rec">→ 闲鱼 Tronxy X5S / Sidewinder X2 基础款</div>
+</div>
+<div class="branch no">
+<div class="branch-label">💰💰 ¥1500-3500</div>
+<div class="branch-rec">→ 闲鱼 Kobra Max / Sidewinder X2 顶配</div>
+</div>
+<div class="branch maybe">
+<div class="branch-label">💰💰💰 ¥3500-7000</div>
+<div class="branch-rec">→ 闲鱼 Voron Trident 350 套件</div>
+</div>
+</div>
+</div>
+
+<div class="decision">
+<div class="decision-q">❓ Q4: 你想把 3D 打印当主业还是辅业？</div>
+<div class="decision-branches">
+<div class="branch yes">
+<div class="branch-label">✅ 主业（接单出货）</div>
+<div class="branch-rec">→ 选 350×350+<br>Voron Trident 350 强烈推荐</div>
+</div>
+<div class="branch no">
+<div class="branch-label">❌ 辅业（自用 + 偶尔卖）</div>
+<div class="branch-rec">→ 选 300×300 入门款<br>Sidewinder X2 / K1 Max</div>
+</div>
+</div>
+</div>
+
+<div class="tip" style="margin-top:24px;">
+<span class="tip-icon">🎯 Andy 哥专属答案（按你 4 个问题）：</span><br>
+Q1 装不下大件 ✅<br>
+Q2 闲鱼捡漏有经验 ✅<br>
+Q3 预算 ¥4000-5000 ✅<br>
+Q4 LED 业务辅助（不接单出货，但批量打灯罩）✅<br>
+<br>
+<strong style="color:#fbbf24;">👉 推荐路线：闲鱼捡漏 Sidewinder X2（¥1500 立即出货）+ 闲鱼捡漏 Voron Trident 350 套件（¥4500 长期方案）</strong><br>
+<br>
+两台分工：<br>
+• Sidewinder X2 = 业务出货机（Arduino Marlin 简单稳定，KLP1 改造后也归这个角色）<br>
+• Voron Trident 350 = 自用+研发（Klipper 高级玩法，ERCF V3 多色 + LED 灯罩研发）
+</div>
+</div>
+
+<!-- Tab 5: Andy 哥专属 -->
+<div class="tab-content" id="t5">
+<h2 class="section-title">🎯 Andy 哥专属 · 最终推荐</h2>
+
+<div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:12px;padding:20px;margin-bottom:20px;">
+<h3 style="color:#fff;margin-bottom:8px;">🏆 最佳方案：两台分工</h3>
+<p style="color:#e0e7ff;line-height:1.8;">
+<strong>台机 1：Artillery Sidewinder X2（¥1500 闲鱼捡漏）</strong><br>
+• 角色：<strong>LED 业务出货机</strong><br>
+• 优点：开箱即用，稳定，300×300×400<br>
+• 改造：装 Klipper（和 K1 改造路线一致）<br>
+• 适合：批量打 LED 灯罩，每卷回收 PETG 必做温度校准<br>
+<br>
+<strong>台机 2：闲鱼捡漏 Voron Trident 350 套件（¥4500）</strong><br>
+• 角色：<strong>3D 打印研发 + 自用 + 多色</strong><br>
+• 优点：Klipper 原生，350×350×250，CoreXY 高速<br>
+• 扩展：可以加 ERCF V3 多色（K1 + Voron 全 Voron 生态）<br>
+• 适合：研发新品、自用样品、3D 打印进阶玩法
+</p>
+</div>
+
+<h3 class="section-title" style="margin-top:24px;">📅 行动时间表（建议）</h3>
+<table class="compare-table">
+<thead>
+<tr>
+<th>周</th>
+<th>动作</th>
+<th>预算</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第 1 周</td>
+<td>闲鱼蹲 Sidewinder X2 捡漏（关键词 + 砍价 5 招）</td>
+<td>¥1500</td>
+</tr>
+<tr>
+<td>第 2 周</td>
+<td>Sidewinder X2 改装 Klipper（参考 K1 改造经验）</td>
+<td>¥200</td>
+</tr>
+<tr>
+<td>第 3 周</td>
+<td>开始用 Sidewinder X2 打 LED 灯罩测试</td>
+<td>¥0</td>
+</tr>
+<tr>
+<td>第 4-5 周</td>
+<td>闲鱼蹲 Voron Trident 350 套件</td>
+<td>¥4500</td>
+</tr>
+<tr>
+<td>第 6-8 周</td>
+<td>KLP1 跑 50+ ABS 件 + 组装 Voron Trident</td>
+<td>¥200</td>
+</tr>
+<tr>
+<td>第 9 周</td>
+<td>Voron Trident 调试 + 配 ERCF V3</td>
+<td>¥500</td>
+</tr>
+</tbody>
+</table>
+
+<div class="tip" style="margin-top:24px;">
+<span class="tip-icon">💰 总预算：</span>¥6900（两台合计，含耗材+小配件）<br>
+<span class="tip-icon">⏱ 总耗时：</span>2-3 月（边改边打）<br>
+<span class="tip-icon">📈 收益：</span>LED 灯罩批量打 + 闲鱼卖 Voron 套件 + 3D 打印服务（代打件 ¥200-500/件）
+</div>
+
+<div class="led-card">
+<h3>💡 LED 业务深度挂钩</h3>
+<p><strong style="color:#fbbf24;">为什么是 350×350 而不是 400×400？</strong>——Trident 350 一次能打 1-2 个大型 LED 面板灯罩 + 4-6 个小型配件，4-8 小时稳定出料。Kobra Max 400×400 一次能打 4-6 个但电机/热端功率要选高配（价格翻倍）。<strong>Trident 350 = LED 业务性价比最优解</strong>。</p>
+<p style="margin-top:8px;"><strong style="color:#fbbf24;">回收 PETG 必做温度校准</strong>：每一卷回收 PETG 直径/水分都不同，温度塔校准是商业级灯罩的基础。Sidewinder X2 + Voron Trident 各做一次温度塔校准，把最佳温度存到 OrcaSlicer 耗材配置里。</p>
+<p style="margin-top:8px;"><strong style="color:#fbbf24;">Voron Trident + ERCF V3 多色</strong>：回收 LED 库存常有多色配件（RGB 灯带、不同色温灯罩），Voron Trident 加装 ERCF V3 后一次能打 3-4 色混合，**LED 业务"个性化"标签就靠多色**。</p>
+</div>
+
+<div class="warn" style="margin-top:16px;">
+<span class="warn-icon">⚠️ Andy 哥决策点：</span>
+你已有 K1 待改造（¥300），再入 Voron Trident 350（¥4500）= 2 台 CoreXY 机器。考虑你资金流，**先 Sidewinder X2 立即出货**，Voron Trident 放 1-2 月后再蹲。
+</div>
+</div>
+
+</div>
+
+<script>
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

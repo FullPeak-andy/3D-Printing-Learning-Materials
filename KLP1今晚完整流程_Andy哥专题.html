@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KLP1 今晚完整流程 Checklist</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; background: #0a0e1a; color: #e0e6ed; padding: 16px; line-height: 1.6; min-height: 100vh; }
+.container { max-width: 1100px; margin: 0 auto; }
+
+.hero { background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%); border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 8px 32px rgba(30, 64, 175, 0.3); }
+.hero h1 { font-size: 26px; margin-bottom: 8px; }
+.hero .sub { font-size: 14px; opacity: 0.85; margin-bottom: 16px; }
+.hero-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
+.stat-card { background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; backdrop-filter: blur(10px); text-align: center; }
+.stat-num { font-size: 24px; font-weight: 700; color: #fbbf24; }
+.stat-label { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+
+/* 进度条 */
+.progress-wrap { background: #1a2332; border-radius: 12px; padding: 16px; margin-bottom: 20px; border: 1px solid #2d3748; }
+.progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.progress-title { font-weight: 700; color: #60a5fa; }
+.progress-num { font-size: 24px; font-weight: 700; color: #fbbf24; }
+.progress-bar { height: 12px; background: #0f172a; border-radius: 6px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #10b981, #34d399); width: 0%; transition: width 0.5s ease; border-radius: 6px; box-shadow: 0 0 12px rgba(16, 185, 129, 0.5); }
+
+/* Checklist */
+.checklist { display: flex; flex-direction: column; gap: 12px; }
+.check-item { background: #1a2332; border-radius: 12px; padding: 18px 20px; border: 2px solid #2d3748; cursor: pointer; transition: all 0.3s; position: relative; }
+.check-item:hover { border-color: #3b82f6; transform: translateX(4px); }
+.check-item.done { border-color: #10b981; background: rgba(16, 185, 129, 0.05); }
+.check-item.done .check-icon { background: #10b981; }
+.check-item.done .check-content { opacity: 0.7; }
+.check-item.now { border-color: #fbbf24; box-shadow: 0 0 24px rgba(251, 191, 36, 0.3); }
+.check-item.now::before { content: "🔥 进行中"; position: absolute; top: -10px; right: 16px; background: #fbbf24; color: #000; padding: 2px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+
+.check-icon { width: 32px; height: 32px; min-width: 32px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 14px; transition: background 0.3s; margin-right: 14px; }
+.check-item.done .check-icon::after { content: "✓"; }
+.check-item:not(.done) .check-icon::after { content: attr(data-num); }
+
+.check-row { display: flex; align-items: flex-start; }
+.check-content { flex: 1; }
+.check-title { font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+.check-tag { display: inline-block; background: #3b82f6; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.check-tag.warn { background: #f59e0b; color: #000; }
+.check-tag.danger { background: #dc2626; }
+.check-tag.success { background: #10b981; }
+
+.check-meta { display: flex; gap: 16px; margin: 8px 0; font-size: 12px; color: #94a3b8; flex-wrap: wrap; }
+.check-meta span { display: flex; align-items: center; gap: 4px; }
+
+.check-desc { color: #cbd5e1; font-size: 14px; margin-top: 8px; line-height: 1.6; }
+
+.check-details { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid #2d3748; }
+.check-item.expanded .check-details { display: block; }
+
+.code { background: #000; color: #10b981; padding: 12px 14px; border-radius: 6px; font-family: "Cascadia Code", "Consolas", monospace; font-size: 13px; margin: 8px 0; border: 1px solid #1e293b; overflow-x: auto; line-height: 1.6; white-space: pre; }
+.code .comment { color: #64748b; }
+.code .key { color: #60a5fa; font-weight: 600; }
+.code .val { color: #fbbf24; }
+.code .num { color: #f472b6; }
+
+.tip { background: rgba(16, 185, 129, 0.08); border: 1px solid #10b981; border-radius: 6px; padding: 10px 12px; margin: 8px 0; color: #d1fae5; font-size: 13px; }
+.warn-box { background: rgba(239, 68, 68, 0.08); border: 1px solid #ef4444; border-radius: 6px; padding: 10px 12px; margin: 8px 0; color: #fecaca; font-size: 13px; }
+.tip-icon, .warn-icon { font-weight: 700; margin-right: 4px; }
+
+.btn { background: #3b82f6; color: #fff; padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 12px; margin: 4px 4px 4px 0; transition: all 0.2s; display: inline-block; }
+.btn:hover { background: #2563eb; }
+.btn-danger { background: #dc2626; }
+.btn-danger:hover { background: #b91c1c; }
+.btn-success { background: #10b981; }
+.btn-success:hover { background: #059669; }
+
+.expand-btn { background: none; border: 1px solid #3b82f6; color: #60a5fa; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 6px; transition: all 0.2s; }
+.expand-btn:hover { background: #3b82f6; color: #fff; }
+
+/* 总览区 */
+.summary { background: #1a2332; border-radius: 12px; padding: 16px; margin-top: 20px; border: 1px solid #2d3748; }
+.summary h3 { color: #60a5fa; margin-bottom: 12px; }
+.summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.summary-item { background: #0f172a; padding: 10px 12px; border-radius: 6px; font-size: 13px; }
+.summary-item strong { color: #fbbf24; }
+.summary-item .done-mark { color: #10b981; }
+.summary-item .todo-mark { color: #64748b; }
+
+.reset-btn { background: #475569; color: #fff; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; margin-top: 12px; }
+.reset-btn:hover { background: #334155; }
+
+.led-card { background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%); border-radius: 12px; padding: 18px; margin-top: 20px; }
+.led-card h3 { color: #fbbf24; margin-bottom: 10px; font-size: 16px; }
+.led-card p { color: #e0e7ff; font-size: 14px; line-height: 1.7; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="hero">
+<h1>🌙 KLP1 今晚完整流程</h1>
+<div class="sub">从冷打急救到温度塔开打 · 全自动 Checklist · 预计 2 小时</div>
+<div class="hero-stats">
+<div class="stat-card">
+<div class="stat-num" id="stat-done">0</div>
+<div class="stat-label">已完成</div>
+</div>
+<div class="stat-card">
+<div class="stat-num" id="stat-todo">5</div>
+<div class="stat-label">总步骤</div>
+</div>
+<div class="stat-card">
+<div class="stat-num" id="stat-time">2h</div>
+<div class="stat-label">预计耗时</div>
+</div>
+<div class="stat-card">
+<div class="stat-num" id="stat-percent">0%</div>
+<div class="stat-label">进度</div>
+</div>
+</div>
+</div>
+
+<div class="progress-wrap">
+<div class="progress-header">
+<div class="progress-title">📊 总体进度</div>
+<div class="progress-num" id="progress-num">0/5</div>
+</div>
+<div class="progress-bar">
+<div class="progress-fill" id="progress-fill"></div>
+</div>
+</div>
+
+<div class="checklist">
+
+<!-- Step 1: 停手 -->
+<div class="check-item" data-step="1" data-time="30秒" onclick="toggleStep(this)">
+<div class="check-row">
+<div class="check-icon" data-num="1"></div>
+<div class="check-content">
+<div class="check-title">
+🚨 停掉冷打任务
+<span class="check-tag danger">紧急</span>
+</div>
+<div class="check-meta">
+<span>⏱ 30 秒</span>
+<span>📍 OrcaSlicer 设备页</span>
+<span>🎯 救喷嘴</span>
+</div>
+<div class="check-desc">点 OrcaSlicer 顶部"取消"按钮，停掉 0% 的温度塔任务。喷嘴 33.5°C 冷打 PETG 会堵嘴，必须立即停。</div>
+</div>
+</div>
+<div class="check-details">
+<div class="warn-box"><span class="warn-icon">⚠️</span> 不要立即断电！等喷嘴温度降到 60°C 以下再断电，否则余温会糊料在喷嘴内部。</div>
+<button class="btn btn-success" onclick="markDone(1)">✅ 已取消打印</button>
+</div>
+</div>
+
+<!-- Step 2: 功率 off 解决 -->
+<div class="check-item" data-step="2" data-time="5分钟" onclick="toggleStep(this)">
+<div class="check-row">
+<div class="check-icon" data-num="2"></div>
+<div class="check-content">
+<div class="check-title">
+🔧 解决喷嘴功率 off
+<span class="check-tag warn">排错</span>
+</div>
+<div class="check-meta">
+<span>⏱ 5 分钟</span>
+<span>📍 Mainsail Console</span>
+<span>🎯 让喷嘴能加热</span>
+</div>
+<div class="check-desc">浏览器打开 <code style="background:#000;padding:2px 6px;border-radius:3px;color:#fbbf24;">http://klp1.local</code> → Console 跑测试命令，看喷嘴能不能加热。</div>
+</div>
+</div>
+<div class="check-details">
+<h4 style="color:#60a5fa;margin-bottom:8px;">测试命令（按顺序跑）：</h4>
+<div class="code">
+<span class="key">M104 S200</span>      <span class="comment"># 喷嘴目标 200°C（不等待）</span>
+<span class="key">M105</span>            <span class="comment"># 1 秒后查温度</span>
+</div>
+<div class="tip"><span class="tip-icon">💡</span> 看 Mainsail 首页温度图表——Extruder 紫线开始上升 = 喷嘴正常。如果 30 秒内没变化，看 Mainsail 温度字段还是 <code>off</code>，说明 Klipper 配置缺 <code>[extruder]</code> section。</div>
+<h4 style="color:#60a5fa;margin:12px 0 8px;">如果喷嘴能加热（紫线上升）：</h4>
+<div class="tip"><span class="tip-icon">✅</span> KLP1 硬件 100% 正常。问题是 OrcaSlicer 温度塔 G-code 起始脚本不包含 M104/M109。修法：OrcaSlicer 打印机设置 → 机器 G-code → 替换起始 G-code（见下）。</div>
+<h4 style="color:#60a5fa;margin:12px 0 8px;">如果喷嘴不能加热（还是 off）：</h4>
+<div class="warn-box"><span class="warn-icon">❌</span> Klipper 缺 <code>[extruder]</code> 配置。修法：SSH 连 KLP1，在 <code>printer.cfg</code> 末尾加：</div>
+<div class="code">
+<span class="key">[extruder]</span>
+<span class="key">step_pin:</span> <span class="val">PB4</span>
+<span class="key">dir_pin:</span> <span class="val">PB3</span>
+<span class="key">enable_pin:</span> <span class="val">!PA15</span>
+<span class="key">microsteps:</span> <span class="val">16</span>
+<span class="key">rotation_distance:</span> <span class="val">7.71</span>
+<span class="key">nozzle_diameter:</span> <span class="val">0.400</span>
+<span class="key">filament_diameter:</span> <span class="val">1.750</span>
+<span class="key">heater_hotend:</span> <span class="val">extruder</span>
+<span class="key">sensor_type:</span> <span class="val">ATC Semitec 104GT-2</span>
+<span class="key">sensor_pin:</span> <span class="val">PA0</span>
+<span class="key">control:</span> <span class="val">pid</span>
+<span class="key">pid_Kp:</span> <span class="val">22.2</span>
+<span class="key">pid_Ki:</span> <span class="val">1.08</span>
+<span class="key">pid_Kd:</span> <span class="val">114</span>
+<span class="key">min_temp:</span> <span class="val">10</span>
+<span class="key">max_temp:</span> <span class="val">275</span>
+
+<span class="key">[heater_hotend extruder]</span>
+<span class="key">heater_pin:</span> <span class="val">PB0</span>
+</div>
+<div class="tip"><span class="tip-icon">💡</span> 上面 pin 编号是 KLP1 标配，如果和你主板不一致，参考 KINGROON 官方 printer.cfg。改完跑：</div>
+<div class="code">
+<span class="key">sudo systemctl restart klipper</span>      <span class="comment"># 重启 Klipper</span>
+<span class="key">M104 S200</span>                          <span class="comment"># 再测一次</span>
+</div>
+<button class="btn btn-success" onclick="markDone(2)">✅ 喷嘴能加热了</button>
+</div>
+</div>
+
+<!-- Step 3: Mesh -->
+<div class="check-item" data-step="3" data-time="5分钟" onclick="toggleStep(this)">
+<div class="check-row">
+<div class="check-icon" data-num="3"></div>
+<div class="check-content">
+<div class="check-title">
+🛏️ 床面 Mesh 自动调平
+<span class="check-tag success">必做</span>
+</div>
+<div class="check-meta">
+<span>⏱ 5 分钟</span>
+<span>📍 Mainsail Console</span>
+<span>🎯 25 点 Z 偏移补偿</span>
+</div>
+<div class="check-desc">测床面 5×5=25 个点的 Z 偏移，KLP1 自动补偿打印。Mesh 才是真正的"自动调平"。</div>
+</div>
+</div>
+<div class="check-details">
+<h4 style="color:#60a5fa;margin-bottom:8px;">Mainsail Console 跑：</h4>
+<div class="code">
+<span class="key">G28</span>                      <span class="comment"># 归位（必须先做）</span>
+<span class="key">BED_MESH_CALIBRATE</span>      <span class="comment"># 自动测 25 点 Z 偏移，3-5 分钟</span>
+<span class="key">SAVE_CONFIG</span>             <span class="comment"># 保存到 printer.cfg</span>
+</div>
+<div class="tip"><span class="tip-icon">💡</span> 测完后看 Mainsail 首页"调平"图，应该是个 5×5 的热力图，颜色越均匀越好。每个点数值在 ±0.3mm 内就算合格。</div>
+<h4 style="color:#60a5fa;margin:12px 0 8px;">如果 Klipper 报错 "bltouch not configured"：</h4>
+<div class="warn-box"><span class="warn-icon">⚠️</span> 你的 printer.cfg 缺 <code>[bltouch]</code> section。SSH 连 KLP1 在 printer.cfg 末尾加：</div>
+<div class="code">
+<span class="key">[bltouch]</span>
+<span class="key">sensor_pin:</span> <span class="val">^PG12</span>
+<span class="key">control_pin:</span> <span class="val">PB1</span>
+<span class="key">x_offset:</span> <span class="val">-42</span>
+<span class="key">y_offset:</span> <span class="val">-10</span>
+<span class="key">z_offset:</span> <span class="val">2.55</span>
+<span class="key">probe_with_touch_mode:</span> <span class="val">True</span>
+</div>
+<button class="btn btn-success" onclick="markDone(3)">✅ Mesh 测完已保存</button>
+</div>
+</div>
+
+<!-- Step 4: Z 偏移 -->
+<div class="check-item" data-step="4" data-time="5分钟" onclick="toggleStep(this)">
+<div class="check-row">
+<div class="check-icon" data-num="4"></div>
+<div class="check-content">
+<div class="check-title">
+📐 手动 Z 偏移（paper test）
+<span class="check-tag success">必做</span>
+</div>
+<div class="check-meta">
+<span>⏱ 5 分钟</span>
+<span>📍 Mainsail 首页 + 喷嘴下放 A4 纸</span>
+<span>🎯 调到纸能滑有阻力</span>
+</div>
+<div class="check-desc">全局微调喷嘴到床距离。Mesh 解决局部高低，Z 偏移解决全局距离。两者必须都做。</div>
+</div>
+</div>
+<div class="check-details">
+<h4 style="color:#60a5fa;margin-bottom:8px;">Mainsail Console 跑：</h4>
+<div class="code">
+<span class="key">G28</span>                                <span class="comment"># 归位</span>
+<span class="key">G1 X110 Y110 Z0 F3000</span>              <span class="comment"># 喷嘴移到床中心</span>
+</div>
+<h4 style="color:#60a5fa;margin:12px 0 8px;">手动 paper test：</h4>
+<ol style="padding-left:24px;line-height:1.8;color:#cbd5e1;">
+<li>在喷嘴和床之间放一张 A4 纸</li>
+<li>Mainsail 首页找 <strong style="color:#fbbf24;">"Baby stepping Z"</strong> 按钮（±0.025mm 步进）</li>
+<li>点 -0.025 让喷嘴下降，+0.025 让喷嘴上升</li>
+<li>调到 A4 纸能滑动但有轻微阻力</li>
+</ol>
+<div class="tip"><span class="tip-icon">💡</span> 这个值是"经验值"，不用很精确。后续第一层打出来看效果再微调（PETG 第一层要能压出薄薄一层、不能像纸一样有缝）。</div>
+<button class="btn btn-success" onclick="markDone(4)">✅ Z 偏移已调到合适</button>
+</div>
+</div>
+
+<!-- Step 5: 温度塔 -->
+<div class="check-item" data-step="5" data-time="1.5小时" onclick="toggleStep(this)">
+<div class="check-row">
+<div class="check-icon" data-num="5"></div>
+<div class="check-content">
+<div class="check-title">
+🌡️ 温度塔 · 找 PETG 最佳温度
+<span class="check-tag success">最后一战</span>
+</div>
+<div class="check-meta">
+<span>⏱ 1.5 小时</span>
+<span>📍 OrcaSlicer 校准 → 温度</span>
+<span>🎯 9 段温度梯度</span>
+</div>
+<div class="check-desc">OrcaSlicer 一键生成温度塔 G-code（260→220°C 步长 5），1.5 小时打完，回收 PETG 必做。</div>
+</div>
+</div>
+<div class="check-details">
+<h4 style="color:#60a5fa;margin-bottom:8px;">OrcaSlicer 生成 G-code：</h4>
+<ol style="padding-left:24px;line-height:1.8;color:#cbd5e1;">
+<li>校准 → 温度（你截图上方的校准下拉）</li>
+<li>起始温度 <strong style="color:#fbbf24;">260</strong>，结束温度 <strong style="color:#fbbf24;">220</strong></li>
+<li>步长 <strong style="color:#fbbf24;">5</strong>（自动 9 段）</li>
+<li>点"开始"，自动生成 G-code</li>
+<li>推送到 KLP1 开始打</li>
+</ol>
+<div class="tip"><span class="tip-icon">💡</span> 如果之前"校准"菜单里没看到温度选项（你之前看的是调平相关），温度选项在"校准 → 温度"，KLP1 用 Generic PETG 耗材。</div>
+<h4 style="color:#60a5fa;margin:12px 0 8px;">判断最佳温度（打完看效果）：</h4>
+<table style="width:100%;font-size:13px;">
+<thead><tr style="background:#0f172a;"><th style="padding:6px 10px;text-align:left;">段</th><th>温度</th><th>效果判断</th></tr></thead>
+<tbody>
+<tr><td style="padding:4px 10px;">1-3</td><td>260-250°C</td><td>拉丝多、表面光亮、堵嘴风险</td></tr>
+<tr><td style="padding:4px 10px;">4-5</td><td>245-240°C</td><td>⭐ 多数 PETG 最佳区</td></tr>
+<tr><td style="padding:4px 10px;">6-7</td><td>235-230°C</td><td>层间好、表面哑光</td></tr>
+<tr><td style="padding:4px 10px;">8-9</td><td>225-220°C</td><td>可能层裂</td></tr>
+</tbody>
+</table>
+<h4 style="color:#60a5fa;margin:12px 0 8px;">LED 业务建议：</h4>
+<div class="tip"><span class="tip-icon">💡</span> 灯罩（透光）选 250°C 偏亮 / 灯壳（结构）选 235°C 偏韧 / 展示样品 243°C 平衡点。回收 PETG 每卷必做。</div>
+<button class="btn btn-success" onclick="markDone(5)">✅ 温度塔打完找到最佳</button>
+</div>
+</div>
+
+</div>
+
+<!-- 总结 -->
+<div class="summary">
+<h3>📊 今晚完成情况</h3>
+<div class="summary-grid">
+<div class="summary-item"><span id="sum-1" class="todo-mark">○</span> 1. 停掉冷打任务</div>
+<div class="summary-item"><span id="sum-2" class="todo-mark">○</span> 2. 解决功率 off</div>
+<div class="summary-item"><span id="sum-3" class="todo-mark">○</span> 3. Mesh 调平</div>
+<div class="summary-item"><span id="sum-4" class="todo-mark">○</span> 4. Z 偏移</div>
+<div class="summary-item"><span id="sum-5" class="todo-mark">○</span> 5. 温度塔</div>
+<div class="summary-item" style="background:linear-gradient(135deg,#1e40af,#3730a3);"><strong>预计总耗时：</strong> 2 小时</div>
+</div>
+<button class="reset-btn" onclick="resetAll()">🔄 重置所有进度</button>
+</div>
+
+<div class="led-card">
+<h3>💡 LED 业务挂钩</h3>
+<p>这 5 步走完，KLP1 进入"商业级"状态——回收 PETG 每一卷都能稳定出 LED 灯罩。</p>
+<p style="margin-top:8px;"><strong style="color:#fbbf24;">差异化卖点</strong>：详情页加"每批次温度校准" + "Klipper 网格调平" 标签，比 PLA 同行贵 30% 客户也认。PETG 透光率 80%+，层纹控制好 = 灯罩级别的 3D 打印。</p>
+<p style="margin-top:8px;"><strong style="color:#fbbf24;">未来扩展</strong>：K1 改 Voron 完成后，两台机器分工——KLP1 跑小件 + 样品，K1 跑大批量 LED 灯罩 + ERCF V3 多色。</p>
+</div>
+
+</div>
+
+<script>
+const TOTAL = 5;
+let done = new Set();
+
+function updateProgress() {
+  const cnt = done.size;
+  const percent = Math.round(cnt / TOTAL * 100);
+  document.getElementById('progress-num').textContent = `${cnt}/${TOTAL}`;
+  document.getElementById('progress-fill').style.width = percent + '%';
+  document.getElementById('stat-done').textContent = cnt;
+  document.getElementById('stat-todo').textContent = TOTAL - cnt;
+  document.getElementById('stat-percent').textContent = percent + '%';
+  
+  // 更新 summary
+  for (let i = 1; i <= TOTAL; i++) {
+    const el = document.getElementById('sum-' + i);
+    if (done.has(i)) {
+      el.innerHTML = '<span class="done-mark">✓</span> ' + el.textContent.replace(/^[✓○]\s*/, '');
+      el.querySelector('.done-mark').textContent = '✓';
+    } else {
+      const txt = el.textContent.replace(/^[✓○]\s*/, '');
+      el.innerHTML = '<span class="todo-mark">○</span> ' + txt;
+    }
+  }
+}
+
+function toggleStep(el) {
+  document.querySelectorAll('.check-item').forEach(item => {
+    if (item !== el) item.classList.remove('expanded', 'now');
+  });
+  el.classList.toggle('expanded');
+  // 标记当前展开为 now
+  document.querySelectorAll('.check-item').forEach(item => item.classList.remove('now'));
+  if (el.classList.contains('expanded') && !el.classList.contains('done')) {
+    el.classList.add('now');
+  }
+}
+
+function markDone(step) {
+  done.add(step);
+  const el = document.querySelector(`[data-step="${step}"]`);
+  el.classList.add('done');
+  el.classList.remove('now');
+  updateProgress();
+  
+  // 滚动到下一步
+  const next = document.querySelector(`[data-step="${step + 1}"]`);
+  if (next) {
+    setTimeout(() => {
+      document.querySelectorAll('.check-item').forEach(item => item.classList.remove('expanded', 'now'));
+      next.classList.add('expanded', 'now');
+      next.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 400);
+  }
+}
+
+function resetAll() {
+  done.clear();
+  document.querySelectorAll('.check-item').forEach(item => {
+    item.classList.remove('done', 'now', 'expanded');
+  });
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// 初始化
+updateProgress();
+</script>
+</body>
+</html>

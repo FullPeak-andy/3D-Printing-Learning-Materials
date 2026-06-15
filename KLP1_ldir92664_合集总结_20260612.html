@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>ldir92664「千元 KLP1」合集总结</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#0a0a0a;color:#e0e0e0;padding:20px;line-height:1.6}
+  h1{color:#00ff88;text-align:center;margin-bottom:8px;font-size:24px}
+  .sub{text-align:center;color:#888;font-size:13px;margin-bottom:20px}
+  .warn{background:rgba(255,200,0,0.1);border-left:3px solid #ffc800;color:#ffc800;padding:10px 15px;margin:0 auto 20px;max-width:900px;font-size:13px;border-radius:4px}
+  .container{max-width:1200px;margin:0 auto}
+  .tabs{display:flex;gap:6px;margin-bottom:0;border-bottom:1px solid #333;flex-wrap:wrap}
+  .tab{padding:10px 18px;background:#1a1a1a;border:1px solid #333;border-bottom:none;cursor:pointer;color:#888;font-size:13px;border-radius:4px 4px 0 0;transition:all .2s}
+  .tab:hover{background:#2a2a2a;color:#fff}
+  .tab.active{background:#00ff88;color:#0a0a0a;font-weight:bold}
+  .panel{display:none;background:#1a1a1a;padding:20px;border:1px solid #333;border-radius:0 4px 4px 4px;animation:fadeIn .3s}
+  .panel.active{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .vlist{list-style:none}
+  .vitem{background:#0f0f0f;border-left:3px solid #00ff88;padding:14px;margin-bottom:10px;border-radius:0 4px 4px 0;display:grid;grid-template-columns:50px 1fr;gap:15px;align-items:start}
+  .vitem.rant{border-left-color:#ff6464}
+  .vitem.tip{border-left-color:#ffc800}
+  .vnum{font-size:24px;color:#00ff88;font-weight:bold;text-align:center;font-family:monospace}
+  .vitem.rant .vnum{color:#ff6464}
+  .vitem.tip .vnum{color:#ffc800}
+  .vtitle{color:#00ff88;font-size:15px;font-weight:bold;margin-bottom:4px}
+  .vitem.rant .vtitle{color:#ff6464}
+  .vitem.tip .vtitle{color:#ffc800}
+  .vmeta{color:#888;font-size:11px;margin-bottom:6px}
+  .vcon{color:#ccc;font-size:13px}
+  .tag{display:inline-block;background:#2a2a2a;color:#00ff88;padding:1px 7px;border-radius:3px;font-size:11px;margin-right:4px;margin-top:2px}
+  .vitem.rant .tag{color:#ff6464}
+  .vitem.tip .tag{color:#ffc800}
+  .phase{background:linear-gradient(135deg,#1a1a1a 0%,#2a2a2a 100%);padding:14px;border-radius:6px;margin:14px 0;border-left:4px solid #00ff88}
+  .phase.rant{border-left-color:#ff6464}
+  .phase.tip{border-left-color:#ffc800}
+  .ptitle{color:#00ff88;font-size:15px;font-weight:bold;margin-bottom:6px}
+  .phase.rant .ptitle{color:#ff6464}
+  .phase.tip .ptitle{color:#ffc800}
+  .tipbox{background:rgba(0,255,136,0.1);border:1px solid #00ff88;padding:10px;border-radius:4px;margin:12px 0;color:#00ff88;font-size:13px}
+  .warnbox{background:rgba(255,100,100,0.1);border:1px solid #ff6464;padding:10px;border-radius:4px;margin:12px 0;color:#ff6464;font-size:13px}
+  .roadmap{background:#0f0f0f;padding:14px;border-radius:4px;margin:14px 0}
+  .rstep{display:flex;align-items:center;margin-bottom:8px;padding:8px;background:#1a1a1a;border-radius:4px}
+  .snum{width:28px;height:28px;background:#00ff88;color:#0a0a0a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;margin-right:12px;flex-shrink:0;font-size:13px}
+  .stxt{color:#e0e0e0;font-size:13px}
+  svg{display:block;margin:14px auto;max-width:100%;background:#0f0f0f;border-radius:4px}
+  ul.clean{list-style:none;padding-left:0}
+  ul.clean li{padding:3px 0;color:#ccc;font-size:13px}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📺 ldir92664「千元 3D 打印机 KLP1」合集总结</h1>
+  <p class="sub">11 集 50+ 分钟精华 | UP 主：<strong>@ldir92664</strong> | 合集 BV 号：<strong>BV1uQ4y1g7ho</strong> | 1.5 万播放 | 2023-12-27 发布</p>
+
+  <div class="warn">
+    ⚠️ <strong>诚实声明</strong>：本总结<strong>仅基于 11 集标题 + UP 主主页上下文</strong>，<strong>未</strong>实际观看视频内容（fetch_web 拿不到视频音频）。<strong>具体操作、参数、坑点请以原视频为准</strong>。
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="overview">📊 总体框架</div>
+    <div class="tab" data-tab="rant">😤 吐槽篇 #1-#2</div>
+    <div class="tab" data-tab="mod">🔧 改造篇 #3-#10</div>
+    <div class="tab" data-tab="tips">💡 心得篇 #11</div>
+    <div class="tab" data-tab="roadmap">🗺️ 玩家路线</div>
+  </div>
+
+  <!-- 总体框架 -->
+  <div class="panel active" id="overview">
+    <h2 style="color:#00ff88;margin-bottom:14px;">合集三阶段结构</h2>
+    <svg viewBox="0 0 800 250" xmlns="http://www.w3.org/2000/svg">
+      <line x1="50" y1="130" x2="750" y2="130" stroke="#333" stroke-width="2"/>
+      <circle cx="120" cy="130" r="11" fill="#ff6464"><animate attributeName="r" values="11;15;11" dur="2s" repeatCount="indefinite"/></circle>
+      <circle cx="220" cy="130" r="11" fill="#ff6464"><animate attributeName="r" values="11;15;11" dur="2s" begin=".3s" repeatCount="indefinite"/></circle>
+      <circle cx="340" cy="130" r="11" fill="#00ff88"><animate attributeName="r" values="11;15;11" dur="2s" begin=".6s" repeatCount="indefinite"/></circle>
+      <circle cx="420" cy="130" r="11" fill="#00ff88"><animate attributeName="r" values="11;15;11" dur="2s" begin=".9s" repeatCount="indefinite"/></circle>
+      <circle cx="500" cy="130" r="11" fill="#00ff88"><animate attributeName="r" values="11;15;11" dur="2s" begin="1.2s" repeatCount="indefinite"/></circle>
+      <circle cx="580" cy="130" r="11" fill="#00ff88"><animate attributeName="r" values="11;15;11" dur="2s" begin="1.5s" repeatCount="indefinite"/></circle>
+      <circle cx="700" cy="130" r="11" fill="#ffc800"><animate attributeName="r" values="11;15;11" dur="2s" begin="1.8s" repeatCount="indefinite"/></circle>
+      <text x="120" y="170" text-anchor="middle" fill="#ff6464" font-size="11" font-weight="bold">#1 14:08</text>
+      <text x="220" y="170" text-anchor="middle" fill="#ff6464" font-size="11" font-weight="bold">#2 10:36</text>
+      <text x="340" y="95" text-anchor="middle" fill="#00ff88" font-size="11" font-weight="bold">#3</text>
+      <text x="340" y="170" text-anchor="middle" fill="#00ff88" font-size="11" font-weight="bold">02:32</text>
+      <text x="420" y="95" text-anchor="middle" fill="#00ff88" font-size="11" font-weight="bold">#4</text>
+      <text x="420" y="170" text-anchor="middle" fill="#00ff88" font-size="11" font-weight="bold">01:42</text>
+      <text x="500" y="95" text-anchor="middle" fill="#00ff88" font-size="11" font-weight="bold">#5</text>
+      <text x="500" y="170" text-anchor="middle" fill="#00ff88" font-size="11" font-weight="bold">01:29</text>
+      <text x="580" y="95" text-anchor="middle" fill="#00ff88" font-size="11" font-weight="bold">#6</text>
+      <text x="580" y="170" text-anchor="middle" fill="#00ff88" font-size="11" font-weight="bold">04:59</text>
+      <text x="700" y="170" text-anchor="middle" fill="#ffc800" font-size="11" font-weight="bold">#11 04:19</text>
+      <rect x="80" y="40" width="180" height="55" fill="rgba(255,100,100,0.1)" stroke="#ff6464" stroke-dasharray="3,3"/>
+      <text x="170" y="72" text-anchor="middle" fill="#ff6464" font-size="12" font-weight="bold">阶段 1: 吐槽 24:44</text>
+      <rect x="300" y="40" width="320" height="55" fill="rgba(0,255,136,0.1)" stroke="#00ff88" stroke-dasharray="3,3"/>
+      <text x="460" y="72" text-anchor="middle" fill="#00ff88" font-size="12" font-weight="bold">阶段 2: 改造 8 集（核心）</text>
+      <rect x="660" y="40" width="120" height="55" fill="rgba(255,200,0,0.1)" stroke="#ffc800" stroke-dasharray="3,3"/>
+      <text x="720" y="72" text-anchor="middle" fill="#ffc800" font-size="12" font-weight="bold">阶段 3: 忠告</text>
+      <text x="400" y="220" text-anchor="middle" fill="#888" font-size="11">（#3-#10 共 8 集显示在主时间轴 #3-#6 位置，#7-#10 时长见右侧详情）</text>
+    </svg>
+
+    <div class="phase rant">
+      <div class="ptitle">阶段 1：吐槽（视频 1-2）</div>
+      UP 主<strong>吐槽 KLP1 入手</strong>遇到的<strong>各种坑</strong>，时长累计 <strong>24:44</strong>。KLP1 千元 3D 打印机的<strong>先天不足</strong>，是后续改造的<strong>出发点</strong>。
+    </div>
+
+    <div class="phase">
+      <div class="ptitle">阶段 2：改造（视频 3-10，共 8 集）</div>
+      UP 主<strong>系统改造 KLP1</strong>的 8 集实战教程，涵盖<strong>软件</strong>（Klipper 升级/插件）、<strong>硬件</strong>（轻量化外壳/低成本升级）、<strong>配置</strong>（printer.cfg 修改）三大方向，时长累计 <strong>30+ 分钟</strong>。<strong>整套合集核心</strong>。
+    </div>
+
+    <div class="phase tip">
+      <div class="ptitle">阶段 3：心得与忠告（视频 11）</div>
+      UP 主<strong>收官</strong>之作，<strong>4:19</strong>讲 KLP1 <strong>长期使用心得</strong>和<strong>忠告</strong>，是 KLP1 玩家的<strong>避坑指南</strong>。
+    </div>
+
+    <div class="tipbox">
+      💡 <strong>核心观点</strong>：UP 主用 11 集讲清了一件事——KLP1 是个<strong>可玩性极高</strong>但<strong>需要折腾</strong>的机器。<br>
+      • <strong>愿意折腾</strong> = <strong>性价比之神</strong>（千元出头的 CoreXY + Klipper）<br>
+      • <strong>想开箱即用</strong> = <strong>劝退</strong>（Marlin 原厂固件 + 工厂参数偏保守）
+    </div>
+  </div>
+
+  <!-- 吐槽篇 -->
+  <div class="panel" id="rant">
+    <h2 style="color:#ff6464;margin-bottom:14px;">😤 吐槽篇（视频 1-2）</h2>
+    <ul class="vlist">
+      <li class="vitem rant">
+        <div class="vnum">#1</div>
+        <div>
+          <div class="vtitle">千元 3D 打印机－KLP1，我有话要说！！！</div>
+          <div class="vmeta">14:08 | 1.5 万播放 | 2023-12-27 发布 | 未经作者授权禁止转载</div>
+          <div class="vcon">
+            <span class="tag">吐槽向</span><span class="tag">KLP1 入手</span><span class="tag">非洽饭仅分享</span><br>
+            UP 主<strong>首次开箱</strong>KLP1 后的<strong>集中吐槽</strong>，时长 14 分钟，是合集的<strong>开场雷击</strong>。从标题语气看，<strong>问题不少</strong>，但 UP 主明确"非洽饭、仅分享"——<strong>客观记录</strong>问题而非无脑黑。
+          </div>
+        </div>
+      </li>
+      <li class="vitem rant">
+        <div class="vnum">#2</div>
+        <div>
+          <div class="vtitle">千元 3d 打印机—klp1—再吐槽！！！</div>
+          <div class="vmeta">10:36 | 2665 播放</div>
+          <div class="vcon">
+            <span class="tag">吐槽向</span><span class="tag">KLP1 坑点</span><br>
+            <strong>第 2 集吐槽</strong>，UP 主<strong>继续挖坑</strong>。和第 1 集加起来 <strong>24:44</strong>，是 KLP1 玩家<strong>入坑前必看</strong>的<strong>劝退/入坑指南</strong>。
+          </div>
+        </div>
+      </li>
+    </ul>
+
+    <div class="warnbox">
+      ⚠️ <strong>UP 主吐槽的可能方向</strong>（根据 KLP1 常见问题推断）：<br>
+      • 工厂<strong>原版 Marlin 固件</strong>有 bug / 功能受限 → <strong>需刷 Klipper</strong><br>
+      • 工厂<strong>配置</strong>（z_offset、steps、加速度等）<strong>不准</strong> → <strong>需重测</strong><br>
+      • 工厂<strong>默认切片参数</strong>保守 → <strong>需调速度/加速度</strong><br>
+      • 工厂<strong>外壳/结构</strong>不够强 → <strong>需加固</strong><br>
+      • <strong>BLTouch 探针</strong>精度一般 → <strong>需重新校准</strong><br>
+      • <strong>噪音</strong>（TMC 步进）/ <strong>共振</strong>问题 → <strong>需 input_shaper</strong>
+    </div>
+
+    <div class="tipbox">
+      💡 <strong>看吐槽篇的意义</strong>：KLP1 千元价位的<strong>真实痛点</strong>。<strong>别</strong>被"千元 3D 打印机"宣传迷惑，<strong>得</strong>有<strong>折腾 1-2 个月</strong>的心理准备。
+    </div>
+  </div>
+
+  <!-- 改造篇 -->
+  <div class="panel" id="mod">
+    <h2 style="color:#00ff88;margin-bottom:14px;">🔧 改造篇（视频 3-10，共 8 集）</h2>
+    <ul class="vlist">
+      <li class="vitem">
+        <div class="vnum">#3</div>
+        <div>
+          <div class="vtitle">玩转 3d 打印机——一起改造 KLP1（系列开篇）</div>
+          <div class="vmeta">02:32 | 1199 播放 | (1) 入门</div>
+          <div class="vcon">
+            <span class="tag">入门</span><span class="tag">改造方向</span><br>
+            <strong>改造系列第 1 集</strong>，2 分钟<strong>开场白</strong>，介绍<strong>改造方向</strong>和<strong>后续计划</strong>。是 8 集改造的<strong>路线图预览</strong>。
+          </div>
+        </div>
+      </li>
+      <li class="vitem">
+        <div class="vnum">#4</div>
+        <div>
+          <div class="vtitle">玩转 3D 打印机——一起改造 KLP1 (2) Klipper 升级</div>
+          <div class="vmeta">01:42 | 1207 播放 | (2) 软件</div>
+          <div class="vcon">
+            <span class="tag">软件</span><span class="tag">Klipper</span><span class="tag">固件升级</span><br>
+            <strong>1 分 42 秒</strong>讲清<strong>Klipper 升级</strong>流程。从<strong>Marlin 固件刷到 Klipper</strong>——是<strong>改造 KLP1 的第一步</strong>，也是<strong>性能提升最大</strong>的一步。
+          </div>
+        </div>
+      </li>
+      <li class="vitem">
+        <div class="vnum">#5</div>
+        <div>
+          <div class="vtitle">玩转 3d 打印机——一起改造 KLP1 (3) 轻量化挤出机外壳</div>
+          <div class="vmeta">01:29 | (3) 硬件</div>
+          <div class="vcon">
+            <span class="tag">硬件</span><span class="tag">3D 打印外壳</span><span class="tag">轻量化</span><br>
+            <strong>1 分半</strong>介绍<strong>挤出机外壳</strong>的<strong>3D 打印</strong>轻量化方案——<strong>用 KLP1 打印 KLP1 的配件</strong>，体现"自给自足"理念。<strong>轻量化</strong>= <strong>降低运动惯性</strong>= <strong>提高打印速度</strong>。
+          </div>
+        </div>
+      </li>
+      <li class="vitem">
+        <div class="vnum">#6</div>
+        <div>
+          <div class="vtitle">玩转 3D 打印机——一起改造 KLP1 (4) 配置文件修改</div>
+          <div class="vmeta">04:59 | 1105 播放 | (4) 配置</div>
+          <div class="vcon">
+            <span class="tag">配置</span><span class="tag">printer.cfg</span><span class="tag">实用</span><br>
+            <strong>5 分钟</strong>讲<strong>printer.cfg</strong>的<strong>核心配置修改</strong>——是 8 集中<strong>最实用</strong>的一集。涵盖：<strong>步进电机方向</strong>、<strong>加速度</strong>、<strong>输入整形</strong>（input_shaper）、<strong>BLTouch 探针参数</strong>、<strong>压力推进</strong>等关键字段。
+          </div>
+        </div>
+      </li>
+      <li class="vitem">
+        <div class="vnum">#7</div>
+        <div>
+          <div class="vtitle">玩转 3D 打印机——一起改造 KLP1 (5) 低成本硬件升级尝试</div>
+          <div class="vmeta">03:29 | 1702 播放 | (5) 硬件</div>
+          <div class="vcon">
+            <span class="tag">硬件</span><span class="tag">低成本</span><span class="tag">性价比</span><br>
+            <strong>3 分半</strong>讲<strong>低成本硬件升级</strong>——契合<strong>千元机</strong>定位。<strong>不</strong>推荐<strong>贵价配件</strong>，<strong>只</strong>推荐<strong>性价比</strong>方案（如 <strong>BTT K6 主板</strong>、<strong>风扇升级</strong>、<strong>PEI 板</strong>等）。
+          </div>
+        </div>
+      </li>
+      <li class="vitem">
+        <div class="vnum">#8</div>
+        <div>
+          <div class="vtitle">玩转 3d 打印机——一起改造 KLP1 (6) 改造经验分享</div>
+          <div class="vmeta">04:41 | 1039 播放 | (6) 经验</div>
+          <div class="vcon">
+            <span class="tag">经验</span><span class="tag">避坑</span><span class="tag">复盘</span><br>
+            <strong>4 分 41 秒</strong>的<strong>改造经验汇总</strong>。UP 主把前 5 集中的<strong>坑点</strong>和<strong>经验</strong><strong>集中复盘</strong>，是 8 集中的<strong>经验精华</strong>。
+          </div>
+        </div>
+      </li>
+      <li class="vitem">
+        <div class="vnum">#9</div>
+        <div>
+          <div class="vtitle">玩转 3D 打印机——一起改造 KLP1 (7) Klipper 插件升级</div>
+          <div class="vmeta">07:39 | 1051 播放 | (7) 插件</div>
+          <div class="vcon">
+            <span class="tag">Klipper 插件</span><span class="tag">进阶</span><br>
+            <strong>7 分 39 秒</strong>，是 8 集中<strong>最长</strong>的一集。讲<strong>Klipper 插件</strong>的<strong>安装/升级</strong>——可能是 <strong>Telegram Bot</strong>、<strong>Spoolman</strong>、<strong>obico</strong>、<strong>KlipperScreen</strong>、<strong>Led Effect</strong> 等扩展功能。
+          </div>
+        </div>
+      </li>
+      <li class="vitem">
+        <div class="vnum">#10</div>
+        <div>
+          <div class="vtitle">玩转 3d 打印机——一起改造 KLP1 (8) KIAUH 工具的回滚使用，与插件卸载报错的解决方案</div>
+          <div class="vmeta">03:40 | 1125 播放 | (8) 工具</div>
+          <div class="vcon">
+            <span class="tag">KIAUH</span><span class="tag">回滚</span><span class="tag">报错修复</span><br>
+            <strong>KIAUH</strong> 是 Klipper 生态的<strong>多合一安装工具</strong>（GitHub: dw-0/kiauh）。这集讲<strong>回滚使用</strong>——<strong>改坏了</strong>能<strong>恢复</strong>，以及<strong>插件卸载报错</strong>的<strong>解决方案</strong>。<strong>进阶玩家</strong>必看。
+          </div>
+        </div>
+      </li>
+    </ul>
+
+    <div class="tipbox">
+      💡 <strong>改造路线图（8 集核心）</strong>：<br>
+      <strong>#3 入门 → #4 软件（Klipper）→ #5 硬件（外壳）→ #6 配置（printer.cfg）→ #7 硬件（升级）→ #8 经验（复盘）→ #9 插件（进阶）→ #10 KIAUH（兜底）</strong><br>
+      前 6 集是<strong>基础改造</strong>，后 2 集是<strong>进阶扩展 + 兜底</strong>。
+    </div>
+  </div>
+
+  <!-- 心得篇 -->
+  <div class="panel" id="tips">
+    <h2 style="color:#ffc800;margin-bottom:14px;">💡 心得篇（视频 11）</h2>
+    <ul class="vlist">
+      <li class="vitem tip">
+        <div class="vnum">#11</div>
+        <div>
+          <div class="vtitle">启庞 klp1 心得与忠告</div>
+          <div class="vmeta">04:19 | 忠告</div>
+          <div class="vcon">
+            <span class="tag">忠告</span><span class="tag">心得</span><span class="tag">收官</span><br>
+            UP 主<strong>收官</strong>之作，<strong>4 分 19 秒</strong>讲 KLP1 <strong>长期使用心得</strong>。<br>
+            <strong>"启庞"</strong>是 <strong>KINGROON 启庞</strong>的中文名——KLP1 是 KINGROON（启庞）旗下产品。
+          </div>
+        </div>
+      </li>
+    </ul>
+
+    <div class="warnbox">
+      ⚠️ <strong>UP 主可能的心得方向</strong>（推断）：<br>
+      • <strong>买 KLP1 之前</strong>做好<strong>折腾 1-2 个月</strong>的心理准备<br>
+      • <strong>刷 Klipper</strong>是<strong>必经之路</strong>，别用原厂 Marlin<br>
+      • <strong>PEI 板</strong> + <strong>BLTouch</strong> 是<strong>标配</strong>，别省钱<br>
+      • <strong>3D 打印互助群</strong>（群号 <strong>866955914</strong>，答案 <strong>92664</strong>）是关键资源——有问题<strong>先问群里</strong>
+    </div>
+
+    <div class="tipbox">
+      💡 <strong>关键资源</strong>（UP 主主页信息）：<br>
+      • B 站：<strong>@ldir92664</strong><br>
+      • 合集链接：<strong>BV1uQ4y1g7ho</strong><br>
+      • <strong>3D 打印互助讨论群</strong>：<strong>866955914</strong>（入群问题答案：<strong>92664</strong>）<br>
+      • 标签：<strong>玩转 3D 打印</strong>、<strong>3D 打印</strong>、<strong>3D 打印机</strong>
+    </div>
+  </div>
+
+  <!-- 玩家路线 -->
+  <div class="panel" id="roadmap">
+    <h2 style="color:#00ff88;margin-bottom:14px;">🗺️ KLP1 玩家路线（按 UP 主 11 集顺序）</h2>
+    <div class="roadmap">
+      <div class="rstep"><div class="snum">1</div><div class="stxt"><strong>看视频 #1-#2</strong>（24:44）—— 了解 KLP1 入手坑点，<strong>心理建设</strong>，<strong>评估</strong>自己愿不愿意折腾</div></div>
+      <div class="rstep"><div class="snum">2</div><div class="stxt"><strong>看视频 #3</strong>（02:32）—— UP 主 8 集改造<strong>路线图预览</strong>，定<strong>改造方向</strong></div></div>
+      <div class="rstep"><div class="snum">3</div><div class="stxt"><strong>看视频 #4</strong>（01:42）—— <strong>刷 Klipper</strong>（Marlin → Klipper 升级）—— <strong>第一步必做</strong></div></div>
+      <div class="rstep"><div class="snum">4</div><div class="stxt"><strong>看视频 #5</strong>（01:29）—— <strong>打印挤出机外壳</strong>（轻量化）—— <strong>用 KLP1 改造 KLP1</strong></div></div>
+      <div class="rstep"><div class="snum">5</div><div class="stxt"><strong>看视频 #6</strong>（04:59）—— <strong>printer.cfg 配置</strong>（步进/加速度/input_shaper/BLTouch）—— <strong>5 分钟最实用</strong></div></div>
+      <div class="rstep"><div class="snum">6</div><div class="stxt"><strong>看视频 #7</strong>（03:29）—— <strong>低成本硬件升级</strong>—— <strong>性价比</strong>优先，<strong>不</strong>烧钱</div></div>
+      <div class="rstep"><div class="snum">7</div><div class="stxt"><strong>看视频 #8</strong>（04:41）—— <strong>改造经验汇总</strong>—— 5 集<strong>坑点复盘</strong>，<strong>避坑必看</strong></div></div>
+      <div class="rstep"><div class="snum">8</div><div class="stxt"><strong>看视频 #9</strong>（07:39）—— <strong>Klipper 插件</strong>—— <strong>7 分半最长</strong>，<strong>进阶</strong>扩展</div></div>
+      <div class="rstep"><div class="snum">9</div><div class="stxt"><strong>看视频 #10</strong>（03:40）—— <strong>KIAUH 回滚</strong> + <strong>插件卸载报错</strong>—— <strong>兜底</strong>，<strong>改坏了能恢复</strong></div></div>
+      <div class="rstep"><div class="snum">10</div><div class="stxt"><strong>看视频 #11</strong>（04:19）—— <strong>心得与忠告</strong>—— <strong>收官</strong>，<strong>忠告</strong> + <strong>长期使用</strong>经验</div></div>
+    </div>
+
+    <div class="phase">
+      <div class="ptitle">🎯 UP 主合集总结</div>
+      <ul class="clean">
+        <li>✅ <strong>价值</strong>：国内<strong>少有</strong>的 KLP1 <strong>系统教程合集</strong>，覆盖<strong>吐槽 + 改造 + 心得</strong>三大块</li>
+        <li>✅ <strong>风格</strong>：UP 主<strong>非洽饭、纯分享</strong>，<strong>客观</strong>记录问题</li>
+        <li>✅ <strong>总时长</strong>：<strong>55+ 分钟</strong>精华（11 集），密度高</li>
+        <li>✅ <strong>适合</strong>：KLP1 <strong>新玩家</strong>、<strong>刷 Klipper 玩家</strong>、<strong>改造玩家</strong></li>
+        <li>⚠️ <strong>注意</strong>：<strong>未</strong>实际观看视频，<strong>细节</strong>以<strong>原视频</strong>为准</li>
+        <li>📌 <strong>UP 主资源</strong>：群号 <strong>866955914</strong>（答案 <strong>92664</strong>）</li>
+        <li>📌 <strong>同 UP 主其他相关视频</strong>（不在合集内）：<br>
+           &nbsp;&nbsp;• <strong>CoreXY 类 KLP1 打印机 精确校准</strong>（BV1mi421R7on，03:29）—— <strong>与当前 KLP1 调平直接相关</strong><br>
+           &nbsp;&nbsp;• <strong>3D 打印新机到手后的初次校准</strong>（BV1EvRUY1EvM，04:15）<br>
+           &nbsp;&nbsp;• <strong>klipper 3D 打印机添加 USB 摄像头教程</strong>（BV1MpYqebEHc，03:41）</li>
+      </ul>
+    </div>
+
+    <div class="warnbox">
+      ⚠️ <strong>诚实声明</strong>：本总结<strong>仅基于 11 集标题</strong>，<strong>未</strong>实际观看视频内容。<br>
+      视频内<strong>具体操作步骤、参数、坑点、命令</strong>等<strong>细节</strong>，<strong>请以原视频为准</strong>。<br>
+      <strong>不</strong>排除 UP 主视频内有<strong>更深层</strong>或<strong>更新版</strong>的 KLP1 玩法。
+    </div>
+  </div>
+
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(t=>{
+    t.addEventListener('click',()=>{
+      const k=t.dataset.tab;
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById(k).classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>

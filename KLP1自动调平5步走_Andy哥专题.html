@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KLP1 自动调平 5 步走</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; background: #0a0e1a; color: #e0e6ed; padding: 16px; line-height: 1.6; }
+.container { max-width: 1100px; margin: 0 auto; }
+
+.hero { background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%); border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 8px 32px rgba(30, 64, 175, 0.3); position: relative; overflow: hidden; }
+.hero::before { content: ""; position: absolute; top: -50%; right: -10%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%); border-radius: 50%; }
+.hero h1 { font-size: 26px; margin-bottom: 8px; position: relative; z-index: 1; }
+.hero .sub { font-size: 14px; opacity: 0.85; position: relative; z-index: 1; }
+.alert { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #000; padding: 14px 18px; border-radius: 10px; font-weight: 600; margin-top: 16px; display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.alert-icon { font-size: 22px; }
+
+.tabs { display: flex; gap: 6px; margin-bottom: 0; overflow-x: auto; padding-bottom: 2px; }
+.tab { background: #1a2332; padding: 12px 18px; cursor: pointer; border-radius: 10px 10px 0 0; font-weight: 600; transition: all 0.2s; border: 1px solid #2d3748; border-bottom: none; font-size: 13px; white-space: nowrap; color: #94a3b8; }
+.tab:hover { background: #2d3748; color: #e0e6ed; }
+.tab.active { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #fff; border-color: #3b82f6; }
+.tab-content { display: none; background: #1a2332; padding: 24px; border-radius: 0 12px 12px 12px; border: 1px solid #2d3748; }
+.tab-content.active { display: block; }
+
+.step-card { background: #0f172a; border-radius: 12px; padding: 20px; margin: 16px 0; border-left: 4px solid #3b82f6; position: relative; }
+.step-num { position: absolute; top: -12px; left: 20px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; width: 32px; height: 32px; border-radius: 50%; text-align: center; line-height: 32px; font-weight: 700; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
+.step-title { font-size: 17px; font-weight: 700; margin: 8px 0 10px 44px; color: #fff; }
+.step-body { margin-left: 44px; color: #cbd5e1; }
+.step-body p { margin-bottom: 8px; }
+.step-body ul { padding-left: 20px; margin: 8px 0; }
+.step-body li { margin: 4px 0; }
+
+.code { background: #000; color: #10b981; padding: 14px 16px; border-radius: 8px; font-family: "Cascadia Code", "Consolas", monospace; font-size: 13px; margin: 10px 0; border: 1px solid #1e293b; overflow-x: auto; line-height: 1.6; }
+.code .comment { color: #64748b; }
+.code .key { color: #60a5fa; font-weight: 600; }
+.code .val { color: #fbbf24; }
+.code .num { color: #f472b6; }
+
+.tip { background: rgba(16, 185, 129, 0.08); border: 1px solid #10b981; border-radius: 8px; padding: 12px 16px; margin: 12px 0; color: #d1fae5; font-size: 14px; }
+.tip-icon { color: #10b981; font-weight: 700; margin-right: 6px; }
+.warn { background: rgba(239, 68, 68, 0.08); border: 1px solid #ef4444; border-radius: 8px; padding: 12px 16px; margin: 12px 0; color: #fecaca; font-size: 14px; }
+.warn-icon { color: #ef4444; font-weight: 700; margin-right: 6px; }
+
+.btn { background: #3b82f6; color: #fff; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; margin: 4px 6px 4px 0; transition: all 0.2s; display: inline-block; }
+.btn:hover { background: #2563eb; transform: translateY(-1px); }
+.btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+
+.scenario { background: #0f172a; border-radius: 10px; padding: 16px; margin: 12px 0; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
+.scenario:hover { border-color: #3b82f6; }
+.scenario.q { border-left: 4px solid #fbbf24; }
+.scenario.a { display: none; margin-left: 20px; border-left: 4px solid #10b981; }
+
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #2d3748; }
+th { background: #0f172a; font-weight: 700; color: #60a5fa; font-size: 13px; }
+tr:hover { background: #0f172a; }
+code { background: #000; color: #fbbf24; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 12px; }
+
+.checklist { list-style: none; padding: 0; }
+.checklist li { padding: 10px 14px; background: #0f172a; border-radius: 8px; margin: 6px 0; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s; }
+.checklist li:hover { background: #1e293b; }
+.checklist li::before { content: "☐"; color: #64748b; font-size: 18px; }
+.checklist li.done { background: rgba(16, 185, 129, 0.1); color: #d1fae5; }
+.checklist li.done::before { content: "✅"; }
+
+.indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; }
+.indicator.green { background: #10b981; box-shadow: 0 0 8px #10b981; }
+.indicator.yellow { background: #fbbf24; box-shadow: 0 0 8px #fbbf24; }
+.indicator.red { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+
+.klp1-svg { background: #0f172a; border-radius: 12px; padding: 20px; margin: 16px 0; text-align: center; }
+
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+.anim-probe { animation: pulse 2s infinite; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="hero">
+<h1>🎯 KLP1 自动调平 5 步走</h1>
+<div class="sub">从 OrcaSlicer 校准按钮到 bed_mesh 全自动 · 一次搞定</div>
+<div class="alert">
+<span class="alert-icon">⚠️</span>
+<span>先别管调平！你现在的温度塔任务在 0% 阶段喷嘴没加热（功率 off），是冷打。点"取消"先停手，调平是打印之前的事。</span>
+</div>
+</div>
+
+<div class="tabs">
+<div class="tab active" data-tab="t1">🎬 Tab 1 三种调平理解</div>
+<div class="tab" data-tab="t2">🔧 Tab 2 硬件准备</div>
+<div class="tab" data-tab="t3">🖥️ Tab 3 Klipper bed_mesh</div>
+<div class="tab" data-tab="t4">📐 Tab 4 OrcaSlicer 校准</div>
+<div class="tab" data-tab="t5">🩺 Tab 5 排错与微调</div>
+</div>
+
+<!-- Tab 1 -->
+<div class="tab-content active" id="t1">
+<h2>🎬 先分清三种"调平"</h2>
+<p style="color: #94a3b8; margin-bottom: 16px;">Andy 哥你问的"自动调平"其实有 3 层意思，先搞清楚才能对症下药：</p>
+
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>做什么</th>
+<th>工具</th>
+<th>频率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="indicator green"></span> <strong>Leveling（平台调平）</strong></td>
+<td>让床面整体水平，4 个角 Z 偏移一致</td>
+<td>CR-Touch / 手动拧螺丝</td>
+<td>每次换床 / 移动后</td>
+</tr>
+<tr>
+<td><span class="indicator yellow"></span> <strong>Tramming（车床校准）</strong></td>
+<td>4 个角 + 中心，让喷嘴到床距离都≈一张纸</td>
+<td>CR-Touch 自动</td>
+<td>1 周 1 次</td>
+</tr>
+<tr>
+<td><span class="indicator red"></span> <strong>Mesh（床面网格）</strong></td>
+<td>把床面分成 N×N 网格，测每个点的 Z 偏移</td>
+<td>Klipper bed_mesh</td>
+<td>每次打印前</td>
+</tr>
+</tbody>
+</table>
+
+<div class="klp1-svg">
+<svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;">
+<defs>
+<linearGradient id="bedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" stop-color="#1e293b"/>
+<stop offset="100%" stop-color="#0f172a"/>
+</linearGradient>
+<linearGradient id="probeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+<stop offset="0%" stop-color="#3b82f6"/>
+<stop offset="100%" stop-color="#1e40af"/>
+</linearGradient>
+</defs>
+<text x="300" y="25" text-anchor="middle" fill="#60a5fa" font-size="14" font-weight="700">KLP1 床面 3D 视图</text>
+<polygon points="50,80 550,80 570,260 30,260" fill="url(#bedGrad)" stroke="#3b82f6" stroke-width="2"/>
+<!-- 网格点 -->
+<g opacity="0.5">
+<circle cx="150" cy="130" r="3" fill="#10b981"/>
+<circle cx="300" cy="130" r="3" fill="#10b981"/>
+<circle cx="450" cy="130" r="3" fill="#10b981"/>
+<circle cx="120" cy="180" r="3" fill="#10b981"/>
+<circle cx="300" cy="180" r="3" fill="#10b981"/>
+<circle cx="480" cy="180" r="3" fill="#10b981"/>
+<circle cx="150" cy="230" r="3" fill="#10b981"/>
+<circle cx="300" cy="230" r="3" fill="#10b981"/>
+<circle cx="450" cy="230" r="3" fill="#10b981"/>
+</g>
+<!-- 喷嘴+CR-Touch -->
+<g class="anim-probe">
+<rect x="280" y="100" width="40" height="20" fill="url(#probeGrad)" rx="2"/>
+<line x1="300" y1="120" x2="300" y2="145" stroke="#3b82f6" stroke-width="2"/>
+<circle cx="300" cy="150" r="4" fill="#fbbf24"/>
+<text x="310" y="115" fill="#60a5fa" font-size="10">CR-Touch</text>
+</g>
+<text x="300" y="275" text-anchor="middle" fill="#94a3b8" font-size="11">5×5 网格 = 25 个测量点（Klipper bed_mesh 默认）</text>
+</svg>
+</div>
+
+<div class="tip">
+<span class="tip-icon">💡 关键概念：</span>
+KLP1 出厂带的 <strong>CR-Touch</strong>（或者 BL-Touch）是个电容式探头，Klipper 用它自动测每个网格点的 Z 偏移。完全不用手拧螺丝，机器自己测。
+</div>
+
+<h3 style="margin: 24px 0 12px; color: #60a5fa;">🚀 自动调平一句话流程</h3>
+<div class="step-card" style="border-left-color: #10b981;">
+<div class="step-body">
+<p><strong>① 硬件</strong>：CR-Touch 探头接好 X 限位（出厂已接）</p>
+<p><strong>② Klipper 配置</strong>：printer.cfg 加 <code>[bltouch]</code> + <code>[bed_mesh]</code> section</p>
+<p><strong>③ 自动校准</strong>：Mainsail 跑 <code>BED_MESH_CALIBRATE</code> 命令</p>
+<p><strong>④ 切片器</strong>：OrcaSlicer 起始 G-code 加 <code>G29</code> 或 <code>BED_MESH_PROFILE LOAD=default</code></p>
+<p><strong>⑤ 保存</strong>：测完 SAVE_CONFIG，每次打印自动加载</p>
+</div>
+</div>
+
+<div class="warn">
+<span class="warn-icon">⚠️</span>
+你的 KLP1 出厂默认是 Marlin 固件 + 手动调平。后来刷成 Klipper 后自动调平需要重新配置。如果是新机器第一次用，强烈建议先看完 Tab 2-4 再动。
+</div>
+</div>
+
+<!-- Tab 2 -->
+<div class="tab-content" id="t2">
+<h2>🔧 硬件准备 · 30 分钟检查</h2>
+<p style="color: #94a3b8; margin-bottom: 16px;">先确认 CR-Touch 探头在位 + Klipper 配置正确。硬件没毛病才能跑自动调平。</p>
+
+<div class="step-card">
+<span class="step-num">1</span>
+<div class="step-title">检查 CR-Touch 探头</div>
+<div class="step-body">
+<p>看 KLP1 喷嘴左边那个蓝色小方块（CR-Touch），看探针能不能正常伸缩。</p>
+<ul>
+<li>探针亮蓝灯 = 正常</li>
+<li>探针亮红灯 = 触发状态（贴着床）</li>
+<li>灯不亮 = 没通电，检查 3 针线（白/红/黑）接 X 限位接口</li>
+</ul>
+<div class="tip"><span class="tip-icon">💡</span> KLP1 出厂 CR-Touch 是接在 <code>X-STOP</code> 接口（3 根线：信号/VCC/GND），不能接到普通 IO。</div>
+</div>
+</div>
+
+<div class="step-card">
+<span class="step-num">2</span>
+<div class="step-title">SSH 登录 KLP1</div>
+<div class="step-body">
+<p>用 MobaXterm / PuTTY 登录 KLP1（Klipper 主机）</p>
+<div class="code">
+<span class="comment"># 主机名（最常用）</span>
+<span class="key">ssh </span><span class="val">pi@klp1.local</span>
+
+<span class="comment"># 或者用 IP（路由器后台查 KLP1 的 IP）</span>
+<span class="key">ssh </span><span class="val">pi@192.168.x.x</span>
+
+<span class="comment"># 默认密码（KLP1 官方是 raspberry 或 klp1）</span>
+<span class="val">password: raspberry</span>
+</div>
+</div>
+</div>
+
+<div class="step-card">
+<span class="step-num">3</span>
+<div class="step-title">查 printer.cfg 关键配置</div>
+<div class="step-body">
+<p>登录后看 printer.cfg 里 CR-Touch 和 bed_mesh 部分：</p>
+<div class="code">
+<span class="key">cat ~/printer.cfg | grep -A 30 "bltouch\|bed_mesh"</span>
+</div>
+
+<p style="margin-top: 12px;">如果有输出就跳过 Tab 3；如果没看到 <code>[bltouch]</code> 或 <code>[bed_mesh]</code>，去 Tab 3 加配置。</p>
+</div>
+</div>
+
+<div class="step-card">
+<span class="step-num">4</span>
+<div class="step-title">测试探针自检</div>
+<div class="step-body">
+<p>在 Mainsail Console 跑：</p>
+<div class="code">
+<span class="key">BLTOUCH_DEBUG COMMAND=</span><span class="val">pin_down</span>      <span class="comment"># 探针伸出</span>
+<span class="key">BLTOUCH_DEBUG COMMAND=</span><span class="val">pin_up</span>        <span class="comment"># 探针收回</span>
+<span class="key">QUERY_PROBE</span>                              <span class="comment"># 查探针状态</span>
+</div>
+<p>输出 <code>TRIGGERED</code> 表示探针触发了（正常）；<code>open</code> 表示没触发（探针线松了）。</p>
+</div>
+</div>
+
+<div class="step-card">
+<span class="step-num">5</span>
+<div class="step-title">清床面 + 装好耗材</div>
+<div class="step-body">
+<ul>
+<li>用酒精擦床面（KLP1 默认 PEI 弹簧钢床）</li>
+<li>装好 PETG 耗材，确认能正常挤出（手动挤出 50mm 看效果）</li>
+<li>关上打印机门（防气流影响）</li>
+</ul>
+</div>
+</div>
+</div>
+
+<!-- Tab 3 -->
+<div class="tab-content" id="t3">
+<h2>🖥️ Klipper bed_mesh 完整配置</h2>
+<p style="color: #94a3b8; margin-bottom: 16px;">把下面三段配置加到 KLP1 的 <code>printer.cfg</code> 末尾。复制粘贴就行，KLP1 出厂 Klipper 模板就是这三段。</p>
+
+<div class="step-card">
+<span class="step-num">1</span>
+<div class="step-title">编辑 printer.cfg</div>
+<div class="step-body">
+<div class="code">
+<span class="key">cd ~</span>
+<span class="key">nano printer.cfg</span>
+</div>
+<p>在文件末尾追加（如果已经有 [bltouch] 就跳过）：</p>
+</div>
+</div>
+
+<div class="step-card">
+<span class="step-num">2</span>
+<div class="step-title">追加 [bltouch] 配置</div>
+<div class="step-body">
+<div class="code">
+<span class="comment"># ===== CR-Touch 探头配置（KLP1 标配）=====</span>
+<span class="key">[bltouch]</span>
+<span class="key">sensor_pin:</span> <span class="val">^PG12</span>          <span class="comment"># KLP1 主板 CR-Touch 信号引脚</span>
+<span class="key">control_pin:</span> <span class="val">PB1</span>           <span class="comment"># 探针控制引脚</span>
+<span class="key">x_offset:</span> <span class="val">-42</span>              <span class="comment"># 探针到喷嘴的 X 偏移（mm）</span>
+<span class="key">y_offset:</span> <span class="val">-10</span>              <span class="comment"># 探针到喷嘴的 Y 偏移（mm）</span>
+<span class="key">z_offset:</span> <span class="val">2.55</span>             <span class="comment"># 探针触发到喷嘴尖距离（首次估个值）</span>
+<span class="key">probe_with_touch_mode:</span> <span class="val">True</span>
+<span class="key">pin_up_touch_mode:</span> <span class="val">True</span>
+<span class="key">pin_up_reports_not_triggered:</span> <span class="val">True</span>
+<span class="key">stow_on_each_sample:</span> <span class="val">True</span>
+</div>
+<div class="warn"><span class="warn-icon">⚠️</span> <code>x_offset / y_offset / z_offset</code> 三个值要按你的实际机器微调。KLP1 出厂手册有标称值，差异在 ±2mm 内都算正常。</div>
+</div>
+</div>
+
+<div class="step-card">
+<span class="step-num">3</span>
+<div class="step-title">追加 [bed_mesh] 配置</div>
+<div class="step-body">
+<div class="code">
+<span class="comment"># ===== bed_mesh 床面网格配置 =====</span>
+<span class="key">[bed_mesh]</span>
+<span class="key">speed:</span> <span class="val">120</span>               <span class="comment"># 探针移动速度（mm/s）</span>
+<span class="key">horizontal_move_z:</span> <span class="val">5</span>      <span class="comment"># Z 抬升高度（mm）</span>
+<span class="key">mesh_min:</span> <span class="val">15, 15</span>          <span class="comment"># 网格起点（X, Y）</span>
+<span class="key">mesh_max:</span> <span class="val">225, 225</span>        <span class="comment"># 网格终点（X, Y）</span>
+<span class="key">probe_count:</span> <span class="val">5, 5</span>         <span class="comment"># 5×5 网格（共 25 点）</span>
+<span class="key">algorithm:</span> <span class="val">lagrange</span>       <span class="comment"># 插值算法（lagrange 最准）</span>
+<span class="key">fade_start:</span> <span class="val">0.6</span>           <span class="comment"># 0.6mm 开始淡出补偿</span>
+<span class="key">fade_end:</span> <span class="val">10.0</span>            <span class="comment"># 10mm 完全淡出</span>
+<span class="key">mesh_pps:</span> <span class="val">2, 2</span>
+<span class="key">relative_reference_index:</span> <span class="val">12</span>  <span class="comment"># 中心点 12（5×5 的中心）</span>
+</div>
+<div class="tip"><span class="tip-icon">💡</span> <code>mesh_pps: 2, 2</code> 让 Klipper 在两个点之间再插 2×2=4 个虚拟点，打印出来的曲面更平滑。</div>
+</div>
+</div>
+
+<div class="step-card">
+<span class="step-num">4</span>
+<div class="step-title">追加 SAFE_HOMING + 起始 macro</div>
+<div class="step-body">
+<div class="code">
+<span class="comment"># ===== 安全归位（避免喷嘴撞床角）=====</span>
+<span class="key">[safe_z_home]</span>
+<span class="key">home_xy_position:</span> <span class="val">125, 125</span>  <span class="comment"># 归位点（床中心）</span>
+<span class="key">speed:</span> <span class="val">100</span>
+<span class="key">z_hop:</span> <span class="val">10</span>
+
+<span class="comment"># ===== 一键自动调平 macro =====</span>
+<span class="key">[gcode_macro AUTO_BED_MESH]</span>
+<span class="key">gcode:</span>
+  <span class="val">M117 开始自动调平</span>
+  <span class="val">G28</span>                       <span class="comment"># 归位</span>
+  <span class="val">BED_MESH_CALIBRATE</span>       <span class="comment"># 测网格</span>
+  <span class="val">G1 Z30 F600</span>              <span class="comment"># 抬 Z</span>
+  <span class="val">M117 调平完成</span>
+</div>
+</div>
+</div>
+
+<div class="step-card">
+<span class="step-num">5</span>
+<div class="step-title">保存 + 重启 Klipper</div>
+<div class="step-body">
+<div class="code">
+<span class="comment"># nano 里：Ctrl+O 保存，Ctrl+X 退出</span>
+<span class="key">sudo systemctl restart klipper</span>
+
+<span class="comment"># 检查 Klipper 状态</span>
+<span class="key">sudo systemctl status klipper</span>
+</div>
+<p>看到 <code>active (running)</code> 绿色就 OK。Mainsail 刷新页面，应该能看到"自动调平"按钮。</p>
+</div>
+</div>
+</div>
+
+<!-- Tab 4 -->
+<div class="tab-content" id="t4">
+<h2>📐 OrcaSlicer 校准按钮使用</h2>
+<p style="color: #94a3b8; margin-bottom: 16px;">你截图顶部"校准"按钮就是 OrcaSlicer 自带的校准向导，能调 5 样东西：</p>
+
+<div class="scenario q" onclick="toggleScenario(this)">
+<strong>📍 校准 → 床形（Z 偏移 / 床面形状）</strong> ← 你问的"自动调平"是这个
+<div class="scenario a">
+<p>OrcaSlicer 校准 → 床形功能会引导你做两件事：</p>
+<div class="step-body" style="margin: 12px 0;">
+<p><strong>步骤 1：手动 Z 偏移</strong>（必做）</p>
+<ol>
+<li>点"校准"→"床形"→"Z 偏移"</li>
+<li>OrcaSlicer 提示你在喷嘴下放一张 A4 纸</li>
+<li>点"开始"，打印头移到床中心 Z=0</li>
+<li>用纸在喷嘴和床之间摩擦（喷嘴刚好擦纸，能感觉到阻力）</li>
+<li>Mainsail 控制台输入 <code>SET_GCODE_OFFSET Z=+0.05</code>（每次 0.05 调整）</li>
+<li>调到纸能滑动但有阻力</li>
+</ol>
+<p style="color: #fbbf24; margin-top: 8px;">⏱ 5 分钟</p>
+</div>
+<div class="step-body">
+<p><strong>步骤 2：床面网格（可选）</strong></p>
+<p>如果你在 Tab 3 加了 bed_mesh 配置，这步可以跳过——Klipper 会在打印前自动跑 <code>BED_MESH_CALIBRATE</code>。</p>
+<p>如果要用 OrcaSlicer 引导：</p>
+<ol>
+<li>点"校准"→"床形"→"自适应网格"</li>
+<li>它会发 <code>BED_MESH_CALIBRATE</code> 给 Klipper，KLP1 自动跑 5×5 网格</li>
+<li>完成后点"保存到 Klipper"</li>
+</ol>
+</div>
+</div>
+</div>
+
+<div class="scenario q" onclick="toggleScenario(this)">
+<strong>📍 校准 → 温度（温度塔）</strong> ← 你现在在做的
+<div class="scenario a">
+<p>你正在用！步骤见之前发的 <strong>PETG 温度塔完全指南</strong>。重点：</p>
+<ul>
+<li>起始温度 260°C，结束 220°C，步长 5°C（9 段）</li>
+<li>先解决 Tab 1 那个功率 off 问题再打印</li>
+</ul>
+</div>
+</div>
+
+<div class="scenario q" onclick="toggleScenario(this)">
+<strong>📍 校准 → 流量（流量系数 / E 步进）
+</strong>
+<div class="scenario a">
+<p>挤出流量校准，调出料量。回收 PETG 直径不均，强烈建议做。</p>
+<ol>
+<li>校准 → 流量 → 流量系数</li>
+<li>OrcaSlicer 让你画 100mm 线 + 测量剩余</li>
+<li>输入实际挤出长度，自动算系数</li>
+</ol>
+</div>
+</div>
+
+<div class="scenario q" onclick="toggleScenario(this)">
+<strong>📍 校准 → 压头（压力提前 PA）
+</strong>
+<div class="scenario a">
+<p>Klipper 特有：压力提前补偿，打印转角时减速。</p>
+<ol>
+<li>校准 → 压头 → 压力提前</li>
+<li>OrcaSlicer 印一个 L 形 + 圆弧测试件</li>
+<li>看转角有没有拉丝/鼓起</li>
+</ol>
+</div>
+</div>
+
+<div class="scenario q" onclick="toggleScenario(this)">
+<strong>📍 校准 → 加速度
+</strong>
+<div class="scenario a">
+<p>最大加速度测试。KLP1 默认 1500 mm/s² 偏激进，PETG 建议调到 800-1200。</p>
+</div>
+</div>
+
+<h3 style="margin: 24px 0 12px; color: #60a5fa;">🎯 推荐校准顺序（Andy 哥）</h3>
+<ol class="checklist">
+<li onclick="this.classList.toggle('done')">手动 Z 偏移（先做这个，否则后面全白做）</li>
+<li onclick="this.classList.toggle('done')">床面 mesh 测一次 + SAVE_CONFIG</li>
+<li onclick="this.classList.toggle('done')">温度塔（已经在做）</li>
+<li onclick="this.classList.toggle('done')">流量系数（回收 PETG 必做）</li>
+<li onclick="this.classList.toggle('done')">压力提前（看转角质量）</li>
+</ol>
+
+<div class="tip" style="margin-top: 16px;">
+<span class="tip-icon">💡</span>
+Andy 哥做 LED 灯罩/外壳，Z 偏移 + 床面 mesh 是两个最关键的——直接影响灯罩透明度（PETG 透光率 80%+，层纹明显就会糊）。
+</div>
+</div>
+
+<!-- Tab 5 -->
+<div class="tab-content" id="t5">
+<h2>🩺 排错与微调</h2>
+<p style="color: #94a3b8; margin-bottom: 16px;">自动调平失败或结果不对的 5 个常见问题：</p>
+
+<div class="scenario q" onclick="toggleScenario(this)">
+<strong>❌ 探针碰到床后报错 "Probe triggered before movement"
+</strong>
+<div class="scenario a">
+<p><strong>原因</strong>：Z_offset 值太大，探针还没降到底就触发。</p>
+<p><strong>解决</strong>：printer.cfg 里减小 <code>z_offset</code>（如 2.55 → 2.4），重启 Klipper。</p>
+</div>
+</div>
+
+<div class="scenario q" onclick="toggleScenario(this)">
+<strong>❌ 自动调平后第一层还是粘不住 / 太近
+</strong>
+<div class="scenario a">
+<p><strong>原因</strong>：手动 Z 偏移没调准，paper test 没做。</p>
+<p><strong>解决</strong>：</p>
+<ol>
+<li>Mainsail 控制台 <code>SET_GCODE_OFFSET Z=0</code> 重置</li>
+<li>喷嘴到床中心 Z=0，放纸</li>
+<li>微调 Mainsail 的 BABYSTEPPING Z（±0.025 mm 步进）</li>
+<li>调到纸能滑动但有阻力</li>
+</ol>
+</div>
+</div>
+
+<div class="scenario q" onclick="toggleScenario(this)">
+<strong>❌ mesh 测到一半报错 "BLTouch failed to deploy"
+</strong>
+<div class="scenario a">
+<p><strong>原因</strong>：探针线松了或电磁干扰。</p>
+<p><strong>解决</strong>：</p>
+<ol>
+<li>关打印机重开（重启 Klipper）</li>
+<li>检查探针 3 针线</li>
+<li>printer.cfg 加 <code>pin_up_reports_not_triggered: False</code></li>
+</ol>
+</div>
+</div>
+
+<div class="scenario q" onclick="toggleScenario(this)">
+<strong>❌ 床面 mesh 范围不够（4 角粘不住）
+</strong>
+<div class="scenario a">
+<p><strong>原因</strong>：<code>mesh_min / mesh_max</code> 设置太保守。</p>
+<p><strong>解决</strong>：printer.cfg 改：</p>
+<div class="code">
+<span class="key">mesh_min:</span> <span class="val">10, 10</span>
+<span class="key">mesh_max:</span> <span class="val">230, 230</span>
+</div>
+<p>接近 KLP1 最大打印范围（220×220）。</p>
+</div>
+</div>
+
+<div class="scenario q" onclick="toggleScenario(this)">
+<strong>❌ 每次打印前都要等调平（浪费时间）
+</strong>
+<div class="scenario a">
+<p><strong>解决</strong>：</p>
+<ol>
+<li>OrcaSlicer 起始 G-code 改用 <code>BED_MESH_PROFILE LOAD=default</code>（加载已保存的 mesh，不重新测）</li>
+<li>只在"明显不平"时手动跑 <code>BED_MESH_CALIBRATE</code></li>
+<li>printer.cfg 加 <code>relative_reference_index: 12</code> 用中心点归一化</li>
+</ol>
+<div class="code">
+<span class="comment"># OrcaSlicer 起始 G-code 替换（Andy 哥优化版）</span>
+<span class="key">G28</span>                                  <span class="comment"># 归位</span>
+<span class="key">BED_MESH_PROFILE LOAD=</span><span class="val">default</span>  <span class="comment"># 加载上次 mesh</span>
+<span class="key">G1 X10 Y10 Z5 F6000</span>                <span class="comment"># 移出料线位置</span>
+<span class="key">G29</span>                                 <span class="comment"># 触发 Klipper 自动 mesh（如果启用）</span>
+</div>
+</div>
+</div>
+
+<div style="background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%); border-radius: 12px; padding: 20px; margin-top: 24px;">
+<h3 style="margin-bottom: 12px;">🎯 Andy 哥下一步</h3>
+<ol style="padding-left: 20px; line-height: 1.9; color: #e0e7ff;">
+<li><strong>立即</strong>：在 OrcaSlicer 设备页点"取消"停掉冷打的温度塔任务</li>
+<li><strong>今晚</strong>：Mainsail 跑 <code>M104 S200</code> 测试喷嘴能不能加热（功率 off 那问题）</li>
+<li><strong>解决加热后</strong>：Tab 4 第 1 步手动 Z 偏移（5 分钟）</li>
+<li><strong>跑温度塔</strong>：看 9 段温度哪个最佳（1.5 小时）</li>
+<li><strong>床面 mesh</strong>：Tab 3 配置加好 + 跑一次 + SAVE_CONFIG</li>
+</ol>
+<p style="margin-top: 12px; color: #fbbf24;">⏱ 整个流程今晚搞定，明早开始打 LED 灯罩样品。</p>
+</div>
+
+</div>
+
+<script>
+function toggleScenario(el) {
+  const ans = el.querySelector('.scenario.a');
+  if (ans) {
+    ans.style.display = ans.style.display === 'block' ? 'none' : 'block';
+  }
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

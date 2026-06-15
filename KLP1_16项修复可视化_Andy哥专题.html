@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KLP1 V2.2 注释版 · 16 项修复可视化总结 · Andy 哥</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1a3a 100%);
+  color: #e0e0e0;
+  min-height: 100vh;
+  padding: 20px;
+}
+.container { max-width: 1200px; margin: 0 auto; }
+
+/* 顶部标题 */
+.hero {
+  text-align: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, rgba(255,107,53,0.1), rgba(0,212,255,0.1));
+  border-radius: 16px;
+  border: 2px solid rgba(255,107,53,0.3);
+  margin-bottom: 30px;
+}
+.hero h1 {
+  font-size: 2.4em;
+  background: linear-gradient(90deg, #ff6b35, #00d4ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+.hero .subtitle { color: #888; font-size: 1.1em; margin-bottom: 20px; }
+.hero .stats {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+.hero .stat {
+  background: rgba(0,0,0,0.4);
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.hero .stat-num {
+  font-size: 2em;
+  font-weight: bold;
+  display: block;
+}
+.hero .stat-num.red { color: #ff4757; }
+.hero .stat-num.yellow { color: #ffa502; }
+.hero .stat-num.green { color: #2ed573; }
+.hero .stat-label { color: #aaa; font-size: 0.85em; }
+
+/* 标签栏 */
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.tab {
+  padding: 12px 20px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #aaa;
+  font-size: 0.95em;
+}
+.tab:hover { background: rgba(255,107,53,0.2); color: #fff; }
+.tab.active {
+  background: linear-gradient(135deg, #ff6b35, #ff8c42);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 20px rgba(255,107,53,0.4);
+}
+.tab .badge {
+  display: inline-block;
+  background: rgba(0,0,0,0.3);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.8em;
+  margin-left: 6px;
+}
+
+/* 内容区 */
+.section { display: none; }
+.section.active { display: block; animation: fadeIn 0.4s; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 修复卡片 */
+.fix-card {
+  background: rgba(255,255,255,0.04);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+.fix-card:hover { border-color: rgba(255,107,53,0.4); }
+.fix-card.critical { border-left: 4px solid #ff4757; }
+.fix-card.recommended { border-left: 4px solid #ffa502; }
+.fix-card.optional { border-left: 4px solid #2ed573; }
+.fix-header {
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  user-select: none;
+}
+.fix-num {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: bold;
+  font-size: 1.1em;
+  flex-shrink: 0;
+}
+.fix-card.critical .fix-num { background: #ff4757; color: #fff; }
+.fix-card.recommended .fix-num { background: #ffa502; color: #fff; }
+.fix-card.optional .fix-num { background: #2ed573; color: #fff; }
+.fix-title { flex: 1; }
+.fix-title h3 { font-size: 1.1em; margin-bottom: 4px; }
+.fix-title .badge {
+  display: inline-block;
+  font-size: 0.7em;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-right: 6px;
+  font-weight: normal;
+}
+.fix-card.critical .fix-title .badge { background: rgba(255,71,87,0.2); color: #ff4757; }
+.fix-card.recommended .fix-title .badge { background: rgba(255,165,2,0.2); color: #ffa502; }
+.fix-card.optional .fix-title .badge { background: rgba(46,213,115,0.2); color: #2ed573; }
+.fix-title .where { color: #888; font-size: 0.85em; }
+.fix-toggle {
+  width: 30px; height: 30px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.3s;
+}
+.fix-card.open .fix-toggle { transform: rotate(180deg); }
+.fix-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s;
+}
+.fix-card.open .fix-body { max-height: 2000px; }
+.fix-content {
+  padding: 0 24px 24px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 20px;
+}
+
+/* 代码块 */
+.code {
+  background: #0d1117;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-family: "SF Mono", Consolas, monospace;
+  font-size: 0.9em;
+  line-height: 1.6;
+  color: #c9d1d9;
+  margin: 10px 0;
+  overflow-x: auto;
+}
+.code .k { color: #ff7b72; } /* keyword */
+.code .v { color: #79c0ff; } /* value */
+.code .c { color: #8b949e; font-style: italic; } /* comment */
+.code .x { color: #ffa657; } /* 重点 */
+.code .ok { color: #2ed573; }
+.code .err { color: #ff4757; text-decoration: line-through; }
+.code .ok::before { content: "✅ "; }
+.code .err::before { content: "❌ "; }
+
+/* 对比表 */
+.compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 12px 0;
+}
+.compare-col {
+  background: rgba(0,0,0,0.3);
+  padding: 12px;
+  border-radius: 6px;
+}
+.compare-col.bad { border-left: 3px solid #ff4757; }
+.compare-col.good { border-left: 3px solid #2ed573; }
+.compare-col-title { font-weight: bold; margin-bottom: 8px; }
+.compare-col.bad .compare-col-title { color: #ff4757; }
+.compare-col.good .compare-col-title { color: #2ed573; }
+
+/* SVG 演示区 */
+.demo {
+  background: #000;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 12px 0;
+  text-align: center;
+}
+.demo-title { color: #aaa; font-size: 0.85em; margin-bottom: 10px; }
+.demo-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.demo-btn {
+  padding: 8px 16px;
+  background: rgba(255,107,53,0.2);
+  border: 1px solid #ff6b35;
+  color: #ff6b35;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s;
+}
+.demo-btn:hover { background: #ff6b35; color: #fff; }
+.demo-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* 提示框 */
+.tip {
+  background: rgba(0,212,255,0.08);
+  border-left: 3px solid #00d4ff;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin: 12px 0;
+  font-size: 0.9em;
+}
+.tip-title { color: #00d4ff; font-weight: bold; margin-bottom: 4px; }
+
+/* 路径地图 */
+.path-map {
+  background: #0d1117;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 20px 0;
+}
+.path-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-family: "SF Mono", Consolas, monospace;
+  font-size: 0.9em;
+}
+.path-row:last-child { border-bottom: none; }
+.path-line { color: #888; width: 40px; }
+.path-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  margin-right: 10px;
+  min-width: 60px;
+  text-align: center;
+}
+.path-tag.critical { background: rgba(255,71,87,0.2); color: #ff4757; }
+.path-tag.recommended { background: rgba(255,165,2,0.2); color: #ffa502; }
+.path-tag.optional { background: rgba(46,213,115,0.2); color: #2ed573; }
+.path-section { color: #79c0ff; }
+.path-fix { color: #aaa; margin-left: auto; font-size: 0.85em; }
+
+/* 验证清单 */
+.checklist {
+  background: rgba(0,0,0,0.3);
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+}
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+.check-item:last-child { border-bottom: none; }
+.check-item.checked { opacity: 0.4; }
+.check-box {
+  width: 24px; height: 24px;
+  border: 2px solid #888;
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+.check-item.checked .check-box {
+  background: #2ed573;
+  border-color: #2ed573;
+}
+.check-item.checked .check-box::after {
+  content: "✓";
+  color: #fff;
+  font-weight: bold;
+}
+.check-text { flex: 1; }
+.check-text strong { color: #00d4ff; }
+
+/* 进度条 */
+.progress {
+  height: 8px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 20px;
+}
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #ff4757, #ffa502, #2ed573);
+  width: 0;
+  transition: width 0.5s;
+  border-radius: 4px;
+}
+.progress-text {
+  text-align: center;
+  color: #aaa;
+  font-size: 0.9em;
+  margin-top: 8px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- 顶部标题区 -->
+<div class="hero">
+  <h1>🎯 KLP1 V2.2 注释版 · 16 项修复</h1>
+  <p class="subtitle">互动可视化总结 · Andy 哥专用</p>
+  <div class="stats">
+    <div class="stat">
+      <span class="stat-num red">3</span>
+      <span class="stat-label">🔴 必修项</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num yellow">5</span>
+      <span class="stat-label">🟡 推荐项</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num green">8</span>
+      <span class="stat-label">🟢 可选项</span>
+    </div>
+  </div>
+  <div class="progress">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="progress-text" id="progressText">已读 0 / 16 项修复</div>
+</div>
+
+<!-- 标签栏 -->
+<div class="tabs">
+  <div class="tab active" data-target="critical">🔴 必修<span class="badge">3</span></div>
+  <div class="tab" data-target="recommended">🟡 推荐<span class="badge">5</span></div>
+  <div class="tab" data-target="optional">🟢 可选<span class="badge">8</span></div>
+  <div class="tab" data-target="path">🗺️ 路径地图</div>
+  <div class="tab" data-target="verify">✅ 验证清单</div>
+</div>
+
+<!-- 必修项 -->
+<div class="section active" id="critical">
+
+  <!-- 修复 2: G29 拆分 -->
+  <div class="fix-card critical" data-fix-id="2">
+    <div class="fix-header">
+      <div class="fix-num">2</div>
+      <div class="fix-title">
+        <h3><span class="badge">必修</span>G29 加 ACCEPT + SAVE_CONFIG</h3>
+        <div class="where">📍 [gcode_macro G29] · 段中部</div>
+      </div>
+      <div class="fix-toggle">▼</div>
+    </div>
+    <div class="fix-body">
+      <div class="fix-content">
+        <p><strong>问题：</strong>Z 轴校准值不写盘 → 每次重启都丢。</p>
+        <div class="compare">
+          <div class="compare-col bad">
+            <div class="compare-col-title">❌ 原版（你改错过的）</div>
+            <div class="code">
+<span class="c"># Klipper 会试图执行 "ACCEPT + SAVE_CONFIG" 当一个命令</span>
+<span class="err">ACCEPT + SAVE_CONFIG</span>
+            </div>
+          </div>
+          <div class="compare-col good">
+            <div class="compare-col-title">✅ 注释版（3 行分开）</div>
+            <div class="code">
+<span class="k">PROBE_CALIBRATE</span>
+<span class="ok">ACCEPT</span>
+<span class="ok">SAVE_CONFIG</span>
+            </div>
+          </div>
+        </div>
+        <div class="tip">
+          <div class="tip-title">💡 为什么必须拆 3 行？</div>
+          Klipper 解析器是按行执行的，写成 <code>ACCEPT + SAVE_CONFIG</code> 会被当成一个未定义命令 <code>"ACCEPT + SAVE_CONFIG"</code> → 报错 shutdown。拆成 3 行，每行一个独立命令。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 修复 3 + 4: G30 -->
+  <div class="fix-card critical" data-fix-id="3">
+    <div class="fix-header">
+      <div class="fix-num">3</div>
+      <div class="fix-title">
+        <h3><span class="badge">必修</span>G30 用 SAVE="default" + SAVE_CONFIG</h3>
+        <div class="where">📍 [gcode_macro G30] · 段中部</div>
+      </div>
+      <div class="fix-toggle">▼</div>
+    </div>
+    <div class="fix-body">
+      <div class="fix-content">
+        <p><strong>问题：</strong>床面 mesh 校准数据每次写到一个新名字 <code>"name"</code>，default profile 还是旧数据，回零时 LOAD=default 加载的也是旧数据。</p>
+        <div class="compare">
+          <div class="compare-col bad">
+            <div class="compare-col-title">❌ 原版（你之前的）</div>
+            <div class="code">
+<span class="err">BED_MESH_PROFILE SAVE="name"</span>
+<span class="err">BED_MESH_PROFILE LOAD="name"</span>
+            </div>
+          </div>
+          <div class="compare-col good">
+            <div class="compare-col-title">✅ 注释版（直接覆盖 default）</div>
+            <div class="code">
+<span class="ok">BED_MESH_PROFILE SAVE="default"</span>
+<span class="ok">SAVE_CONFIG</span>
+            </div>
+          </div>
+        </div>
+        <div class="tip">
+          <div class="tip-title">💡 原理动画</div>
+          <div class="demo">
+            <svg width="100%" height="120" viewBox="0 0 500 120">
+              <!-- 旧版流程 -->
+              <text x="60" y="20" fill="#ff4757" font-size="13" font-weight="bold">❌ 旧版流程</text>
+              <rect x="20" y="35" width="80" height="30" fill="rgba(255,71,87,0.2)" stroke="#ff4757" rx="4"/>
+              <text x="60" y="55" fill="#fff" font-size="11" text-anchor="middle">G30 测 36 点</text>
+              <line x1="100" y1="50" x2="140" y2="50" stroke="#ff4757" stroke-width="2" marker-end="url(#arrR)"/>
+              <rect x="140" y="35" width="100" height="30" fill="rgba(255,71,87,0.2)" stroke="#ff4757" rx="4"/>
+              <text x="190" y="55" fill="#fff" font-size="10" text-anchor="middle">SAVE="name"</text>
+              <text x="190" y="105" fill="#888" font-size="9" text-anchor="middle">新数据</text>
+              <line x1="240" y1="50" x2="280" y2="50" stroke="#ff4757" stroke-width="2" marker-end="url(#arrR)"/>
+              <rect x="280" y="35" width="100" height="30" fill="rgba(255,71,87,0.2)" stroke="#ff4757" rx="4"/>
+              <text x="330" y="55" fill="#fff" font-size="10" text-anchor="middle">LOAD="name"</text>
+              <text x="330" y="105" fill="#888" font-size="9" text-anchor="middle">重启就丢</text>
+              <text x="430" y="55" fill="#ff4757" font-size="11" text-anchor="middle">❌</text>
+
+              <line x1="0" y1="80" x2="500" y2="80" stroke="#444" stroke-dasharray="2,2"/>
+
+              <text x="60" y="0" fill="#2ed573" font-size="0" font-weight="bold"></text>
+              <text x="60" y="98" fill="#2ed573" font-size="13" font-weight="bold">✅ 新版流程</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 修复 4: G30 删 LOAD=name -->
+  <div class="fix-card critical" data-fix-id="4">
+    <div class="fix-header">
+      <div class="fix-num">4</div>
+      <div class="fix-title">
+        <h3><span class="badge">必修</span>G30 删掉 LOAD="name" 死代码</h3>
+        <div class="where">📍 [gcode_macro G30]</div>
+      </div>
+      <div class="fix-toggle">▼</div>
+    </div>
+    <div class="fix-body">
+      <div class="fix-content">
+        <p><strong>问题：</strong>测完 mesh 后又 LOAD="name"，但 SAVE_CONFIG 没写盘 = 内存里有，硬盘上没有 → 重启就丢。</p>
+        <div class="code">
+<span class="err">BED_MESH_PROFILE LOAD="name"</span>   <span class="c"># 死代码：默认就是 default，不写这句也是 default</span>
+        </div>
+        <div class="tip">
+          <div class="tip-title">💡 LOAD=default 的作用</div>
+          <code>[homing_override]</code> 末尾有 <code>BED_MESH_PROFILE LOAD=default</code>，这是回零后自动加载 default profile 的关键。G30 本身不需要再 LOAD 一次，删掉死代码即可。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 修复 7: PURGE_NOZZLE 4 次 -->
+  <div class="fix-card critical" data-fix-id="7">
+    <div class="fix-header">
+      <div class="fix-num">7</div>
+      <div class="fix-title">
+        <h3><span class="badge">必修</span>PURGE_NOZZLE 擦嘴 4 次来回</h3>
+        <div class="where">📍 [gcode_macro PURGE_NOZZLE]</div>
+      </div>
+      <div class="fix-toggle">▼</div>
+    </div>
+    <div class="fix-body">
+      <div class="fix-content">
+        <p><strong>问题：</strong>你之前改的 PURGE_NOZZLE 4 行都是 <code>X10</code> → 喷嘴原地不动 → 擦嘴完全没效果！</p>
+        <div class="compare">
+          <div class="compare-col bad">
+            <div class="compare-col-title">❌ 旧版（你改错的）</div>
+            <div class="code">
+<span class="err">G1 X10 F3000</span>  <span class="c"># 原地</span>
+<span class="err">G1 X10 F3000</span>  <span class="c"># 原地</span>
+<span class="err">G1 X10 F3000</span>  <span class="c"># 原地</span>
+<span class="err">G1 X10 F3000</span>  <span class="c"># 原地</span>
+            </div>
+          </div>
+          <div class="compare-col good">
+            <div class="compare-col-title">✅ 注释版（4 次来回）</div>
+            <div class="code">
+<span class="ok">G1 X25 F3000</span>
+<span class="ok">G1 X10 F3000</span>
+<span class="ok">G1 X25 F3000</span>
+<span class="ok">G1 X10 F3000</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-title">🎬 喷嘴在 X=10↔X=25 之间擦嘴 4 次</div>
+          <svg width="100%" height="160" viewBox="0 0 600 160" id="purgeDemo">
+            <!-- 擦嘴片 -->
+            <rect x="80" y="50" width="240" height="60" fill="rgba(255,107,53,0.2)" stroke="#ff6b35" stroke-width="2" rx="4"/>
+            <text x="200" y="40" fill="#ff6b35" font-size="12" text-anchor="middle">擦嘴片 (X=10 ~ X=250)</text>
+            <!-- 刻度 -->
+            <line x1="100" y1="115" x2="300" y2="115" stroke="#666" stroke-width="1"/>
+            <line x1="100" y1="115" x2="100" y2="120" stroke="#666"/>
+            <line x1="300" y1="115" x2="300" y2="120" stroke="#666"/>
+            <text x="100" y="135" fill="#aaa" font-size="10" text-anchor="middle">X=10</text>
+            <text x="200" y="135" fill="#aaa" font-size="10" text-anchor="middle">X=180 中点</text>
+            <text x="300" y="135" fill="#aaa" font-size="10" text-anchor="middle">X=250</text>
+            <!-- 喷嘴（动画） -->
+            <g id="nozzle">
+              <circle cx="200" cy="80" r="12" fill="#00d4ff" stroke="#fff" stroke-width="2"/>
+              <text x="200" y="84" fill="#000" font-size="10" text-anchor="middle" font-weight="bold">N</text>
+            </g>
+            <!-- 计数 -->
+            <text x="450" y="50" fill="#00d4ff" font-size="14" id="countText">第 0 次</text>
+            <text x="450" y="75" fill="#aaa" font-size="11" id="posText">位置: X=180</text>
+          </svg>
+          <div class="demo-controls">
+            <button class="demo-btn" onclick="playPurgeDemo()">▶️ 播放擦嘴</button>
+            <button class="demo-btn" onclick="resetPurgeDemo()">⏹️ 重置</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 推荐项 -->
+<div class="section" id="recommended">
+
+  <!-- 修复 1: PID : 风格 -->
+  <div class="fix-card recommended" data-fix-id="1">
+    <div class="fix-header">
+      <div class="fix-num">1</div>
+      <div class="fix-title">
+        <h3><span class="badge">推荐</span>PID 4 行风格统一为 "key: value"</h3>
+        <div class="where">📍 [extruder] / [heater_bed]</div>
+      </div>
+      <div class="fix-toggle">▼</div>
+    </div>
+    <div class="fix-body">
+      <div class="fix-content">
+        <p><strong>问题：</strong>Mainsail 编辑器显示 4 行红色警告（你之前问过）。</p>
+        <div class="compare">
+          <div class="compare-col bad">
+            <div class="compare-col-title">❌ 原版（Klipper 自动生成）</div>
+            <div class="code">
+<span class="err">control = pid</span>
+<span class="err">pid_kp = 19.837</span>
+<span class="err">pid_ki = 4.723</span>
+<span class="err">pid_kd = 20.829</span>
+            </div>
+          </div>
+          <div class="compare-col good">
+            <div class="compare-col-title">✅ 注释版（统一风格）</div>
+            <div class="code">
+<span class="ok">control: pid</span>
+<span class="ok">pid_kp: 19.837</span>
+<span class="ok">pid_ki: 4.723</span>
+<span class="ok">pid_kd: 20.829</span>
+            </div>
+          </div>
+        </div>
+        <div class="tip">
+          <div class="tip-title">💡 改 : 风格后</div>
+          Mainsail 红色警告消失，Klipper 解析器两种写法都接受，<strong>不影响功能</strong>。但末尾 <code>#*#</code> 块是 Klipper 自动生成的，没法改，红色忽略即可。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 修复 5: G37 -->
+  <div class="fix-card recommended" data-fix-id="5">
+    <div class="fix-header">
+      <div class="fix-num">5</div>
+      <div class="fix-title">
+        <h3><span class="badge">推荐</span>G37 加 SAVE_CONFIG</h3>
+        <div class="where">📍 [gcode_macro G37]</div>
+      </div>
+      <div class="fix-toggle">▼</div>
+    </div>
+    <div class="fix-body">
+      <div class="fix-content">
+        <p><strong>问题：</strong>G37 只 ACCEPT，不写盘 = 内存里有，重启就丢。</p>
+        <div class="compare">
+          <div class="compare-col bad">
+            <div class="compare-col-title">❌ 原版</div>
+            <div class="code">
+<span class="k">ACCEPT</span>
+<span class="c"># 没写盘，重启就丢</span>
+            </div>
+          </div>
+          <div class="compare-col good">
+            <div class="compare-col-title">✅ 注释版</div>
+            <div class="code">
+<span class="k">ACCEPT</span>
+<span class="ok">SAVE_CONFIG</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 修复 8: verify_heater -->
+  <div class="fix-card recommended" data-fix-id="8">
+    <div class="fix-header">
+      <div class="fix-num">8</div>
+      <div class="fix-title">
+        <h3><span class="badge">推荐</span>verify_heater 阈值收紧</h3>
+        <div class="where">📍 [verify_heater extruder] / [verify_heater heater_bed]</div>
+      </div>
+      <div class="fix-toggle">▼</div>
+    </div>
+    <div class="fix-body">
+      <div class="fix-content">
+        <p><strong>问题：</strong>原版阈值太松（max_error 120 / check_gain_time 120），温度大波动也不报警 = 假阴性。</p>
+        <div class="compare">
+          <div class="compare-col bad">
+            <div class="compare-col-title">❌ 原版（太松）</div>
+            <div class="code">
+<span class="err">max_error: 120</span>
+<span class="err">check_gain_time: 120</span>
+            </div>
+          </div>
+          <div class="compare-col good">
+            <div class="compare-col-title">✅ 注释版（精准）</div>
+            <div class="code">
+<span class="ok">max_error: 80</span>
+<span class="ok">check_gain_time: 60</span>
+<span class="ok">max_error: 5</span>  <span class="c"># 热床 5°C 严格</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 修复 10: pressure_advance -->
+  <div class="fix-card recommended" data-fix-id="10">
+    <div class="fix-header">
+      <div class="fix-num">10</div>
+      <div class="fix-title">
+        <h3><span class="badge">推荐</span>pressure_advance 0.03→0.04</h3>
+        <div class="where">📍 [extruder]</div>
+      </div>
+      <div class="fix-toggle">▼</div>
+    </div>
+    <div class="fix-body">
+      <div class="fix-content">
+        <p><strong>问题：</strong>0.03 偏小，拐角处容易堆料；0.04-0.06 是 KLP1 默认挤出机的推荐区间。</p>
+        <div class="code">
+<span class="err">pressure_advance: 0.03</span>  <span class="c"># 偏小</span>
+<span class="ok">pressure_advance: 0.04</span>  <span class="c"># 推荐</span>
+        </div>
+        <div class="tip">
+          <div class="tip-title">💡 怎么进一步调到最佳？</div>
+          打印一个 <a href="https://www.thingiverse.com/thing:4105849" style="color:#00d4ff">pressure advance 标定塔</a>，从 0.02 打到 0.08，看哪个层角最锐利就选哪个。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 修复 12: homing_override -->
+  <div class="fix-card recommended" data-fix-id="12">
+    <div class="fix-header">
+      <div class="fix-num">12</div>
+      <div class="fix-title">
+        <h3><span class="badge">推荐</span>[homing_override] 加 LOAD=default</h3>
+        <div class="where">📍 [homing_override] 末尾</div>
+      </div>
+      <div class="fix-toggle">▼</div>
+    </div>
+    <div class="fix-body">
+      <div class="fix-content">
+        <p><strong>问题：</strong>回零后不加载床面 mesh = 打印头走到 (X,Y) 时不会自动 Z 补偿，喷嘴可能撞到翘起的床面。</p>
+        <div class="code">
+<span class="c"># [homing_override] gcode 块末尾加：</span>
+<span class="ok">{% if printer.bed_mesh.profiles.default %}</span>
+<span class="ok">  BED_MESH_PROFILE LOAD=default</span>
+<span class="ok">{% endif %}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 可选项 -->
+<div class="section" id="optional">
+
+  <!-- 修复 13: screws_tilt_adjust -->
+  <div class="fix-card optional" data-fix-id="13">
+    <div class="fix-header">
+      <div class="fix-num">13</div>
+      <div class="fix-title">
+        <h3><span class="badge">可选</span>新增 [screws_tilt_adjust] 4 角校准</h3>
+        <div class="where">📍 段尾部 · 4 角螺丝定义</div>
+      </div>
+      <div class="fix-toggle">▼</div>
+    </div>
+    <div class="fix-body">
+      <div class="fix-content">
+        <p>控制台敲 <code>SCREWS_TILT_CALCULATE</code> 自动测 4 角高度，告诉你每颗螺丝拧几圈。</p>
+        <div class="demo">
+          <svg width="100%" height="200" viewBox="0 0 300 200">
+            <!-- 床面 -->
+            <rect x="20" y="20" width="260" height="160" fill="rgba(0,212,255,0.05)" stroke="#00d4ff" stroke-width="2" rx="4"/>
+            <!-- 4 个螺丝 -->
+            <circle cx="55" cy="55" r="10" fill="#ffa502"/>
+            <text x="55" y="80" fill="#aaa" font-size="10" text-anchor="middle">screw1</text>
+            <text x="55" y="93" fill="#ffa502" font-size="11" text-anchor="middle" font-weight="bold">-0.15mm</text>
+            <text x="55" y="106" fill="#aaa" font-size="9" text-anchor="middle">拧紧 1/4 圈</text>
+
+            <circle cx="245" cy="55" r="10" fill="#2ed573"/>
+            <text x="245" y="80" fill="#aaa" font-size="10" text-anchor="middle">screw2</text>
+            <text x="245" y="93" fill="#2ed573" font-size="11" text-anchor="middle" font-weight="bold">+0.02mm</text>
+            <text x="245" y="106" fill="#aaa" font-size="9" text-anchor="middle">OK</text>
+
+            <circle cx="55" cy="145" r="10" fill="#ff4757"/>
+            <text x="55" y="170" fill="#aaa" font-size="10" text-anchor="middle">screw3</text>
+            <text x="55" y="183" fill="#ff4757" font-size="11" text-anchor="middle" font-weight="bold">+0.20mm</text>
+            <text x="55" y="196" fill="#aaa" font-size="9" text-anchor="middle">松 1/4 圈</text>
+
+            <circle cx="245" cy="145" r="10" fill="#2ed573"/>
+            <text x="245" y="170" fill="#aaa" font-size="10" text-anchor="middle">screw4</text>
+            <text x="245" y="183" fill="#2ed573" font-size="11" text-anchor="middle" font-weight="bold">-0.03mm</text>
+            <text x="245" y="196" fill="#aaa" font-size="9" text-anchor="middle">OK</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 修复 14: bed_mesh 36 点 -->
+  <div class="fix-card optional" data-fix-id="14">
+    <div class="fix-header">
+      <div class="fix-num">14</div>
+      <div class="fix-title">
+        <h3><span class="badge">可选</span>[bed_mesh] 36 点 lagrange</h3>
+        <div class="where">📍 [bed_mesh] 段</div>
+      </div>
+      <div class="fix-toggle">▼</div>
+    </div>
+    <div class="fix-body">
+      <div class="fix-content">
+        <p><strong>升级：</strong>12 个点 → 36 个点（6×6）= 床面精度提升 3 倍。算法 lagrange 适合平整的 PEI 磁吸板。</p>
+        <div class="demo">
+          <div class="demo-title">📊 12 点 vs 36 点 对比</div>
+          <svg width="100%" height="200" viewBox="0 0 500 200">
+            <!-- 12 点 -->
+            <text x="125" y="20" fill="#888" font-size="12" text-anchor="middle">12 点（原版）</text>
+            <rect x="25" y="30" width="200" height="150" fill="rgba(0,212,255,0.05)" stroke="#00d4ff" rx="4"/>
+            <g id="mesh12"></g>
+            <!-- 36 点 -->
+            <text x="375" y="20" fill="#2ed573" font-size="12" text-anchor="middle">36 点（注释版）</text>
+            <rect x="275" y="30" width="200" height="150" fill="rgba(46,213,115,0.05)" stroke="#2ed573" rx="4"/>
+            <g id="mesh36"></g>
+          </svg>
+        </div>
+        <script>
+          // 12 个点
+          const c12 = document.getElementById('mesh12');
+          for (let r = 0; r < 3; r++) {
+            for (let c = 0; c < 4; c++) {
+              const cx = 50 + c * 50;
+              const cy = 55 + r * 50;
+              const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+              dot.setAttribute('cx', cx);
+              dot.setAttribute('cy', cy);
+              dot.setAttribute('r', '4');
+              dot.setAttribute('fill', '#00d4ff');
+              c12.appendChild(dot);
+            }
+          }
+          // 36 个点
+          const c36 = document.getElementById('mesh36');
+          for (let r = 0; r < 6; r++) {
+            for (let c = 0; c < 6; c++) {
+              const cx = 290 + c * 32;
+              const cy = 50 + r * 24;
+              const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+              dot.setAttribute('cx', cx);
+              dot.setAttribute('cy', cy);
+              dot.setAttribute('r', '3');
+              dot.setAttribute('fill', '#2ed573');
+              c36.appendChild(dot);
+            }
+          }
+        </script>
+      </div>
+    </div>
+  </div>
+
+  <!-- 修复 15/16: exclude_object + arcs -->
+  <div class="fix-card optional" data-fix-id="15">
+    <div class="fix-header">
+      <div class="fix-num">15</div>
+      <div class="fix-title">
+        <h3><span class="badge">可选</span>新增 [exclude_object] 对象排除</h3>
+        <div class="where">📍 段尾 · 对象排除</div>
+      </div>
+      <div class="fix-toggle">▼</div>
+    </div>
+    <div class="fix-body">
+      <div class="fix-content">
+        <p>切片时勾选"按对象排除" → 打印某个对象失败可以跳过它继续打别的。OrcaSlicer / PrusaSlicer 都支持。</p>
+        <div class="tip">
+          <div class="tip-title">💡 实战场景</div>
+          一次打 3 个模型，A 失败 → 控制台 <code>EXCLUDE_OBJECT_START NAME=A</code> → 跳过 A 继续打 B+C，节省 1 小时。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fix-card optional" data-fix-id="16">
+    <div class="fix-header">
+      <div class="fix-num">16</div>
+      <div class="fix-title">
+        <h3><span class="badge">可选</span>新增 [gcode_arcs] 圆弧支持</h3>
+        <div class="where">📍 段尾 · G2/G3 支持</div>
+      </div>
+      <div class="fix-toggle">▼</div>
+    </div>
+    <div class="fix-body">
+      <div class="fix-content">
+        <p>圆弧路径不再被 Klipper 拆成 N 段折线 = 圆弧打印速度更快、表面更光滑。</p>
+        <div class="demo">
+          <svg width="100%" height="120" viewBox="0 0 400 120">
+            <text x="200" y="20" fill="#aaa" font-size="11" text-anchor="middle">圆弧 vs 折线</text>
+            <!-- 折线 -->
+            <path d="M 50,80 L 75,40 L 100,80 L 125,40 L 150,80 L 175,40 L 200,80" stroke="#ff4757" stroke-width="2" fill="none" stroke-dasharray="4,2"/>
+            <text x="50" y="105" fill="#ff4757" font-size="10">折线（无 arcs）</text>
+            <!-- 圆弧 -->
+            <path d="M 250,80 A 75,40 0 0,1 400,80" stroke="#2ed573" stroke-width="2" fill="none"/>
+            <text x="325" y="105" fill="#2ed573" font-size="10">圆弧（有 arcs）</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 其他可选 -->
+  <div class="fix-card optional" data-fix-id="6">
+    <div class="fix-header">
+      <div class="fix-num">6</div>
+      <div class="fix-title">
+        <h3><span class="badge">可选</span>PURGE_NOZZLE 坐标移出 mesh</h3>
+        <div class="where">📍 [gcode_macro PURGE_NOZZLE]</div>
+      </div>
+      <div class="fix-toggle">▼</div>
+    </div>
+    <div class="fix-body">
+      <div class="fix-content">
+        <p>擦嘴片位置 (X=10, Y=210) 在 mesh 范围外（mesh 是 X=20-202, Y=20-190），不会触发 Z 补偿 → 喷嘴不会"忽上忽下"。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="fix-card optional" data-fix-id="9">
+    <div class="fix-header">
+      <div class="fix-num">9</div>
+      <div class="fix-title">
+        <h3><span class="badge">可选</span>verify_heater check_gain_time 120→60</h3>
+        <div class="where">📍 [verify_heater extruder]</div>
+      </div>
+      <div class="fix-toggle">▼</div>
+    </div>
+    <div class="fix-body">
+      <div class="fix-content">
+        <p>120 秒太长 = 温度已经飙到危险值才报警，60 秒更早检测到异常加热。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="fix-card optional" data-fix-id="11">
+    <div class="fix-header">
+      <div class="fix-num">11</div>
+      <div class="fix-title">
+        <h3><span class="badge">可选</span>heater_bed 加 pwm_cycle_time: 0.02</h3>
+        <div class="where">📍 [heater_bed]</div>
+      </div>
+      <div class="fix-toggle">▼</div>
+    </div>
+    <div class="fix-body">
+      <div class="fix-content">
+        <p>热床 PID 控制周期 0.02s = 抗 SSR 振荡，床温曲线更稳（不会 ±2°C 来回飘）。</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 路径地图 -->
+<div class="section" id="path">
+  <div class="path-map">
+    <h3 style="margin-bottom: 16px;">🗺️ 修复点在 cfg 中的位置</h3>
+    <p style="color: #aaa; margin-bottom: 16px;">按文件顺序排列（行号 = 注释版 cfg 顺序）</p>
+
+    <div class="path-row">
+      <div class="path-line">L1-30</div>
+      <span class="path-tag optional">顶部</span>
+      <span class="path-section">文件头</span>
+      <span class="path-fix">→ 16 项修复清单</span>
+    </div>
+    <div class="path-row">
+      <div class="path-line">L32-36</div>
+      <span class="path-tag optional">include</span>
+      <span class="path-section">[include mainsail.cfg / MKS_THR.cfg]</span>
+      <span class="path-fix"></span>
+    </div>
+    <div class="path-row">
+      <div class="path-line">L38-44</div>
+      <span class="path-tag optional">mcu</span>
+      <span class="path-section">[mcu]</span>
+      <span class="path-fix">MKS_TH 工具头板</span>
+    </div>
+    <div class="path-row">
+      <div class="path-line">L46-58</div>
+      <span class="path-tag optional">printer</span>
+      <span class="path-section">[printer]</span>
+      <span class="path-fix">速度限制</span>
+    </div>
+    <div class="path-row">
+      <div class="path-line">L60-200</div>
+      <span class="path-tag optional">运动</span>
+      <span class="path-section">[stepper_x/y/z] [tmc2209 ...]</span>
+      <span class="path-fix">4×TMC2209 静音</span>
+    </div>
+    <div class="path-row">
+      <div class="path-line">L200-260</div>
+      <span class="path-tag recommended">修复 1</span>
+      <span class="path-section">[extruder]</span>
+      <span class="path-fix">PID 改 : 风格 + pressure_advance</span>
+    </div>
+    <div class="path-row">
+      <div class="path-line">L260-300</div>
+      <span class="path-tag recommended">修复 12</span>
+      <span class="path-section">[homing_override]</span>
+      <span class="path-fix">末尾加 LOAD=default</span>
+    </div>
+    <div class="path-row">
+      <div class="path-line">L300-340</div>
+      <span class="path-tag optional">修复 11</span>
+      <span class="path-section">[heater_bed]</span>
+      <span class="path-fix">pwm_cycle_time</span>
+    </div>
+    <div class="path-row">
+      <div class="path-line">L340-380</div>
+      <span class="path-tag optional">风扇</span>
+      <span class="path-section">[temperature_fan Pi_fan2]</span>
+      <span class="path-fix"></span>
+    </div>
+    <div class="path-row">
+      <div class="path-line">L380-460</div>
+      <span class="path-tag optional">START_PRINT</span>
+      <span class="path-section">[gcode_macro START_PRINT / PAUSE / RESUME / END_PRINT]</span>
+      <span class="path-fix">一键预热 + 断点续打</span>
+    </div>
+    <div class="path-row">
+      <div class="path-line">L460-500</div>
+      <span class="path-tag optional">G40</span>
+      <span class="path-section">[gcode_macro G40 / SHAPER_CALIBRATE] [adxl345]</span>
+      <span class="path-fix">共振补偿</span>
+    </div>
+    <div class="path-row">
+      <div class="path-line">L500-540</div>
+      <span class="path-tag optional">断料</span>
+      <span class="path-section">[filament_switch_sensor fila]</span>
+      <span class="path-fix">断料续打</span>
+    </div>
+    <div class="path-row">
+      <div class="path-line">L540-560</div>
+      <span class="path-tag recommended">修复 8+9</span>
+      <span class="path-section">[verify_heater extruder / heater_bed]</span>
+      <span class="path-fix">阈值收紧</span>
+    </div>
+    <div class="path-row">
+      <div class="path-line">L560-580</div>
+      <span class="path-tag optional">probe</span>
+      <span class="path-section">[probe]</span>
+      <span class="path-fix">BLTouch 配置</span>
+    </div>
+    <div class="path-row">
+      <div class="path-line">L580-650</div>
+      <span class="path-tag critical">修复 2+3+4+5</span>
+      <span class="path-section">[gcode_macro G29-G37]</span>
+      <span class="path-fix">4 个调平宏</span>
+    </div>
+    <div class="path-row">
+      <div class="path-line">L650-720</div>
+      <span class="path-tag optional">退料</span>
+      <span class="path-section">[gcode_macro G50 / LOAD_FILAMENT / UNLOAD_FILAMENT]</span>
+      <span class="path-fix">自动退料</span>
+    </div>
+    <div class="path-row">
+      <div class="path-line">L720-770</div>
+      <span class="path-tag optional">arcs/object</span>
+      <span class="path-section">[exclude_object] [gcode_arcs] [neopixel mini12864]</span>
+      <span class="path-fix">修复 15+16</span>
+    </div>
+    <div class="path-row">
+      <div class="path-line">L770-810</div>
+      <span class="path-tag recommended">修复 13</span>
+      <span class="path-section">[screws_tilt_adjust]</span>
+      <span class="path-fix">4 角螺丝</span>
+    </div>
+    <div class="path-row">
+      <div class="path-line">L810-840</div>
+      <span class="path-tag optional">修复 14</span>
+      <span class="path-section">[bed_mesh]</span>
+      <span class="path-fix">36 点 lagrange</span>
+    </div>
+    <div class="path-row">
+      <div class="path-line">L840-880</div>
+      <span class="path-tag critical">修复 6+7</span>
+      <span class="path-section">[gcode_macro PURGE_NOZZLE]</span>
+      <span class="path-fix">冲刷+擦嘴 4 次来回</span>
+    </div>
+    <div class="path-row">
+      <div class="path-line">L880+</div>
+      <span class="path-tag optional">自动</span>
+      <span class="path-section">#*# 自动生成块</span>
+      <span class="path-fix">Klipper 自动写，禁止手改</span>
+    </div>
+  </div>
+</div>
+
+<!-- 验证清单 -->
+<div class="section" id="verify">
+  <div class="checklist">
+    <h3 style="margin-bottom: 16px;">✅ 覆盖后 4 步验证清单</h3>
+    <p style="color: #aaa; margin-bottom: 16px;">每步点一下打勾</p>
+
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-text">
+        <strong>步骤 1：</strong>Mainsail 编辑器<strong style="color: #2ed573;">无红色</strong>
+        <div style="color: #888; font-size: 0.9em; margin-top: 4px;">（除末尾 #*# 块外，整篇都是白/蓝/绿）</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-text">
+        <strong>步骤 2：</strong>Mainsail 点 <strong>RESTART</strong> → klippy 日志<strong style="color: #2ed573;">无 warning</strong>
+        <div style="color: #888; font-size: 0.9em; margin-top: 4px;">（除 `probe_type: bltouch` 之类的提示）</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-text">
+        <strong>步骤 3：</strong>控制台敲 <code style="background: #000; padding: 2px 6px; border-radius: 3px;">G30</code> → 36 点测完 + <strong style="color: #2ed573;">自动重启</strong>
+        <div style="color: #888; font-size: 0.9em; margin-top: 4px;">（说明 SAVE="default" + SAVE_CONFIG 都生效）</div>
+      </div>
+    </div>
+    <div class="check-item" onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-text">
+        <strong>步骤 4：</strong>控制台敲 <code style="background: #000; padding: 2px 6px; border-radius: 3px;">G29</code> → 弹 PROBE_CALIBRATE 窗口 → A4 纸调 → <strong style="color: #2ed573;">ACCEPT</strong> → SAVE_CONFIG 重启
+        <div style="color: #888; font-size: 0.9em; margin-top: 4px;">（说明 ACCEPT + SAVE_CONFIG 都生效）</div>
+      </div>
+    </div>
+
+    <div class="tip" style="margin-top: 20px;">
+      <div class="tip-title">🎉 4 步全通过 = 注释版 cfg 完美落地</div>
+      接下来就可以跑完整 5 步调平流程（G28 → PROBE_CALIBRATE → SCREWS_TILT_CALCULATE → BED_MESH_CALIBRATE → SHAPER_CALIBRATE），再打一个 20×20mm 单层测试。
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+// 标签切换
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.target).classList.add('active');
+  });
+});
+
+// 卡片展开
+document.querySelectorAll('.fix-card').forEach(card => {
+  card.querySelector('.fix-header').addEventListener('click', () => {
+    card.classList.toggle('open');
+    updateProgress();
+  });
+});
+
+// 验证清单勾选
+function toggleCheck(item) {
+  item.classList.toggle('checked');
+}
+
+// 进度统计
+function updateProgress() {
+  const total = document.querySelectorAll('.fix-card').length;
+  const read = document.querySelectorAll('.fix-card.open').length;
+  const pct = (read / total) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `已读 ${read} / ${total} 项修复`;
+}
+
+// PURGE_NOZZLE 动画
+let purgeAnimating = false;
+function playPurgeDemo() {
+  if (purgeAnimating) return;
+  purgeAnimating = true;
+  const nozzle = document.getElementById('nozzle');
+  const countText = document.getElementById('countText');
+  const posText = document.getElementById('posText');
+  const positions = [
+    { x: 100, count: 1, label: 'X=10' },   // 起点
+    { x: 300, count: 1, label: 'X=250' },  // 第一次右
+    { x: 100, count: 2, label: 'X=10' },   // 第 2 次左
+    { x: 300, count: 2, label: 'X=250' },  // 第 2 次右
+    { x: 100, count: 3, label: 'X=10' },   // 第 3 次左
+    { x: 300, count: 3, label: 'X=250' },  // 第 3 次右
+    { x: 100, count: 4, label: 'X=10' },   // 第 4 次左
+  ];
+  let i = 0;
+  function step() {
+    if (i >= positions.length) {
+      purgeAnimating = false;
+      return;
+    }
+    const p = positions[i];
+    nozzle.style.transition = 'transform 0.6s ease-in-out';
+    nozzle.style.transform = `translateX(${p.x - 200}px)`;
+    countText.textContent = `第 ${p.count} 次来回`;
+    posText.textContent = `位置: ${p.label}`;
+    i++;
+    setTimeout(step, 700);
+  }
+  step();
+}
+
+function resetPurgeDemo() {
+  const nozzle = document.getElementById('nozzle');
+  nozzle.style.transition = 'none';
+  nozzle.style.transform = 'translateX(0)';
+  document.getElementById('countText').textContent = '第 0 次';
+  document.getElementById('posText').textContent = '位置: X=180';
+  purgeAnimating = false;
+}
+
+// 默认展开必修项第一张
+setTimeout(() => {
+  document.querySelector('#critical .fix-card').classList.add('open');
+  updateProgress();
+}, 300);
+</script>
+</body>
+</html>

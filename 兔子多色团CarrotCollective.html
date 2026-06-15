@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>🐰 兔子多色团 Carrot Collective GitHub 全家桶</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, "Microsoft YaHei", "PingFang SC", sans-serif;
+  background: linear-gradient(135deg, #1a1d2e 0%, #2d1f3d 50%, #1a1d2e 100%);
+  color: #e8e8f0;
+  min-height: 100vh;
+  padding: 20px;
+}
+.container { max-width: 1200px; margin: 0 auto; }
+
+header {
+  text-align: center;
+  padding: 40px 20px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 20px;
+  margin-bottom: 30px;
+  border: 1px solid rgba(255,150,80,0.3);
+}
+.title {
+  font-size: 42px;
+  background: linear-gradient(90deg, #ff8a50, #ffb74d, #fff176);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+  font-weight: 800;
+}
+.subtitle { color: #ffb74d; font-size: 18px; margin-bottom: 8px; }
+.tagline { color: #a0a0b0; font-size: 14px; }
+
+.intro {
+  background: rgba(255,255,255,0.05);
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 30px;
+  border-left: 4px solid #ff8a50;
+}
+.intro h2 { color: #ffb74d; margin-bottom: 12px; font-size: 20px; }
+.intro p { line-height: 1.8; color: #d0d0e0; }
+.intro strong { color: #fff176; }
+
+.org-card {
+  background: linear-gradient(135deg, rgba(255,138,80,0.15), rgba(255,183,77,0.05));
+  border: 2px solid #ff8a50;
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+.org-card .org-name { font-size: 28px; color: #ff8a50; font-weight: 700; margin-bottom: 8px; }
+.org-card .org-meta { color: #ffb74d; font-size: 15px; margin-bottom: 15px; }
+.org-link {
+  display: inline-block;
+  background: #ff8a50;
+  color: #1a1d2e;
+  padding: 12px 30px;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 16px;
+  transition: all 0.3s;
+}
+.org-link:hover { background: #fff176; transform: scale(1.05); }
+
+.projects {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+.project {
+  background: rgba(255,255,255,0.05);
+  border-radius: 15px;
+  padding: 22px;
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.project::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+  background: var(--accent);
+}
+.project:hover {
+  transform: translateY(-5px);
+  border-color: var(--accent);
+  box-shadow: 0 10px 30px rgba(255,138,80,0.2);
+}
+.project-head { display: flex; align-items: center; margin-bottom: 12px; }
+.project-icon {
+  font-size: 36px;
+  margin-right: 15px;
+  width: 50px; height: 50px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.3);
+  border-radius: 12px;
+}
+.project-title { font-size: 18px; font-weight: 700; color: #fff; }
+.project-stars { font-size: 12px; color: #ffb74d; margin-top: 2px; }
+.project-desc { color: #b0b0c0; font-size: 14px; line-height: 1.6; margin-bottom: 12px; }
+.project-meta { color: #888; font-size: 12px; margin-bottom: 12px; }
+.project-link {
+  display: inline-block;
+  background: rgba(255,138,80,0.2);
+  border: 1px solid #ff8a50;
+  color: #ffb74d;
+  padding: 6px 14px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 13px;
+  transition: all 0.3s;
+}
+.project-link:hover { background: #ff8a50; color: #1a1d2e; }
+
+.section-title {
+  font-size: 26px;
+  color: #ffb74d;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(255,138,80,0.3);
+}
+
+.sister-link {
+  background: rgba(255,255,255,0.05);
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px dashed rgba(255,183,77,0.4);
+}
+.sister-link h3 { color: #fff176; margin-bottom: 10px; font-size: 18px; }
+.sister-link p { color: #b0b0c0; font-size: 14px; line-height: 1.6; margin-bottom: 10px; }
+
+.tip-box {
+  background: linear-gradient(135deg, rgba(76,175,80,0.15), rgba(76,175,80,0.05));
+  border: 1px solid #4caf50;
+  border-radius: 12px;
+  padding: 18px;
+  margin-top: 20px;
+}
+.tip-box h4 { color: #66bb6a; margin-bottom: 8px; font-size: 16px; }
+.tip-box p, .tip-box li { color: #c0d0c0; font-size: 14px; line-height: 1.7; }
+.tip-box ul { padding-left: 20px; margin-top: 6px; }
+
+footer {
+  text-align: center;
+  color: #707080;
+  font-size: 12px;
+  margin-top: 40px;
+  padding: 20px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="title">🐰 兔子多色团 GitHub 全家桶</div>
+  <div class="subtitle">Carrot Collective — Voron 多色方案的核心团队</div>
+  <div class="tagline">GPL-3.0 开源 · 维护 4 个核心项目 + 1 个 Affiliate 工具头</div>
+</header>
+
+<div class="intro">
+  <h2>📖 兔子多色团是什么？</h2>
+  <p>Carrot Collective（兔子多色团）是 <strong>Voron 多色打印生态</strong>里最硬核的团队之一，由多位核心贡献者组成，专注<strong>多色换料（Filament Changer）</strong>整套方案。</p>
+  <p>主仓库 <strong>ERCF V3</strong>（Enraged Rabbit Carrot Feeder）是当前 Voron 圈最成熟的开源 8 色 ERCF 方案，<strong>1,200+ stars</strong>。围绕 ERCF 还发展出切刀、排料、缓冲等 4 个配套项目，加上炸脖龙 Jabberwocky 这个 Affiliate 高端工具头，构成完整的多色打印工具链。</p>
+</div>
+
+<div class="org-card">
+  <div class="org-name">🐰 Carrot Collective（组织主页）</div>
+  <div class="org-meta">⭐ 5 个公开仓库 · GPL-3.0 · Voron 多色生态核心</div>
+  <a class="org-link" href="https://github.com/Carrot-collective" target="_blank">👉 进入组织主页</a>
+</div>
+
+<div class="section-title">📦 4 个核心项目</div>
+
+<div class="projects">
+
+  <div class="project" style="--accent: #ff8a50;">
+    <div class="project-head">
+      <div class="project-icon">🥕</div>
+      <div>
+        <div class="project-title">ERCF V3</div>
+        <div class="project-stars">⭐ ~1,200 stars</div>
+      </div>
+    </div>
+    <div class="project-desc">Enraged Rabbit Carrot Feeder — 多色换料器（Filament Changer）。Voron 圈最成熟的开源多色方案，支持 2-8 色扩展。</div>
+    <div class="project-meta">📜 GPL-3.0 · 🔧 Active</div>
+    <a class="project-link" href="https://github.com/Carrot-collective/ERCF_v3" target="_blank">👉 ERCF_v3</a>
+  </div>
+
+  <div class="project" style="--accent: #4caf50;">
+    <div class="project-head">
+      <div class="project-icon">🐇</div>
+      <div>
+        <div class="project-title">CottonTail Integrated Buffer</div>
+        <div class="project-stars">⭐ ERCT 子项目</div>
+      </div>
+    </div>
+    <div class="project-desc">ERCT 集成缓冲器 — 料管稳定推送装置，配合 ERCF 防止卡料、回抽不稳定问题。体积紧凑，安装在打印头附近。</div>
+    <div class="project-meta">📜 GPL-3.0 · 🔧 Active</div>
+    <a class="project-link" href="https://github.com/Carrot-collective/ERCT" target="_blank">👉 ERCT</a>
+  </div>
+
+  <div class="project" style="--accent: #42a5f5;">
+    <div class="project-head">
+      <div class="project-icon">✂️</div>
+      <div>
+        <div class="project-title">Filametrix Toolhead Cutter</div>
+        <div class="project-stars">⭐ 切刀模块</div>
+      </div>
+    </div>
+    <div class="project-desc">工具头切刀 — 集成在工具头上的料管切断器，换色时在工具头内部完成切料，无需工具头外置切刀结构。</div>
+    <div class="project-meta">📜 GPL-3.0 · 🔧 Active</div>
+    <a class="project-link" href="https://github.com/Carrot-collective/Filametrix" target="_blank">👉 Filametrix</a>
+  </div>
+
+  <div class="project" style="--accent: #ab47bc;">
+    <div class="project-head">
+      <div class="project-icon">🧹</div>
+      <div>
+        <div class="project-title">Blobifier Purge System</div>
+        <div class="project-stars">⭐ 排料系统</div>
+      </div>
+    </div>
+    <div class="project-desc">Blobifier 排料系统 — 换色时把残余料丝"擦"到指定位置（废料桶/擦料块），防止渗料污染主打印件。</div>
+    <div class="project-meta">📜 GPL-3.0 · 🔧 Active</div>
+    <a class="project-link" href="https://github.com/Carrot-collective/Blobifier" target="_blank">👉 Blobifier</a>
+  </div>
+
+  <div class="project" style="--accent: #ffb74d;">
+    <div class="project-head">
+      <div class="project-icon">🌀</div>
+      <div>
+        <div class="project-title">Filamentalist Rewinder Buffer</div>
+        <div class="project-stars">⭐ 卷绕缓冲器</div>
+      </div>
+    </div>
+    <div class="project-desc">Filamentalist — 料管卷绕缓冲器，防止长料管在 ERCF 系统中打结/卡死，提升 8 色以上配置的稳定性。</div>
+    <div class="project-meta">📜 GPL-3.0 · 🔧 Active</div>
+    <a class="project-link" href="https://github.com/Carrot-collective/Filamentalist" target="_blank">👉 Filamentalist</a>
+  </div>
+
+</div>
+
+<div class="section-title">🐉 1 个 Affiliate 工具头</div>
+
+<div class="sister-link">
+  <h3>🐉 Jabberwocky Toolhead（炸脖龙）</h3>
+  <p>不是 Carrot Collective 自研，但被官方列为 <strong>Affiliate 合作伙伴</strong>，专为 FCU（Filament Changer Unit）高频换料设计的高端工具头：Phaetus Conch 热端 + Bondtech 双齿轮 + 双 LDO Orbiter 行星减速 + Nitehawk 36 工具板 + 全长切刀。</p>
+  <a class="project-link" href="https://github.com/kinematicdigit/Jabberwocky" target="_blank">👉 Jabberwocky GitHub</a>
+  &nbsp;&nbsp;
+  <a class="project-link" href="https://stealthchanger.com/hardware/toolheads/" target="_blank">👉 StealthChanger 兼容列表</a>
+</div>
+
+<div class="tip-box">
+  <h4>💡 给 Andy 哥的使用建议</h4>
+  <ul>
+    <li><strong>先收藏 ERCF V3 仓库</strong>：主仓是整套方案的总入口，BOM 清单 / 打印件 STL / 装配指南都在这里</li>
+    <li><strong>想装 KLP1？装不上</strong>：KLP1 是 i3 架构，ERCF 是给 CoreXY（Voron/改造机）设计的</li>
+    <li><strong>K1 改造机有可能</strong>：CoreXY 架构 + Voron StealthChanger 码头可上，但需要上 ERCF + 切刀 + 工具头全套</li>
+    <li><strong>大鱼 SPA 4 色机：方案不同</strong>：大鱼是 i3 + 4 色挤出，硬件方案是 Z 轴切换+挤出塔，跟 ERCF 走的是完全不同的路线</li>
+    <li><strong>GitHub 看完后去 B 站</strong>：搜"兔子换料" "ERCF" 有大量中文实装视频，比单看文档上手快</li>
+  </ul>
+</div>
+
+<footer>
+  🐰 Carrot Collective 兔子多色团 · GPL-3.0 开源 · 整理于 2026-06-10
+</footer>
+
+</div>
+</body>
+</html>

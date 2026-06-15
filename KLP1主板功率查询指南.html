@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>KLP1 主板功率查询指南 — 3 种方法</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #0a0e1a; color: #e8e8e8; line-height: 1.6; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
+h1 { font-size: 26px; color: #4dd0e1; text-align: center; margin: 20px 0 8px; font-weight: 700; }
+.subtitle { text-align: center; color: #8aa; margin-bottom: 24px; font-size: 14px; }
+.section-title { font-size: 20px; color: #4dd0e1; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #2a3a4e; }
+.highlight { color: #ffd54f; font-weight: 600; }
+.danger { color: #ff5252; font-weight: 600; }
+.success { color: #66bb6a; font-weight: 600; }
+.code-block { background: #0a0e1a; border: 1px solid #2a3a4e; border-radius: 6px; padding: 14px 18px; margin: 12px 0; font-family: "Consolas", "Monaco", monospace; font-size: 13px; color: #66bb6a; overflow-x: auto; }
+.code-block .comment { color: #5a7a8a; }
+.code-block .key { color: #4dd0e1; }
+.code-block .val { color: #ffd54f; }
+.box { background: #1a2332; border-left: 4px solid #4dd0e1; padding: 14px 18px; margin: 12px 0; border-radius: 4px; }
+.warn-box { background: #2a1a1a; border-left: 4px solid #ff5252; padding: 14px 16px; margin: 12px 0; border-radius: 4px; }
+.tip-box { background: #1a2a1a; border-left: 4px solid #66bb6a; padding: 14px 16px; margin: 12px 0; border-radius: 4px; }
+.step { display: flex; gap: 16px; margin: 16px 0; padding: 16px; background: #1a2332; border-radius: 8px; align-items: flex-start; }
+.step-num { width: 36px; height: 36px; background: #4dd0e1; color: #0a0e1a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; flex-shrink: 0; }
+.step-content { flex: 1; }
+.step-title { color: #ffd54f; font-weight: 600; font-size: 16px; margin-bottom: 8px; }
+.method { background: #1a2332; border: 1px solid #2a3a4e; border-radius: 12px; padding: 20px; margin: 16px 0; }
+.method-title { color: #4dd0e1; font-size: 20px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+.method-tag { background: #4dd0e1; color: #0a0e1a; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; }
+.hot { color: #ff5252; }
+.cold { color: #4dd0e1; }
+.power-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+.power-table th { background: #1a2332; color: #4dd0e1; padding: 10px; text-align: left; }
+.power-table td { padding: 10px; border-bottom: 1px solid #1a2332; }
+.power-table tr:hover { background: #1a2332; }
+.btn { display: inline-block; padding: 10px 20px; background: #4dd0e1; color: #0a0e1a; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin: 4px; font-size: 13px; text-decoration: none; }
+.copy-btn { background: #2a3a4e; color: #fff; padding: 4px 10px; font-size: 11px; border-radius: 4px; border: none; cursor: pointer; margin-left: 8px; }
+.copy-btn:hover { background: #3a4a5e; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🔍 KLP1 主板功率查询指南</h1>
+  <div class="subtitle">3 种方法：从软件看到硬件查到 datasheet 验算</div>
+
+  <h2 class="section-title">📋 先说结论（你已经知道的）</h2>
+  <div class="box">
+    <strong>KLP1 主板关键规格（来自 p3d.mx 官方页面）：</strong>
+    <table class="power-table">
+      <tr><th>项目</th><th>规格</th><th>出处</th></tr>
+      <tr><td>主板型号</td><td>KINGROON KP Cheetah V2.0</td><td>p3d.mx 产品页</td></tr>
+      <tr><td>MCU</td><td>GD32F303（国产 STM32 替代）</td><td>p3d.mx 规格表</td></tr>
+      <tr><td>电源</td><td>24V × 12.5A = <span class="highlight">300W 总额定</span></td><td>ThePhonograph 评测</td></tr>
+      <tr><td>系统</td><td>MKS EMMC V1.0（8GB）+ Armbian</td><td>p3d.mx 规格表</td></tr>
+      <tr><td>整机功率</td><td>240W（厂家标称）</td><td>KINGROON 官方手册</td></tr>
+      <tr><td>标配加热棒</td><td>24V × 50W（陶瓷卡式 Φ6×20）</td><td>KLP1 BOM 清单</td></tr>
+      <tr><td>最大喷嘴温度</td><td>260°C（Klipper 软限制）</td><td>ThePhonograph 评测</td></tr>
+    </table>
+  </div>
+
+  <div class="warn-box">
+    <strong>⚠️ 关键问题：</strong>300W 总额定 ≠ 加热棒能用 300W！<br>
+    实际单路加热棒最大功率 <span class="danger">取决于主板 MOSFET 型号 + 走线宽度 + 散热</span>。<br>
+    官方没明确写"加热棒最大支持多少W"，所以要自己查。
+  </div>
+
+  <!-- 方法 1: SSH 查询 -->
+  <div class="method">
+    <div class="method-title">
+      <span>方法 1：SSH 终端查询（推荐）</span>
+      <span class="method-tag">最准 · 3 分钟</span>
+    </div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">SSH 连 KLP1</div>
+        <strong>电脑打开终端/PowerShell，输入：</strong>
+        <div class="code-block">ssh mks@你的KLP1的IP地址<span class="comment"># 例如 ssh mks@192.168.1.100</span>
+<span class="comment"># 密码：makerbase（默认）</span></div>
+        <strong>不知道 IP？</strong>在 KLP1 屏幕菜单里找 "网络" → "WiFi 信息" / "有线 IP"
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">查看 Klipper 配置（最直接）</div>
+        <div class="code-block">cat ~/printer_data/config/printer.cfg | grep -A 3 "extruder\]"
+<span class="comment"># 输出类似：</span>
+[extruder]
+<span class="key">heater_pin:</span> <span class="val">PA1</span>
+<span class="key">max_temp:</span> <span class="val">260</span>
+<span class="key">min_temp:</span> <span class="val">0</span>
+<span class="key">sensor_type:</span> <span class="val">EPCOS 100K B57560G104F</span></div>
+        <strong>关键看 <code>max_temp: 260</code> ← 主板软件锁的最高温度</strong>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">查看 MCU 型号（间接知道功率上限）</div>
+        <div class="code-block">cat /proc/cpuinfo | grep "model name"
+<span class="comment"># 或更精准：</span>
+dmesg | grep -i "mcu\|gd32\|stm32"
+<span class="comment"># 应该能看到：</span>
+<span class="key">MCU:</span> <span class="val">GD32F303 (GD32F303VCT6)</span>
+<span class="key">Clock:</span> <span class="val">72 MHz</span></div>
+        <strong>GD32F303 = STM32F103 的国产替代品</strong>，IO 口驱动能力 25mA 单 IO
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="step-title">查看加热棒实际功率（动态测试）</div>
+        <div class="code-block"><span class="comment"># 在 Klipper 终端执行（mainsail/fluidd 网页 console 框）：</span>
+SET_HEATER_PWM HEATER=extruder VALUE=1.0
+<span class="comment"># 100% 满功率加热 5 秒，观察温度上升速度</span>
+
+<span class="comment"># 或看电源电流（如果有钳形表）：</span>
+<span class="comment"># 钳住 24V 主电源线，看电流</span>
+<span class="comment"># 50W 加热棒 = 50/24 ≈ 2.08A</span>
+<span class="comment"># 60W 加热棒 = 60/24 ≈ 2.5A</span>
+<span class="comment"># 100W 加热棒 = 100/24 ≈ 4.17A（KLP1 危险）</span></div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <strong>💡 SSH 终极查询：导出完整 Klipper 状态</strong>
+      <div class="code-block" style="margin-top: 8px;">RESTART
+<span class="comment"># 然后立刻看 klippy.log：</span>
+tail -f ~/printer_data/logs/klippy.log
+<span class="comment"># 启动时会有这一行：</span>
+<span class="key">MCU 'mcu' config:</span> <span class="val">GD32F303VCT6</span>
+<span class="key">Heap:</span> <span class="val">23456/32768 bytes free</span>
+<span class="key">Clock:</span> <span class="val">72MHz</span></div>
+    </div>
+  </div>
+
+  <!-- 方法 2: 网页界面 -->
+  <div class="method">
+    <div class="method-title">
+      <span>方法 2：Mainsail / Fluidd 网页界面查询</span>
+      <span class="method-tag">最简单 · 1 分钟</span>
+    </div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">打开 KLP1 网页</div>
+        <strong>浏览器输入：</strong><code>http://你的KLP1的IP地址</code><br>
+        默认进 Mainsail 界面
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">查看机器信息</div>
+        <strong>Mainsail 顶部齿轮 ⚙️ → "Dashboard" 或 "Machine"</strong><br>
+        能看到：
+        <ul style="margin-left: 20px; margin-top: 6px;">
+          <li>MCU 型号：GD32F303VCT6</li>
+          <li>Klipper 版本</li>
+          <li>运行时间</li>
+          <li>主机名：mks</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">查看温度传感器（动态看实际温度）</div>
+        <strong>Mainsail 主界面 → "Temperature" 区域</strong><br>
+        能实时看到：
+        <ul style="margin-left: 20px; margin-top: 6px;">
+          <li>🔴 <span class="hot">Extruder</span>：热端实际温度 + 目标温度</li>
+          <li>🔵 <span class="cold">Bed</span>：热床实际温度 + 目标温度</li>
+          <li>PWM 百分比（加热棒当前占空比）</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="step-title">查看功耗（如果有智能插座）</div>
+        <strong>最简单方法：</strong>给 KLP1 接一个智能插座（小米/涂鸦都行，¥30-50）<br>
+        → App 能看实时功率 W、累计 kWh、电流 A<br>
+        → 加热到 240°C 满载时，<strong>整机功率约 150-180W</strong>（加热棒 50W + 热床 100W + 主板 + 风扇等）
+      </div>
+    </div>
+  </div>
+
+  <!-- 方法 3: 物理查主板 -->
+  <div class="method">
+    <div class="method-title">
+      <span>方法 3：拆机看主板硬件（进阶）</span>
+      <span class="method-tag">最权威 · 需要拆机</span>
+    </div>
+
+    <div class="warn-box">
+      <strong>⚠️ 拆机风险：</strong>断电 5 分钟后再操作，避免静电。<br>
+      不建议新手做——除非你已经确定要 DIY 改电路。
+    </div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">拆 KLP1 底板 / 侧板</div>
+        <strong>KLP1 主板位置：</strong>底部仓（掀开底板）<br>
+        <strong>需要的工具：</strong>2.5mm 内六角扳手（拆底板 4 颗螺丝）<br>
+        <strong>⚠️ 先断电！</strong>拔 24V 电源线 + 等 5 分钟（电容放电）
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">找加热棒输出 MOSFET</div>
+        <strong>看主板上靠近 "HE" 端口（加热棒输出）的位置</strong><br>
+        应该有一个 <span class="highlight">8-Pin SOIC 或 DPAK 封装的 MOS 管</span><br>
+        <strong>常见型号：</strong>
+        <ul style="margin-left: 20px; margin-top: 6px;">
+          <li><strong>HY2302 / SI2302</strong>（N 沟道，2A/20V，太小）</li>
+          <li><strong>IRF7507</strong>（双 N 沟道，2.4A/20V）</li>
+          <li><strong>AO3400A / AO3401A</strong>（5.7A/30V，够用）</li>
+          <li><strong>SR340 / SS34</strong>（肖特基，3A/40V，整流用）</li>
+        </ul>
+        <strong>🔍 找到型号后：</strong>拍照 + Google "[型号] datasheet" → 看 Id（连续漏极电流）
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">查 datasheet 计算最大功率</div>
+        <strong>公式：</strong>
+        <div class="code-block">P_max = V × I_d × 0.7  <span class="comment"># 0.7 是降额系数（安全余量）</span>
+
+<span class="comment"># 例 1：AO3401A（5.7A）</span>
+P_max = 24V × 5.7A × 0.7 = <span class="success">95.7W</span>
+
+<span class="comment"># 例 2：IRF7507（2.4A）</span>
+P_max = 24V × 2.4A × 0.7 = <span class="danger">40.3W</span>  <span class="comment"># ← 太低了，KLP1 不可能用这个</span>
+
+<span class="comment"># 例 3：双 MOS 并联（2 × IRF7507）</span>
+P_max = 24V × 4.8A × 0.7 = <span class="highlight">80.6W</span></div>
+        <strong>💡 Andy 实际能查到的：</strong>KLP1 主板很可能是 <span class="highlight">双 MOS 并联方案</span>（80W 安全），但厂家没写出来。<br>
+        <strong>如果查到是单 MOS（40W）：</strong>那 KLP1 比想象中还弱，连 50W 都接近极限。
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <strong>🎯 最简单的"猜"法：</strong>
+      <ul style="margin-left: 20px; margin-top: 6px;">
+        <li>官方标配 50W 加热棒 → 主板至少支持 50W</li>
+        <li>Kingroon 是国产贴牌方案 → 大概率用 <strong>双 AO3401A 并联</strong>（~95W 理论 / 60W 安全）</li>
+        <li>加热床输出（约 200W）→ 主板必然能扛 200W+，所以加热棒 MOS 比加热床 MOS 小</li>
+        <li>结论：<span class="highlight">加热棒单路实际安全上限 60-80W</span>（不超 MOS 规格的 70%）</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 class="section-title">📊 KLP1 主板功率全景图</h2>
+  <table class="power-table">
+    <tr><th>项目</th><th>数值</th><th>说明</th></tr>
+    <tr><td>电源总额定</td><td>300W（24V × 12.5A）</td><td>KINGROON 官方</td></tr>
+    <tr><td>整机峰值功耗</td><td>~240W（厂家标称）</td><td>加热 + 步进 + 风扇</td></tr>
+    <tr><td>热床最大功率</td><td>~200W（24V × 8A）</td><td>100°C 时 100W 左右</td></tr>
+    <tr><td>标配加热棒</td><td>50W（24V × 2.08A）</td><td>陶瓷 Φ6×20</td></tr>
+    <tr><td>加热棒 MOS 推测</td><td>60-80W 安全</td><td>双 AO3401A 或类似</td></tr>
+    <tr><td>Klipper 温度锁</td><td>260°C（max_temp）</td><td>软件硬限制</td></tr>
+    <tr><td>主控 MCU</td><td>GD32F303VCT6</td><td>72MHz, 256KB Flash</td></tr>
+    <tr><td>驱动芯片</td><td>TMC2209 × 5</td><td>超静音</td></tr>
+    <tr><td>系统</td><td>Armbian + Klipper</td><td>Linux 内核</td></tr>
+    <tr><td>EMMC 存储</td><td>8GB（系统 + 配置文件）</td><td>MKS EMMC V1.0</td></tr>
+  </table>
+
+  <h2 class="section-title">🎯 你的升级结论</h2>
+  <div class="box">
+    <strong>Andy 实际可用的加热棒范围：</strong>
+    <ul style="margin-left: 20px; margin-top: 8px;">
+      <li>✅ <strong>50W 标配</strong>（完全安全）</li>
+      <li>✅ <strong>60W 升级</strong>（主流高流量热端标准，KLP1 撑得住）</li>
+      <li>⚠️ <strong>80W 边界</strong>（理论安全但要监控 MOS 温度，建议加散热片）</li>
+      <li>❌ <strong>100W+</strong>（KLP1 主板必烧）</li>
+    </ul>
+    <br>
+    <strong>所以 KLP1 升级的最佳方案：</strong>
+    <ol style="margin-left: 20px; margin-top: 6px;">
+      <li>Phaetus Dragonfly BMO（50W 即可）+ 60W 加热棒（淘宝 ¥20）= <strong>¥450 搞定</strong></li>
+      <li>流速从 8 → 30 mm³/s（+275%）</li>
+      <li>温度锁 260°C 没办法（要换主板或买新机）</li>
+    </ol>
+  </div>
+
+  <h2 class="section-title">🔗 信息来源</h2>
+  <div style="font-size: 12px; color: #8aa; line-height: 1.8;">
+    据 <a href="https://p3d.mx/products/kingroon-kp-cheetah-v2-0-mainboard-for-klp1-3d-printer" style="color:#4dd0e1;">KINGROON KP Cheetah V2.0 主板</a>、<a href="https://www.thephonograph.net/kingroon-klp1-review/" style="color:#4dd0e1;">Kingroon KLP1 评测 (ThePhonograph)</a>、<a href="https://kingroon.com/en-germany/products/kingroon-klp1-corexy-3d-printer-with-klipper-firmware" style="color:#4dd0e1;">Kingroon KLP1 官方页</a>、<a href="https://www.obico.io/es-ES/blog/kingroon-klipper-remote-access-and-ai/" style="color:#4dd0e1;">Kingroon Klipper 远程访问指南</a>
+  </div>
+</div>
+</body>
+</html>

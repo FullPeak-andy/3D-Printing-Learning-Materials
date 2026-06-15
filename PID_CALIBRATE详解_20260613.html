@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>PID_CALIBRATE 命令详解</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0a0e14; color: #e0e6ed; font-family: 'Segoe UI', 'Microsoft YaHei', monospace; padding: 20px; line-height: 1.6; }
+h1 { color: #00d9a3; font-size: 28px; margin-bottom: 8px; }
+h2 { color: #00d4ff; font-size: 20px; margin: 20px 0 12px; }
+h3 { color: #ffd866; font-size: 16px; margin: 12px 0 8px; }
+.subtitle { color: #6c7a8c; font-size: 14px; margin-bottom: 20px; }
+.command { background: #1a1f2e; padding: 14px 18px; border-left: 4px solid #00d9a3; font-family: 'Consolas', monospace; color: #00d9a3; font-size: 15px; margin: 12px 0; border-radius: 4px; }
+.code { background: #1a1f2e; padding: 2px 8px; border-radius: 3px; font-family: 'Consolas', monospace; color: #ffd866; }
+.slider-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; }
+.slider-row label { width: 60px; color: #00d9a3; font-weight: bold; }
+.slider-row input[type=range] { flex: 1; }
+.slider-row .val { width: 60px; text-align: right; color: #ffd866; font-family: 'Consolas', monospace; }
+canvas { display: block; border: 1px solid #2a3142; border-radius: 4px; background: #0d1117; margin: 12px 0; max-width: 100%; }
+.card { background: #131820; padding: 20px; border-radius: 8px; margin: 16px 0; border: 1px solid #2a3142; }
+.warn { color: #ff6b6b; }
+.ok { color: #00d9a3; }
+.info { color: #00d4ff; }
+table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+th, td { padding: 8px 12px; border-bottom: 1px solid #2a3142; text-align: left; font-size: 14px; }
+th { color: #00d9a3; background: #1a1f2e; }
+ol, ul { padding-left: 24px; }
+li { margin: 6px 0; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 12px; margin-right: 6px; }
+.tag-req { background: #ff6b6b33; color: #ff6b6b; border: 1px solid #ff6b6b; }
+.tag-opt { background: #00d9a333; color: #00d9a3; border: 1px solid #00d9a3; }
+.tag-no { background: #6c7a8c33; color: #6c7a8c; border: 1px solid #6c7a8c; }
+input[type=range] { -webkit-appearance: none; height: 4px; background: #2a3142; border-radius: 2px; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: #00d9a3; border-radius: 50%; cursor: pointer; }
+input[type=range]::-moz-range-thumb { width: 16px; height: 16px; background: #00d9a3; border-radius: 50%; cursor: pointer; border: none; }
+.klp1-tag { background: #ff6b6b22; color: #ff6b6b; padding: 2px 8px; border-radius: 3px; font-size: 12px; border: 1px solid #ff6b6b; }
+</style>
+</head>
+<body>
+
+<h1>🧪 PID_CALIBRATE 命令详解</h1>
+<p class="subtitle">Klipper 自动整定 PID 参数 · 5 分钟搞定</p>
+
+<!-- ========== 1. 命令格式 ========== -->
+<div class="card">
+<h2>📋 1. 命令格式</h2>
+<div class="command">PID_CALIBRATE HEATER=&lt;config_name&gt; TARGET=&lt;temp&gt; [WRITE_FILE=1]</div>
+<table>
+<tr><th>参数</th><th>必选</th><th>说明</th><th>常用值</th></tr>
+<tr>
+  <td><code>HEATER</code></td>
+  <td><span class="tag tag-req">必填</span></td>
+  <td>要校准的加热器段名（<code>[heater_*]</code> 段）</td>
+  <td><code>extruder</code>（热端）/ <code>heater_bed</code>（热床）</td>
+</tr>
+<tr>
+  <td><code>TARGET</code></td>
+  <td><span class="tag tag-req">必填</span></td>
+  <td>目标温度（°C）</td>
+  <td>热端 <code>220</code> / 热床 <code>60</code></td>
+</tr>
+<tr>
+  <td><code>WRITE_FILE</code></td>
+  <td><span class="tag tag-opt">可选</span></td>
+  <td>Klipper 0.12+：写临时文件供 SAVE_CONFIG 读取</td>
+  <td>默认 1（推荐）</td>
+</tr>
+</table>
+<p style="margin-top:10px">💡 <span class="info">KLP1 实际命令</span>（你刚才发的）：</p>
+<div class="command">PID_CALIBRATE HEATER=extruder TARGET=220</div>
+<p class="subtitle">→ 校准热端 PID，目标温度 220°C（PLA/PETG 标准挤出温度）</p>
+</div>
+
+<!-- ========== 2. PID 原理 ========== -->
+<div class="card">
+<h2>⚙️ 2. PID 三要素（拖滑块看曲线）</h2>
+<p class="subtitle">温度控制 = <span style="color:#00d9a3">P</span>(比例) + <span style="color:#00d4ff">I</span>(积分) + <span style="color:#ffd866">D</span>(微分)</p>
+
+<div class="slider-row">
+  <label>Kp</label>
+  <input type="range" id="kp" min="0" max="60" value="20" step="0.5">
+  <span class="val" id="kp-val">20.0</span>
+</div>
+<div class="slider-row">
+  <label>Ki</label>
+  <input type="range" id="ki" min="0" max="20" value="4" step="0.1">
+  <span class="val" id="ki-val">4.0</span>
+</div>
+<div class="slider-row">
+  <label>Kd</label>
+  <input type="range" id="kd" min="0" max="80" value="40" step="0.5">
+  <span class="val" id="kd-val">40.0</span>
+</div>
+
+<canvas id="pid-canvas" width="900" height="320"></canvas>
+<p class="subtitle">🔵 蓝线 = 实际温度　⚪ 灰虚线 = 目标 220°C　横轴 = 时间(秒)</p>
+
+<table style="margin-top:12px">
+<tr><th>参数</th><th>作用</th><th>调大后果</th><th>调小后果</th></tr>
+<tr>
+  <td><span class="ok">Kp</span> 比例</td>
+  <td>温度差多大 → 加热多猛</td>
+  <td>升温快、震荡大</td>
+  <td>升温慢、稳态误差</td>
+</tr>
+<tr>
+  <td><span class="info">Ki</span> 积分</td>
+  <td>累积误差 → 消除偏差</td>
+  <td>消除误差慢、震荡</td>
+  <td>温度上不去</td>
+</tr>
+<tr>
+  <td><span class="warn">Kd</span> 微分</td>
+  <td>预测趋势 → 阻尼过冲</td>
+  <td>响应迟钝</td>
+  <td>过冲到 230°C</td>
+</tr>
+</table>
+</div>
+
+<!-- ========== 3. 校准流程 ========== -->
+<div class="card">
+<h2>🔄 3. 校准流程（约 5 分钟）</h2>
+<ol>
+  <li><span class="info">预热</span>：Klipper 加热到 TARGET（220°C）</li>
+  <li><span class="info">稳态</span>：目标温度 ±2°C 保持 30 秒</li>
+  <li><span class="info">震荡测试</span>：自动跑 3 个震荡周期（加热到 230°C → 断电到 210°C）</li>
+  <li><span class="info">计算</span>：Ziegler-Nichols 法算 Kp / Ki / Kd</li>
+  <li><span class="info">输出</span>：控制台显示 <code>// pid_Kp=39.409 pid_Ki=9.383 pid_Kd=41.379</code></li>
+  <li><span class="warn">⚠️ 不</span>自动保存 → <span class="ok">要手动</span>跑 <code>SAVE_CONFIG</code></li>
+</ol>
+</div>
+
+<!-- ========== 4. 校准前后对比 ========== -->
+<div class="card">
+<h2>📊 4. 校准前后温度对比</h2>
+<canvas id="compare-canvas" width="900" height="280"></canvas>
+<p class="subtitle">🔴 校准前：±5°C 震荡　🟢 校准后：±0.5°C 稳定　⚪ 目标 220°C</p>
+</div>
+
+<!-- ========== 5. 何时需要校准 ========== -->
+<div class="card">
+<h2>🔧 5. 何时需要校准</h2>
+<table>
+<tr><th>场景</th><th>必要性</th><th>原因</th></tr>
+<tr>
+  <td>第一次装机</td>
+  <td><span class="tag tag-req">必跑</span></td>
+  <td>工厂默认 PID 适配不了所有机器</td>
+</tr>
+<tr>
+  <td>换热端 / 加热棒 / 热敏</td>
+  <td><span class="tag tag-req">必跑</span></td>
+  <td>加热功率/热敏响应变了</td>
+</tr>
+<tr>
+  <td>换主板 / 温控板</td>
+  <td><span class="tag tag-req">必跑</span></td>
+  <td>PWM 频率 / 死区可能不同</td>
+</tr>
+<tr>
+  <td>改 <code>[extruder]</code> 段参数</td>
+  <td><span class="tag tag-opt">建议跑</span></td>
+  <td>挤出口径变了影响热负荷</td>
+</tr>
+<tr>
+  <td>换耗材（PLA→ABS）</td>
+  <td><span class="tag tag-opt">建议跑</span></td>
+  <td>ABS 需要更高热端/热床温度</td>
+</tr>
+<tr>
+  <td>每次打印前</td>
+  <td><span class="tag tag-no">不跑</span></td>
+  <td>校准要 5 分钟常加热</td>
+</tr>
+</table>
+</div>
+
+<!-- ========== 6. 不校准的后果 ========== -->
+<div class="card">
+<h2>⚠️ 6. 不校准的后果（这就是你之前的问题）</h2>
+<table>
+<tr><th>现象</th><th>原因</th></tr>
+<tr>
+  <td><span class="warn">温度震荡 ±5°C</span></td>
+  <td>PID 参数错 → 输出忽大忽小</td>
+</tr>
+<tr>
+  <td><span class="warn">挤出量不稳定</span></td>
+  <td>温度抖 → 耗材热胀冷缩 → 线宽不均</td>
+</tr>
+<tr>
+  <td><span class="warn">首层拉丝/缺料</span></td>
+  <td class="klp1-tag">KLP1 当前症状</td>
+  <td>底行缺料 / 中行拉丝 / 顶行正常（之前看过的 3×3）</td>
+</tr>
+<tr>
+  <td><span class="warn">堵喷嘴（高温耗材）</span></td>
+  <td>ABS/ASA 打印时温度掉 → 耗材固化堵头</td>
+</tr>
+<tr>
+  <td><span class="warn">热床温度上不去</span></td>
+  <td>热床 PID 错 → 加热慢/温度低 → 翘边</td>
+</tr>
+</table>
+</div>
+
+<!-- ========== 7. KLP1 当前状态 ========== -->
+<div class="card">
+<h2>📌 7. KLP1 当前状态</h2>
+<table>
+<tr><th>项目</th><th>当前</th><th>应该</th><th>状态</th></tr>
+<tr>
+  <td>v7 cfg PID（[extruder] 段）</td>
+  <td><code>pid_Kp: 19.837<br>pid_Ki: 4.723<br>pid_Kd: 20.829</code></td>
+  <td>校准后值</td>
+  <td><span class="warn">旧值</span></td>
+</tr>
+<tr>
+  <td>19:25 跑过 PID 校准</td>
+  <td>新值 <code>pid_Kp=39.409 pid_Ki=9.383 pid_Kd=41.379</code></td>
+  <td>已算出</td>
+  <td><span class="warn">未持久化</span></td>
+</tr>
+<tr>
+  <td>现在的任务</td>
+  <td>重跑校准 → SAVE_CONFIG 持久化</td>
+  <td>—</td>
+  <td><span class="ok">正在做</span></td>
+</tr>
+</table>
+</div>
+
+<!-- ========== 8. 跑完后 ========== -->
+<div class="card">
+<h2>✅ 8. 跑完后下一步</h2>
+<ol>
+  <li>控制台会显示 <code>// pid_Kp=39.409 pid_Ki=9.383 pid_Kd=41.379</code> → 贴给我</li>
+  <li>我帮填到 v7 cfg 的 <code>[extruder]</code> 段（替换旧的 19.837/4.723/20.829）</li>
+  <li>跑 <code>SAVE_CONFIG</code> 持久化</li>
+  <li>（可选）跑 <code>PID_CALIBRATE HEATER=heater_bed TARGET=60</code> 校准热床</li>
+</ol>
+</div>
+
+<script>
+// ==================== 滑块同步 ====================
+['kp','ki','kd'].forEach(id => {
+  const slider = document.getElementById(id);
+  const valSpan = document.getElementById(id+'-val');
+  slider.addEventListener('input', () => {
+    valSpan.textContent = parseFloat(slider.value).toFixed(1);
+    drawPID();
+  });
+});
+
+// ==================== PID 响应曲线 ====================
+function drawPID() {
+  const canvas = document.getElementById('pid-canvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  const kp = parseFloat(document.getElementById('kp').value);
+  const ki = parseFloat(document.getElementById('ki').value);
+  const kd = parseFloat(document.getElementById('kd').value);
+
+  ctx.clearRect(0, 0, w, h);
+
+  // 网格
+  ctx.strokeStyle = '#2a3142';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 5; i++) {
+    const y = h * (i / 4);
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+
+  // 温度刻度
+  ctx.fillStyle = '#6c7a8c';
+  ctx.font = '11px monospace';
+  for (let i = 0; i <= 5; i++) {
+    const temp = 250 - i * 50;
+    const y = h * (i / 4);
+    ctx.fillText(temp + '°C', 5, y - 2);
+  }
+
+  // 目标线（220°C）
+  const targetY = h * (250 - 220) / 250;
+  ctx.strokeStyle = '#6c7a8c';
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath();
+  ctx.moveTo(40, targetY);
+  ctx.lineTo(w, targetY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#6c7a8c';
+  ctx.fillText('目标 220°C', w-100, targetY-5);
+
+  // 模拟 PID 响应
+  let temp = 25;
+  const dt = 0.05;
+  const T = 30;
+  const N = T / dt;
+  let lastErr = 220 - temp;
+  let integral = 0;
+  const setpoint = 220;
+
+  ctx.beginPath();
+  ctx.strokeStyle = '#00d4ff';
+  ctx.lineWidth = 2;
+
+  for (let i = 0; i < N; i++) {
+    const err = setpoint - temp;
+    integral += err * dt;
+    const derivative = (err - lastErr) / dt;
+    const output = kp * err + ki * integral + kd * derivative;
+    const heat = Math.max(0, Math.min(100, output));
+    const cool = 0.05 * (temp - 25);
+    temp += (heat * 0.4 - cool) * dt;
+    lastErr = err;
+
+    const x = 40 + (i / N) * (w - 50);
+    const y = h * (250 - temp) / 250;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+}
+
+// ==================== 校准前后对比 ====================
+function drawCompare() {
+  const canvas = document.getElementById('compare-canvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+
+  ctx.clearRect(0, 0, w, h);
+
+  // 网格
+  ctx.strokeStyle = '#2a3142';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 5; i++) {
+    const y = h * (i / 4);
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+
+  // 温度刻度
+  ctx.fillStyle = '#6c7a8c';
+  ctx.font = '11px monospace';
+  for (let i = 0; i <= 5; i++) {
+    const temp = 250 - i * 50;
+    const y = h * (i / 4);
+    ctx.fillText(temp + '°C', 5, y - 2);
+  }
+
+  // 目标线
+  const targetY = h * (250 - 220) / 250;
+  ctx.strokeStyle = '#6c7a8c';
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath();
+  ctx.moveTo(40, targetY);
+  ctx.lineTo(w, targetY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 校准前：±5°C 震荡
+  ctx.beginPath();
+  ctx.strokeStyle = '#ff6b6b';
+  ctx.lineWidth = 1.5;
+  for (let i = 0; i < w - 50; i++) {
+    const noise = Math.sin(i * 0.05) * 4 + Math.sin(i * 0.13) * 2 + (Math.random() - 0.5) * 0.8;
+    const temp = 220 + noise;
+    const y = h * (250 - temp) / 250;
+    if (i === 0) ctx.moveTo(40 + i, y);
+    else ctx.lineTo(40 + i, y);
+  }
+  ctx.stroke();
+
+  // 校准后：±0.5°C 稳定
+  ctx.beginPath();
+  ctx.strokeStyle = '#00d9a3';
+  ctx.lineWidth = 1.5;
+  for (let i = 0; i < w - 50; i++) {
+    const noise = Math.sin(i * 0.05) * 0.3 + Math.sin(i * 0.13) * 0.15 + (Math.random() - 0.5) * 0.1;
+    const temp = 220 + noise;
+    const y = h * (250 - temp) / 250;
+    if (i === 0) ctx.moveTo(40 + i, y);
+    else ctx.lineTo(40 + i, y);
+  }
+  ctx.stroke();
+
+  // 图例
+  ctx.fillStyle = '#ff6b6b';
+  ctx.fillRect(50, 20, 16, 3);
+  ctx.fillText('校准前：±5°C 震荡', 72, 25);
+
+  ctx.fillStyle = '#00d9a3';
+  ctx.fillRect(50, 40, 16, 3);
+  ctx.fillText('校准后：±0.5°C 稳定', 72, 45);
+
+  ctx.fillStyle = '#6c7a8c';
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath();
+  ctx.moveTo(50, 60);
+  ctx.lineTo(66, 60);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillText('目标 220°C', 72, 64);
+}
+
+window.addEventListener('load', () => {
+  drawPID();
+  drawCompare();
+});
+</script>
+
+</body>
+</html>

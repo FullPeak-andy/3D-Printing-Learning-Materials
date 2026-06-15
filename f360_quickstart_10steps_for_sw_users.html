@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>F360 速通 10 步（SW 用户专版）</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Microsoft YaHei", "PingFang SC", sans-serif;
+    background: #0a0e1a;
+    color: #c9d1d9;
+    padding: 20px;
+    line-height: 1.5;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  /* Header */
+  header {
+    background: linear-gradient(135deg, #ff7b00 0%, #ff5500 100%);
+    padding: 24px 28px;
+    border-radius: 12px;
+    margin-bottom: 18px;
+    box-shadow: 0 8px 24px rgba(255,123,0,0.3);
+  }
+  h1 { color: white; font-size: 26px; margin-bottom: 6px; }
+  .subtitle { color: rgba(255,255,255,0.85); font-size: 13px; }
+  .progress-bar {
+    background: rgba(0,0,0,0.3);
+    height: 8px;
+    border-radius: 4px;
+    margin-top: 14px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    background: linear-gradient(90deg, #fff 0%, #ffe9d4 100%);
+    height: 100%;
+    width: 0%;
+    transition: width 0.6s ease;
+  }
+  .progress-text {
+    color: rgba(255,255,255,0.9);
+    font-size: 12px;
+    margin-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .reset-btn {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+  }
+  .reset-btn:hover { background: rgba(0,0,0,0.5); }
+
+  /* Step cards */
+  .step {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  .step.completed { border-color: #3fb950; background: #0d1a13; }
+  .step.active { border-color: #ff7b00; box-shadow: 0 0 0 1px #ff7b00; }
+  .step-header {
+    padding: 14px 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    user-select: none;
+  }
+  .step-header:hover { background: #1c2128; }
+  .step-left { display: flex; align-items: center; gap: 12px; flex: 1; }
+  .step-num {
+    background: #21262d;
+    color: #8b949e;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 15px;
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+  .step.completed .step-num { background: #3fb950; color: white; }
+  .step.active .step-num { background: #ff7b00; color: white; }
+  .step-title { font-size: 16px; font-weight: 600; color: #f0f6fc; }
+  .step-time { color: #8b949e; font-size: 11px; margin-top: 2px; }
+  .step-toggle {
+    color: #8b949e;
+    font-size: 18px;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+  .step.open .step-toggle { transform: rotate(180deg); }
+  .step-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s;
+  }
+  .step.open .step-content { max-height: 1800px; }
+  .step-body {
+    padding: 0 18px 16px;
+    border-top: 1px solid #30363d;
+    padding-top: 14px;
+  }
+
+  /* Section styles */
+  .section-title {
+    color: #ff7b00;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .ops-list { list-style: none; padding: 0; }
+  .ops-list li {
+    padding: 5px 0 5px 18px;
+    position: relative;
+    line-height: 1.65;
+    font-size: 13.5px;
+  }
+  .ops-list li::before {
+    content: "▸";
+    position: absolute;
+    left: 0;
+    color: #ff7b00;
+  }
+  .diff-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+    font-size: 12.5px;
+  }
+  .diff-table th, .diff-table td {
+    padding: 7px 10px;
+    text-align: left;
+    border: 1px solid #30363d;
+  }
+  .diff-table th {
+    background: #21262d;
+    color: #f0f6fc;
+    font-weight: 600;
+    font-size: 12px;
+  }
+  .diff-table tr:nth-child(even) { background: #1c2128; }
+  .diff-table .sw { color: #8b949e; }
+  .diff-table .f360 { color: #ff9d4d; }
+  .kbd {
+    background: #21262d;
+    color: #f0f6fc;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-family: 'Cascadia Code', Consolas, monospace;
+    font-size: 11px;
+    border: 1px solid #30363d;
+    margin: 0 1px;
+  }
+  .tip {
+    background: #1f3a5f;
+    border-left: 3px solid #58a6ff;
+    padding: 9px 12px;
+    border-radius: 4px;
+    margin: 10px 0;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .tip::before { content: "💡 "; }
+  .trap {
+    background: #4a1a1a;
+    border-left: 3px solid #f85149;
+    padding: 9px 12px;
+    border-radius: 4px;
+    margin: 10px 0;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .trap::before { content: "⚠️ "; }
+  .btn {
+    background: linear-gradient(135deg, #ff7b00 0%, #ff5500 100%);
+    color: white;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(255,123,0,0.4); }
+  .btn.secondary {
+    background: #21262d;
+    border: 1px solid #30363d;
+  }
+  .btn.done {
+    background: #1a4a2a;
+    border: 1px solid #3fb950;
+  }
+
+  /* Footer */
+  .footer {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 18px;
+    text-align: center;
+  }
+  .footer h3 { color: #f0f6fc; margin-bottom: 8px; font-size: 15px; }
+  .footer p { color: #8b949e; font-size: 12.5px; margin-bottom: 14px; }
+  .footer-buttons { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+
+  /* Print styles */
+  @media print {
+    body { background: white; color: #333; padding: 0; }
+    .step { page-break-inside: avoid; border: 1px solid #ddd; }
+    .step-header { background: #f5f5f5; }
+    .step-num { background: #ddd; }
+    .step.completed .step-num { background: #3fb950; }
+    .step.active .step-num { background: #ff7b00; }
+    .step-content { max-height: none !important; }
+    .step-toggle { display: none; }
+    .footer-buttons { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🚀 Fusion 360 速通 10 步</h1>
+    <p class="subtitle">针对 SolidWorks 用户 · 跳过基础概念 · 直击差异点 · 10-15 分钟上手</p>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text">
+      <span id="progressText">0 / 10 步已完成</span>
+      <span>⏱️ 预计 10-15 分钟</span>
+      <button class="reset-btn" onclick="resetProgress()">🔄 重置进度</button>
+    </div>
+  </header>
+
+  <div id="stepsContainer"></div>
+
+  <div class="footer">
+    <h3>📦 实战应用</h3>
+    <p>10 步完成后，建议直接打开你的 58MB Voron 2.4 R2 装配体练手</p>
+    <div class="footer-buttons">
+      <button class="btn" onclick="window.open('https://www.autodesk.com/products/fusion-360/overview', '_blank')">📥 F360 下载页</button>
+      <button class="btn" onclick="window.open('https://www.youtube.com/results?search_query=fusion+360+for+solidworks+users', '_blank')">🎬 B 站/YouTube 教程</button>
+      <button class="btn secondary" onclick="exportProgress()">💾 导出进度</button>
+      <button class="btn secondary" onclick="window.print()">🖨️ 打印速通表</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const steps = [
+  {
+    title: "环境认知：浏览器 / 时间轴 / 工具栏布局",
+    time: "1 分钟",
+    ops: [
+      "<b>顶部 Ribbon 工具栏</b>：所有命令都在这，SW 是 FeatureManager 树 + 顶部菜单双轨",
+      "<b>左侧 Browser 浏览器</b>：对应 SW 的 FeatureManager 设计树，多了「文档 / 资源 / 外观」3 个标签",
+      "<b>底部 Timeline 时间轴</b>：对应 SW 的特征树底部，<b>F360 草图也在时间轴上</b>——这是关键差异",
+      "<b>画布</b>：和 SW 几乎一样，鼠标中键平移 / 滚轮缩放 / 右键旋转"
+    ],
+    diff: [
+      ["", "SolidWorks", "Fusion 360"],
+      ["模型树", "FeatureManager（左侧）", "Browser（左侧）"],
+      ["时间轴", "无独立（树内含）", "<b>Timeline（底部独立）</b>"],
+      ["草图位置", "设计树内", "<b>时间轴上</b>"],
+      ["工具栏样式", "CommandManager 多层", "顶部 Ribbon 单层"]
+    ],
+    tip: "时间轴上的项可以<b>拖拽重排序</b>——这是 F360 比 SW 灵活的地方。删除特征：时间轴右键 Delete。",
+    trap: "别习惯性去左侧 Browser 找草图——<b>草图在底部时间轴上</b>，不在 Browser。"
+  },
+  {
+    title: "新建文档：本地 vs 云文档（重要选择）",
+    time: "1 分钟",
+    ops: [
+      "<b>File → New Design</b> 弹出选项：",
+      "<b>New Component</b>：.ipt 单文件（SW 习惯，<b>F360 推荐用这个</b>）",
+      "<b>New Design</b>：.f3d 格式，<b>自动存云端</b>，Voron 社区都用这个",
+      "<b>New Design with Extrusion</b>：带基础基准面 + 已有拉伸"
+    ],
+    diff: [
+      ["", "SolidWorks", "Fusion 360"],
+      ["默认存储", "本地硬盘", "<b>Autodesk Cloud（云端）</b>"],
+      ["离线可用", "✅ 完全", "❌ <b>必须联网</b>（免费版）"],
+      ["文件后缀", ".sldprt / .sldasm", "<b>.f3d（单文件含装配）</b>"],
+      ["换电脑同步", "U 盘 / 网盘", "<b>自动云同步</b>"]
+    ],
+    tip: "免费版强制云端，文件存 Autodesk 云 → 换电脑登录就同步。",
+    trap: "⚠️ <b>免费版 10 个云文档上限</b>！超了要删旧的，或买商业版。重要文件记得 <b>File → Export → STEP/IGES 备份到本地</b>。"
+  },
+  {
+    title: "草图：进入 / 退出 / 约束逻辑",
+    time: "1 分钟",
+    ops: [
+      "<b>进入草图</b>：选一个面 → 点 <b>Create Sketch</b> 工具（或快捷键 <span class='kbd'>S</span>）",
+      "<b>绘制</b>：Rectangle <span class='kbd'>R</span> / Circle <span class='kbd'>C</span> / Line <span class='kbd'>L</span> / Arc <span class='kbd'>A</span> / Spline <span class='kbd'>P</span>",
+      "<b>退出草图</b>：点 <b>Finish Sketch</b>（或按 <span class='kbd'>Enter</span>）",
+      "<b>关键差异</b>：F360 草图<b>默认开启自动约束</b>（蓝色标记），SW 默认手动"
+    ],
+    diff: [
+      ["", "SolidWorks", "Fusion 360"],
+      ["进入草图", "点面自动进", "<b>必须点 Create Sketch</b>"],
+      ["自动约束", "默认关（手动）", "<b>默认开（自动捕捉）</b>"],
+      ["退出草图", "右上角 ✓", "<span class='kbd'>Enter</span> 或 Finish"],
+      ["草图颜色", "蓝色边线", "黑色边线（更淡）"],
+      ["草图显隐", "设计树眼睛图标", "<b>时间轴眼睛图标</b>"]
+    ],
+    trap: "如果点了<b>空白处</b>（不是面）就进草图，F360 会<b>直接用默认基准面</b>——之后所有特征偏移是 0，对齐会找不到。"
+  },
+  {
+    title: "拉伸 Extrude：和 SW 90% 一样",
+    time: "1 分钟",
+    ops: [
+      "点 <b>Extrude</b> 工具（<span class='kbd'>E</span>）",
+      "选草图轮廓 → 拖拽 / 输入距离 → <span class='kbd'>Enter</span> 完成",
+      "<b>操作类型 Operation</b>：和 SW 完全一致（Join / Cut / Intersect / New Body）",
+      "<b>注意</b>：F360 的 Taper 锥度在 Extrude 第二个面板（SW 是 Draft 工具）"
+    ],
+    diff: [
+      ["", "SolidWorks", "Fusion 360"],
+      ["工具位置", "Features 工具栏", "Solid → Extrude"],
+      ["轮廓选择", "草图后自动识别", "<b>必须手动点轮廓</b>"],
+      ["方向控制", "Direction 1 / 2", "单向 / 双向 / 对称 按钮"],
+      ["薄壁特征", "Thin Feature 复选", "外/内/双侧 + 厚度"]
+    ],
+    tip: "<b>轮廓选择技巧</b>：Extrude 工具启动后，<b>鼠标移到闭合区域会高亮</b>——点一下就选，<b>不用回草图</b>。"
+  },
+  {
+    title: "修改 Modify：圆角 / 倒角 / 抽壳",
+    time: "1 分钟",
+    ops: [
+      "<b>顶部 Ribbon → Solid → Modify</b> 下拉",
+      "<b>Fillet（圆角）</b>：选边 → 输入半径 → Enter",
+      "<b>Chamfer（倒角）</b>：选边 → 输入距离 / 角度 → Enter",
+      "<b>Shell（抽壳）</b>：选移除面 → 输入厚度 → Enter"
+    ],
+    diff: [
+      ["", "SolidWorks", "Fusion 360"],
+      ["工具位置", "Features 工具栏独立", "<b>Modify 下拉</b>"],
+      ["Fillet 全圆角", "Fillet 特殊选项", "Edge Fillet 选项卡"],
+      ["变量半径", "✅ 支持（变半径控制点）", "❌ 不支持，<b>变半径用 Fillet Chain</b>"],
+      ["Shell 多面移除", "✅ Ctrl 多选", "✅ Ctrl 多选面"]
+    ],
+    trap: "F360 的 Fillet 选边后<b>没法直接调半径</b>（不像 SW 实时拉）——必须<b>输入数值</b>或拖拽 <b>黄色菱形</b>控点。"
+  },
+  {
+    title: "装配体 Joint（关键差异点）",
+    time: "2 分钟",
+    ops: [
+      "<b>核心差异</b>：F360 用 <b>Joint（运动副）</b>，<b>SW 用 Mate（约束）</b>",
+      "<b>Joint 类型</b>：Rigid（刚性）/ Revolute（旋转）/ Slider（滑动）/ Cylindrical（圆柱）/ Pin Slot（针槽）/ Planar（平面）/ Ball（球）",
+      "<b>操作</b>：Assemble → Joint → 选 2 个面/边/原点 → 选 Joint 类型 → 确定"
+    ],
+    diff: [
+      ["", "SolidWorks", "Fusion 360"],
+      ["概念", "<b>Mate（约束）</b>", "<b>Joint（运动副）</b>"],
+      ["重合配合", "Coincident Mate", "<b>Revolute / Slider 派生</b>"],
+      ["距离配合", "Distance Mate", "<b>用 Joint + Offset</b>"],
+      ["对齐方式", "Default / Aligned", "<b>Origin 选面/边</b>"],
+      ["运动模拟", "需 Motion 模块", "<b>直接能动</b>（结构件避障）"]
+    ],
+    tip: "<b>Voron 2.4 用 Joint 装配</b>——你要看 Z 轴 4 个独立电机怎么同步，<b>直接选 Revolute Joint 就能看旋转动画</b>。",
+    trap: "SW 习惯用 Mate 重合/同心来对齐 → F360 这步<b>经常出错</b>，因为 Joint 默认是 <b>Rigid 刚性连接</b>。<b>要可动就改 Joint 类型</b>。"
+  },
+  {
+    title: "浏览装配体：爆炸图 / 隐藏 / 透明",
+    time: "1 分钟",
+    ops: [
+      "<b>View → Explode</b> 直接看爆炸图（SW 是 Tools → Explode → 复杂操作）",
+      "<b>隐藏</b>：Browser 里右键零件 → Hide，<b>快捷键 <span class='kbd'>H</span></b>",
+      "<b>透明</b>：右键零件 → Appearance → 半透明颜色，<b>或 <span class='kbd'>T</span> 切透明</b>",
+      "<b>隔离</b>：右键 → Isolate（<b>快捷键 <span class='kbd'>F5</span></b>）"
+    ],
+    diff: [
+      ["", "SolidWorks", "Fusion 360"],
+      ["爆炸图", "Tools → Explode 配置", "<b>View → Explode 一键</b>"],
+      ["隔离", "Isolate 工具栏", "<b>F5 一键</b>"],
+      ["透明切换", "Display Pane 拖", "<b>T 键切显示</b>"],
+      ["保存爆炸图", "Configuration", "<b>Named View 存视角</b>"]
+    ],
+    tip: "<b>最常用快捷键三件套</b>：<span class='kbd'>F5</span> 隔离 + <span class='kbd'>T</span> 透明 + <span class='kbd'>H</span> 隐藏，三招搞定复杂装配体浏览。"
+  },
+  {
+    title: "CAM 加工路径（F360 独门武器）",
+    time: "1 分钟",
+    ops: [
+      "<b>顶部 Ribbon → Manufacture</b> 进入加工环境",
+      "<b>Setup</b>：定义工件 + 坐标系 + 装夹（夹具图标）",
+      "<b>2D Contour（外形铣）</b>：选轮廓 → 设深度 → 选刀具 → Generate → Simulate",
+      "<b>关键</b>：F360 CAM 2D / 2.5D / 3D <b>完全免费</b>"
+    ],
+    diff: [
+      ["", "SolidWorks", "Fusion 360"],
+      ["CAM 模块", "❌ 需 SolidCAM 插件（贵）", "<b>✅ 内置 2/3/5 轴免费</b>"],
+      ["后处理", "插件配置", "<b>自带库 + 自定义 Post</b>"],
+      ["仿真", "插件自带", "<b>Visualize 实时仿真</b>"]
+    ],
+    tip: "如果以后想<b>自己做铝件</b>（Voron 框架改装件、LED 灯具外壳），F360 CAM 直接出 G-code 上雕刻机。SW 没 CAM 是硬伤。",
+    trap: "F360 CAM 默认<b>英制单位</b>——进 CAM 后第一件事检查 <b>Setup → Document Units → 改 mm</b>。"
+  },
+  {
+    title: "渲染（免费云渲染）",
+    time: "1 分钟",
+    ops: [
+      "<b>顶部 Ribbon → Render</b>",
+      "<b>In-Canvas Render</b>：实时降采样，<b>边建模边看效果</b>",
+      "<b>Cloud Render</b>：上传云端 → 几分钟回高分辨率图（<b>免费版每月 50 张</b>）",
+      "<b>场景预设</b>：HDR 环境 + 阴影 + 反射一键开"
+    ],
+    diff: [
+      ["", "SolidWorks", "Fusion 360"],
+      ["渲染工具", "Visualize（<b>另装 ¥5000+</b>）", "<b>内置 + 云渲染</b>"],
+      ["实时预览", "RealView 慢", "<b>In-Canvas 流畅</b>"],
+      ["云渲染", "❌", "<b>✅ 免费 50 张/月</b>"],
+      ["动画", "Visualize 单独做", "<b>Camera 路径动画</b>"]
+    ],
+    tip: "Voron 2.4 的<b>银黑配色铝合金版渲染图</b>——云渲染出来能直接发闲鱼 / 小红书做展示。"
+  },
+  {
+    title: "实战：Voron 2.4 R2 装配体速读",
+    time: "2 分钟",
+    ops: [
+      "<b>拖入 58MB 的 Voron_2.4r2_Assembly.f3d</b>",
+      "<b>顶部 Ribbon → 切到 Assembled 模式</b>（默认）",
+      "<b>按 F5</b> 依次隔离 5 大子系统：① 框架 ② X/Y 运动组件 ③ Z 4 电机 ④ 热端 ⑤ 工具头板",
+      "<b>View → Explode</b> 看完整装配",
+      "<b>量尺寸</b>：Inspect → Measure → 点 2 个面/边",
+      "<b>导出 STEP 备 SW 用</b>：File → Export → STEP → 选装配体全部"
+    ],
+    diff: [
+      ["", "SolidWorks", "Fusion 360"],
+      ["打开 58MB", "流畅", "<b>中等卡顿</b>（F360 弱项）"],
+      ["Voron 装配", "需 STEP/IGES 转", "<b>直接 .f3d 原生</b>"],
+      ["量尺寸", "Evaluate → Measure", "<b>Inspect → Measure</b>"]
+    ],
+    trap: "58MB 大装配体打开<b>会很慢</b>——第一次打开等 3-5 分钟。<b>免费版 GPU 加速可能被限</b>。",
+    tip: "<b>导出 STEP 给 SW 用时勾选「Export all components in single file」</b>——SW 打开还是一个装配体，不会变成一堆散件。"
+  }
+];
+
+let completed = new Set(JSON.parse(localStorage.getItem('f360_completed') || '[]'));
+
+function render() {
+  const container = document.getElementById('stepsContainer');
+  container.innerHTML = '';
+  steps.forEach((s, i) => {
+    const isCompleted = completed.has(i);
+    const isActive = i === 0 || completed.has(i-1) || isCompleted;
+    const div = document.createElement('div');
+    div.className = `step ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`;
+    div.innerHTML = `
+      <div class="step-header" onclick="toggleStep(${i})">
+        <div class="step-left">
+          <div class="step-num">${isCompleted ? '✓' : i+1}</div>
+          <div>
+            <div class="step-title">${s.title}</div>
+            <div class="step-time">⏱️ ${s.time}</div>
+          </div>
+        </div>
+        <div class="step-toggle">▼</div>
+      </div>
+      <div class="step-content">
+        <div class="step-body">
+          <div class="section-title">📋 操作步骤</div>
+          <ul class="ops-list">
+            ${s.ops.map(o => `<li>${o}</li>`).join('')}
+          </ul>
+          <div class="section-title" style="margin-top:12px">⚖️ F360 vs SW 差异对比</div>
+          <table class="diff-table">
+            ${s.diff.map((row, ri) =>
+              ri === 0
+                ? `<tr><th>${row[0]}</th><th>${row[1]}</th><th>${row[2]}</th></tr>`
+                : `<tr><td>${row[0]}</td><td class="sw">${row[1]}</td><td class="f360">${row[2]}</td></tr>`
+            ).join('')}
+          </table>
+          ${s.tip ? `<div class="tip">${s.tip}</div>` : ''}
+          ${s.trap ? `<div class="trap">${s.trap}</div>` : ''}
+          <div style="margin-top:12px;text-align:right">
+            <button class="btn ${isCompleted ? 'done' : ''}" onclick="event.stopPropagation();toggleComplete(${i})">
+              ${isCompleted ? '✅ 已完成（点取消）' : '☑️ 标记完成'}
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+  updateProgress();
+
+  if (completed.size === 0) {
+    setTimeout(() => toggleStep(0, true), 300);
+  }
+}
+
+function toggleStep(i, forceOpen) {
+  const allSteps = document.querySelectorAll('.step');
+  const wasOpen = allSteps[i].classList.contains('open');
+  if (forceOpen && !wasOpen) {
+    allSteps[i].classList.add('open');
+  } else {
+    allSteps[i].classList.toggle('open');
+  }
+}
+
+function toggleComplete(i) {
+  if (completed.has(i)) {
+    completed.delete(i);
+  } else {
+    completed.add(i);
+  }
+  localStorage.setItem('f360_completed', JSON.stringify([...completed]));
+  render();
+}
+
+function updateProgress() {
+  const total = steps.length;
+  const done = completed.size;
+  const pct = (done / total) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${done} / ${total} 步已完成`;
+}
+
+function resetProgress() {
+  if (confirm('确定要重置学习进度吗？')) {
+    completed.clear();
+    localStorage.removeItem('f360_completed');
+    render();
+  }
+}
+
+function exportProgress() {
+  const data = {
+    title: 'F360 速通 10 步 学习进度',
+    date: new Date().toLocaleString('zh-CN'),
+    completed: [...completed].sort((a,b) => a-b).map(i => ({
+      step: i + 1,
+      title: steps[i].title,
+      time: steps[i].time
+    })),
+    progress: `${completed.size}/${steps.length} (${Math.round(completed.size/steps.length*100)}%)`
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `f360_progress_${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+render();
+</script>
+</body>
+</html>

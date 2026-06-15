@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>K1 SE vs K1 Max 对比图</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #e0e0e0;
+  padding: 20px;
+  min-height: 100vh;
+}
+.container { max-width: 1400px; margin: 0 auto; }
+h1 {
+  text-align: center;
+  font-size: 2.4em;
+  background: linear-gradient(90deg, #00d4ff, #7b2ff7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
+}
+.subtitle {
+  text-align: center;
+  color: #888;
+  font-size: 0.95em;
+  margin-bottom: 30px;
+}
+.tab-bar {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.tab {
+  padding: 10px 24px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 0.95em;
+}
+.tab:hover { background: rgba(255,255,255,0.1); }
+.tab.active {
+  background: linear-gradient(90deg, #00d4ff, #7b2ff7);
+  color: #fff;
+  border-color: transparent;
+}
+.panel { display: none; }
+.panel.active { display: block; animation: fadeIn 0.4s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ====== Tab 1: 参数对比 ====== */
+.compare-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: rgba(255,255,255,0.03);
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 0.95em;
+}
+.compare-table th {
+  padding: 14px 12px;
+  text-align: left;
+  font-weight: 600;
+  background: rgba(0,0,0,0.3);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.compare-table th.se {
+  background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+  color: #fff;
+  width: 30%;
+}
+.compare-table th.max {
+  background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+  color: #fff;
+  width: 30%;
+}
+.compare-table th.title-col {
+  background: rgba(0,0,0,0.3);
+  width: 25%;
+}
+.compare-table td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.compare-table tr:hover td { background: rgba(255,255,255,0.05); }
+.compare-table td.se { color: #00cec9; font-weight: 500; }
+.compare-table td.max { color: #a29bfe; font-weight: 500; }
+.better { color: #ffd700; font-weight: 700; }
+.worse { color: #888; }
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.8em;
+  margin-left: 6px;
+}
+.badge.pro { background: #6c5ce7; color: #fff; }
+.badge.lite { background: #00b894; color: #fff; }
+
+/* ====== Tab 2: 体积对比 ====== */
+.viz-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 30px;
+  padding: 30px 10px;
+}
+.cube-box {
+  text-align: center;
+  position: relative;
+}
+.cube {
+  margin: 0 auto 15px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.3s;
+}
+.cube:hover { transform: rotateY(15deg) rotateX(-5deg); }
+.cube .face {
+  position: absolute;
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.2em;
+}
+.cube-se { width: 220px; height: 220px; }
+.cube-se .front, .cube-se .back { width: 220px; height: 250px; }
+.cube-se .top, .cube-se .bottom { width: 220px; height: 220px; }
+.cube-max { width: 300px; height: 300px; }
+.cube-max .front, .cube-max .back { width: 300px; height: 300px; }
+.cube-max .top, .cube-max .bottom { width: 300px; height: 300px; }
+.cube-se .face { border-color: #00cec9; background: rgba(0,206,201,0.1); color: #00cec9; }
+.cube-max .face { border-color: #a29bfe; background: rgba(162,155,254,0.1); color: #a29bfe; }
+.cube-label {
+  margin-top: 20px;
+  font-size: 1.3em;
+  font-weight: 700;
+}
+.cube-label.se { color: #00cec9; }
+.cube-label.max { color: #a29bfe; }
+.cube-dim { font-size: 0.9em; color: #888; margin-top: 5px; }
+.cube-vol {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 5px 15px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9em;
+}
+.cube-vol.se { background: rgba(0,206,201,0.2); color: #00cec9; }
+.cube-vol.max { background: rgba(162,155,254,0.2); color: #a29bfe; }
+.vs-divider {
+  font-size: 3em;
+  font-weight: 900;
+  color: #ffd700;
+  text-shadow: 0 0 20px rgba(255,215,0,0.5);
+}
+.scale-info {
+  text-align: center;
+  margin-top: 20px;
+  padding: 15px;
+  background: rgba(255,215,0,0.1);
+  border-radius: 10px;
+  color: #ffd700;
+  font-size: 1.1em;
+}
+
+/* ====== Tab 3: 关键差异雷达 ====== */
+.radar-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 10px;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+.radar-box { text-align: center; }
+.radar-svg { display: block; margin: 0 auto; }
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 15px;
+  margin-top: 30px;
+}
+.score-card {
+  background: rgba(255,255,255,0.05);
+  padding: 18px;
+  border-radius: 10px;
+  border-left: 4px solid;
+}
+.score-card.se { border-color: #00cec9; }
+.score-card.max { border-color: #a29bfe; }
+.score-title { font-size: 1.1em; margin-bottom: 10px; font-weight: 700; }
+.score-card.se .score-title { color: #00cec9; }
+.score-card.max .score-title { color: #a29bfe; }
+.bar-row {
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+  font-size: 0.9em;
+}
+.bar-label { width: 110px; color: #aaa; }
+.bar-track {
+  flex: 1;
+  height: 8px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0 10px;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+.bar-fill.se { background: linear-gradient(90deg, #00b894, #00cec9); }
+.bar-fill.max { background: linear-gradient(90deg, #6c5ce7, #a29bfe); }
+.bar-value { width: 40px; text-align: right; font-weight: 700; }
+
+/* ====== Tab 4: 选购建议 ====== */
+.advice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+.advice-card {
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 25px;
+  border-top: 4px solid;
+}
+.advice-card.se { border-color: #00cec9; }
+.advice-card.max { border-color: #a29bfe; }
+.advice-card.universal { border-color: #ffd700; }
+.advice-title {
+  font-size: 1.4em;
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.advice-card.se .advice-title { color: #00cec9; }
+.advice-card.max .advice-title { color: #a29bfe; }
+.advice-card.universal .advice-title { color: #ffd700; }
+.advice-icon { font-size: 1.5em; }
+.advice-list { list-style: none; padding: 0; }
+.advice-list li {
+  padding: 8px 0;
+  padding-left: 20px;
+  position: relative;
+  font-size: 0.95em;
+  line-height: 1.6;
+}
+.advice-list li::before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: #ffd700;
+}
+.price-tag {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 6px 14px;
+  background: rgba(255,215,0,0.15);
+  color: #ffd700;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+footer {
+  text-align: center;
+  margin-top: 40px;
+  padding: 20px;
+  color: #666;
+  font-size: 0.85em;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🆚 Creality K1 SE vs K1 Max</h1>
+  <p class="subtitle">2026 年 6 月 · 创想 K1 系列全维度对比</p>
+
+  <div class="tab-bar">
+    <div class="tab active" data-tab="params">📋 参数对比</div>
+    <div class="tab" data-tab="volume">📦 体积可视化</div>
+    <div class="tab" data-tab="score">📊 能力雷达</div>
+    <div class="tab" data-tab="advice">🎯 选购建议</div>
+  </div>
+
+  <!-- Tab 1: 参数对比 -->
+  <div class="panel active" id="params">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th class="title-col">参数</th>
+          <th class="se">K1 SE <span class="badge lite">入门</span></th>
+          <th class="max">K1 Max <span class="badge pro">旗舰</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>售价（官方）</b></td>
+          <td class="se">$359 / 约 ¥2,499</td>
+          <td class="max better">$799-899 / 约 ¥5,500-7,000</td>
+        </tr>
+        <tr>
+          <td><b>国内闲鱼二手</b></td>
+          <td class="se">¥1,200-1,800</td>
+          <td class="max better">¥3,500-4,500</td>
+        </tr>
+        <tr>
+          <td><b>打印体积</b></td>
+          <td class="se">220 × 220 × 250 mm</td>
+          <td class="max better">300 × 300 × 300 mm</td>
+        </tr>
+        <tr>
+          <td><b>体积差异</b></td>
+          <td class="se worse">12.1 升（基准）</td>
+          <td class="max better">27 升（+123%）</td>
+        </tr>
+        <tr>
+          <td><b>机器尺寸</b></td>
+          <td class="se">355 × 355 × 482 mm</td>
+          <td class="max">435 × 462 × 526 mm</td>
+        </tr>
+        <tr>
+          <td><b>净重</b></td>
+          <td class="se">~12 kg</td>
+          <td class="max">~18 kg</td>
+        </tr>
+        <tr>
+          <td><b>额定功率</b></td>
+          <td class="se">350 W</td>
+          <td class="max better">1000 W</td>
+        </tr>
+        <tr>
+          <td><b>最高热端温度</b></td>
+          <td class="se">300℃</td>
+          <td class="max">300℃（相同）</td>
+        </tr>
+        <tr>
+          <td><b>最高热床温度</b></td>
+          <td class="se">100℃</td>
+          <td class="max better">120℃</td>
+        </tr>
+        <tr>
+          <td><b>热床升温时间</b></td>
+          <td class="se">100℃ / 6 分钟</td>
+          <td class="max better">100℃ / 3 分钟</td>
+        </tr>
+        <tr>
+          <td><b>最大打印速度</b></td>
+          <td class="se">600 mm/s</td>
+          <td class="max">600 mm/s（相同）</td>
+        </tr>
+        <tr>
+          <td><b>最大加速度</b></td>
+          <td class="se">20,000 mm/s²</td>
+          <td class="max">20,000 mm/s²（相同）</td>
+        </tr>
+        <tr>
+          <td><b>喷嘴</b></td>
+          <td class="se">钢制一体喷嘴</td>
+          <td class="max">铜合金喷嘴（即将升级钢制）</td>
+        </tr>
+        <tr>
+          <td><b>热端材料</b></td>
+          <td class="se">PA+30%GF</td>
+          <td class="max">金属 + 特氟龙管（即将全金属）</td>
+        </tr>
+        <tr>
+          <td><b>断料检测</b></td>
+          <td class="se">✅ 有</td>
+          <td class="max">✅ 有</td>
+        </tr>
+        <tr>
+          <td><b>腔体加热</b></td>
+          <td class="se worse">❌ 开放式</td>
+          <td class="max better">✅ 被动加热（封闭）</td>
+        </tr>
+        <tr>
+          <td><b>空气滤芯</b></td>
+          <td class="se worse">❌ 无</td>
+          <td class="max better">✅ 有</td>
+        </tr>
+        <tr>
+          <td><b>AI 摄像头</b></td>
+          <td class="se">可选</td>
+          <td class="max better">✅ 1080P（内置）</td>
+        </tr>
+        <tr>
+          <td><b>AI LiDAR 雷达</b></td>
+          <td class="se worse">❌ 无</td>
+          <td class="max better">✅ 有（首层扫描）</td>
+        </tr>
+        <tr>
+          <td><b>异物检测</b></td>
+          <td class="se worse">❌ 无</td>
+          <td class="max better">✅ 有</td>
+        </tr>
+        <tr>
+          <td><b>故障检测（AI）</b></td>
+          <td class="se worse">❌ 无</td>
+          <td class="max better">✅ 有</td>
+        </tr>
+        <tr>
+          <td><b>远程监控</b></td>
+          <td class="se">可选</td>
+          <td class="max better">✅ 有</td>
+        </tr>
+        <tr>
+          <td><b>延时摄影</b></td>
+          <td class="se">可选</td>
+          <td class="max better">✅ 有</td>
+        </tr>
+        <tr>
+          <td><b>静音模式</b></td>
+          <td class="se worse">❌ 无</td>
+          <td class="max better">✅ 固件更新后</td>
+        </tr>
+        <tr>
+          <td><b>连接方式</b></td>
+          <td class="se">WiFi</td>
+          <td class="max better">WiFi + RJ45 网口</td>
+        </tr>
+        <tr>
+          <td><b>支持耗材</b></td>
+          <td class="se">Hyper PLA / PLA / PETG / TPU</td>
+          <td class="max better">+ ABS / ASA / PC / PA / CF 复合材料</td>
+        </tr>
+        <tr>
+          <td><b>机架工艺</b></td>
+          <td class="se">铝制一体压铸 + CNC</td>
+          <td class="max">铝制一体压铸 + CNC（相同）</td>
+        </tr>
+        <tr>
+          <td><b>适合场景</b></td>
+          <td class="se">入门 / 桌面 / PLA 玩具</td>
+          <td class="max">工程件 / 大件 / AI 监控 / 工厂</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Tab 2: 体积可视化 -->
+  <div class="panel" id="volume">
+    <div class="viz-container">
+      <div class="cube-box">
+        <div class="cube cube-se">
+          <div class="face front" style="transform: translateZ(110px);">220</div>
+          <div class="face back" style="transform: rotateY(180deg) translateZ(110px);">220</div>
+          <div class="face top" style="transform: rotateX(90deg) translateZ(110px);">250</div>
+          <div class="face bottom" style="transform: rotateX(-90deg) translateZ(140px);">220</div>
+        </div>
+        <div class="cube-label se">K1 SE</div>
+        <div class="cube-dim">220 × 220 × 250 mm</div>
+        <div class="cube-vol se">12.1 升</div>
+      </div>
+
+      <div class="vs-divider">VS</div>
+
+      <div class="cube-box">
+        <div class="cube cube-max">
+          <div class="face front" style="transform: translateZ(150px);">300</div>
+          <div class="face back" style="transform: rotateY(180deg) translateZ(150px);">300</div>
+          <div class="face top" style="transform: rotateX(90deg) translateZ(150px);">300</div>
+          <div class="face bottom" style="transform: rotateX(-90deg) translateZ(150px);">300</div>
+        </div>
+        <div class="cube-label max">K1 Max</div>
+        <div class="cube-dim">300 × 300 × 300 mm</div>
+        <div class="cube-vol max">27 升</div>
+      </div>
+    </div>
+    <div class="scale-info">
+      💡 K1 Max 的打印体积是 K1 SE 的 <b>2.23 倍</b>（+123%），相当于多塞下 14.9 升空间
+    </div>
+  </div>
+
+  <!-- Tab 3: 能力雷达 -->
+  <div class="panel" id="score">
+    <div class="score-grid">
+      <div class="score-card se">
+        <div class="score-title">🌱 K1 SE 评分</div>
+        <div class="bar-row">
+          <span class="bar-label">打印速度</span>
+          <div class="bar-track"><div class="bar-fill se" style="width:90%"></div></div>
+          <span class="bar-value">90</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">打印质量</span>
+          <div class="bar-track"><div class="bar-fill se" style="width:85%"></div></div>
+          <span class="bar-value">85</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">AI 智能</span>
+          <div class="bar-track"><div class="bar-fill se" style="width:30%"></div></div>
+          <span class="bar-value">30</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">大件能力</span>
+          <div class="bar-track"><div class="bar-fill se" style="width:45%"></div></div>
+          <span class="bar-value">45</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">耗材兼容</span>
+          <div class="bar-track"><div class="bar-fill se" style="width:50%"></div></div>
+          <span class="bar-value">50</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">性价比</span>
+          <div class="bar-track"><div class="bar-fill se" style="width:95%"></div></div>
+          <span class="bar-value">95</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">桌面占地</span>
+          <div class="bar-track"><div class="bar-fill se" style="width:95%"></div></div>
+          <span class="bar-value">95</span>
+        </div>
+      </div>
+
+      <div class="score-card max">
+        <div class="score-title">🏆 K1 Max 评分</div>
+        <div class="bar-row">
+          <span class="bar-label">打印速度</span>
+          <div class="bar-track"><div class="bar-fill max" style="width:95%"></div></div>
+          <span class="bar-value">95</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">打印质量</span>
+          <div class="bar-track"><div class="bar-fill max" style="width:92%"></div></div>
+          <span class="bar-value">92</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">AI 智能</span>
+          <div class="bar-track"><div class="bar-fill max" style="width:95%"></div></div>
+          <span class="bar-value">95</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">大件能力</span>
+          <div class="bar-track"><div class="bar-fill max" style="width:95%"></div></div>
+          <span class="bar-value">95</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">耗材兼容</span>
+          <div class="bar-track"><div class="bar-fill max" style="width:90%"></div></div>
+          <span class="bar-value">90</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">性价比</span>
+          <div class="bar-track"><div class="bar-fill max" style="width:70%"></div></div>
+          <span class="bar-value">70</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">桌面占地</span>
+          <div class="bar-track"><div class="bar-fill max" style="width:55%"></div></div>
+          <span class="bar-value">55</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 4: 选购建议 -->
+  <div class="panel" id="advice">
+    <div class="advice-grid">
+      <div class="advice-card se">
+        <div class="advice-title"><span class="advice-icon">🌱</span> 选 K1 SE 的人</div>
+        <ul class="advice-list">
+          <li>预算 2,500 以内，想要 CoreXY 速度</li>
+          <li>桌面空间小（机器 355×355 mm）</li>
+          <li>只打 PLA / PETG / TPU，不碰工程塑料</li>
+          <li>不需要 AI 摄像头（手机也能远程看）</li>
+          <li>第一次入手高速机，不确定要不要花大钱</li>
+          <li>学生 / 兴趣玩家 / 桌面空间紧</li>
+        </ul>
+        <div class="price-tag">💰 闲鱼二手 ¥1,200-1,800</div>
+      </div>
+
+      <div class="advice-card max">
+        <div class="advice-title"><span class="advice-icon">🏆</span> 选 K1 Max 的人</div>
+        <ul class="advice-list">
+          <li>需要 300×300 大件一次成型（如外壳、机箱、cosplay 道具）</li>
+          <li>要打 ABS / ASA / PC / PA 等工程料（封闭腔体必备）</li>
+          <li>需要 AI LiDAR + 摄像头做无人值守</li>
+          <li>通宵打印 / 远程监控是刚需</li>
+          <li>有 RJ45 网口需求（稳定性 > WiFi）</li>
+          <li>工作室 / 小工厂 / 接单生产</li>
+        </ul>
+        <div class="price-tag">💰 官方 $799 / 闲鱼二手 ¥3,500-4,500</div>
+      </div>
+
+      <div class="advice-card universal">
+        <div class="advice-title"><span class="advice-icon">💡</span> 共同点（都有）</div>
+        <ul class="advice-list">
+          <li>CoreXY 高速架构（600mm/s，20,000mm/s²）</li>
+          <li>一体压铸航空铝合金机架 + CNC 精加工</li>
+          <li>4.3" 彩色触屏（800×480）</li>
+          <li>8GB 内存，WiFi 连接</li>
+          <li>开源 CreOS 固件</li>
+          <li>断料检测 + 断电续打</li>
+        </ul>
+        <div class="price-tag" style="background: rgba(0,206,201,0.15); color: #00cec9;">
+          ⚙️ 你已经有 K1 Max，没错的选择！
+        </div>
+      </div>
+
+      <div class="advice-card" style="border-color:#ff6b6b">
+        <div class="advice-title" style="color:#ff6b6b"><span class="advice-icon">⚠️</span> 关键提醒</div>
+        <ul class="advice-list">
+          <li><b>K1 SE 没有腔体加热</b> → 慎打 ABS/PC（必翘边）</li>
+          <li><b>K1 SE 没有 AI 摄像头</b> → 通宵打印不放心</li>
+          <li><b>K1 Max 1,000W 功率</b> → 长期打件电费可观</li>
+          <li><b>K1 Max 18kg 净重</b> → 想搬动不容易</li>
+          <li>两者都是<b>创想闭源 CreOS</b>，不能刷 Klipper</li>
+          <li>断料器是同型号通用件，Andy 修好 K1 Max 后，K1 SE 也能用</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>📊 数据来源：<a href="https://www.creality.com/pages/compare-k1-flagship-series" style="color:#7b2ff7">Creality 官方对比页</a> · <a href="https://crealityprinters.com/reviews/k1-max" style="color:#7b2ff7">K1 Max 评测</a> · 闲鱼实测价</p>
+    <p style="margin-top:8px;">💡 单击顶部 Tab 切换视图 · 体积对比为等比缩放 · Andy 已入手 K1 Max 2026-06-13 ¥1,588</p>
+  </footer>
+</div>
+
+<script>
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

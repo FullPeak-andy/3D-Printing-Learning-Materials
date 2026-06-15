@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Klipper 数字孪生搭建指南（互动动画版）</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Microsoft YaHei", "PingFang SC", sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #e4e4e7;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+  }
+  .header h1 {
+    font-size: 28px;
+    background: linear-gradient(90deg, #00d4ff, #7b2ff7, #ff6b6b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .header p { color: #94a3b8; font-size: 14px; }
+
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .tab {
+    padding: 10px 20px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+  }
+  .tab:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+  .tab.active {
+    background: linear-gradient(90deg, #00d4ff33, #7b2ff733);
+    border-color: #00d4ff;
+    box-shadow: 0 0 20px rgba(0,212,255,0.3);
+  }
+
+  .panel { display: none; animation: fadeIn 0.4s; }
+  .panel.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .container {
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .container h2 {
+    color: #00d4ff;
+    margin-bottom: 15px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .container p, .container li { line-height: 1.7; color: #cbd5e1; font-size: 14px; }
+  .container code {
+    background: rgba(0,212,255,0.1);
+    color: #00d4ff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "Consolas", "Monaco", monospace;
+    font-size: 13px;
+  }
+
+  /* 架构图 */
+  .arch-svg { width: 100%; height: 480px; background: rgba(0,0,0,0.4); border-radius: 8px; }
+  .node-box { fill: rgba(255,255,255,0.05); stroke: rgba(255,255,255,0.3); stroke-width: 2; }
+  .node-klipper { fill: rgba(0,212,255,0.15); stroke: #00d4ff; }
+  .node-mqtt { fill: rgba(255,165,0,0.15); stroke: #ffa500; }
+  .node-influx { fill: rgba(123,47,247,0.15); stroke: #7b2ff7; }
+  .node-grafana { fill: rgba(255,107,107,0.15); stroke: #ff6b6b; }
+  .node-nodered { fill: rgba(72,199,142,0.15); stroke: #48c78e; }
+  .node-text { fill: #e4e4e7; font-size: 14px; text-anchor: middle; font-weight: bold; }
+  .node-sub { fill: #94a3b8; font-size: 11px; text-anchor: middle; }
+  .flow-line { stroke: rgba(255,255,255,0.2); stroke-width: 2; fill: none; }
+  .data-packet { fill: #00d4ff; }
+  @keyframes flowDown {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(100px); opacity: 0; }
+  }
+  @keyframes pulse { 0%,100% { r: 4; } 50% { r: 8; } }
+
+  /* 终端 */
+  .terminal {
+    background: #0a0e1a;
+    border-radius: 8px;
+    padding: 15px;
+    font-family: "Consolas", "Monaco", monospace;
+    font-size: 13px;
+    min-height: 280px;
+    border: 1px solid rgba(0,212,255,0.2);
+  }
+  .terminal-prompt { color: #48c78e; }
+  .terminal-cmd { color: #00d4ff; }
+  .terminal-out { color: #cbd5e1; }
+  .terminal-err { color: #ff6b6b; }
+  .terminal-ok { color: #48c78e; }
+  .terminal-warn { color: #ffa500; }
+
+  /* MQTT 实时面板 */
+  .mqtt-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  .mqtt-card {
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    padding: 15px;
+    border-left: 4px solid #ffa500;
+  }
+  .mqtt-card.bed { border-left-color: #ff6b6b; }
+  .mqtt-card.progress { border-left-color: #48c78e; }
+  .mqtt-card.xy { border-left-color: #00d4ff; }
+  .mqtt-card-title { font-size: 12px; color: #94a3b8; margin-bottom: 5px; }
+  .mqtt-card-value { font-size: 28px; font-weight: bold; color: #e4e4e7; }
+  .mqtt-card-target { font-size: 14px; color: #94a3b8; }
+
+  /* 进度条 */
+  .progress-bar {
+    width: 100%;
+    height: 24px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 10px 0;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #48c78e, #00d4ff);
+    border-radius: 12px;
+    transition: width 0.5s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  /* Node-RED 流 */
+  .nodered-canvas {
+    background: #1e1e1e;
+    border-radius: 8px;
+    padding: 20px;
+    min-height: 400px;
+    position: relative;
+  }
+  .nodered-node {
+    position: absolute;
+    background: linear-gradient(180deg, #2a4a7a, #1a3a6a);
+    border: 1px solid #4a7ab8;
+    border-radius: 4px;
+    padding: 8px 12px;
+    color: white;
+    font-size: 12px;
+    min-width: 100px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .nodered-node:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(0,212,255,0.4); }
+  .nodered-node input { background: #2a4a7a; }
+  .nodered-node.json { background: linear-gradient(180deg, #6a4a7a, #5a3a6a); border-color: #b87ab8; }
+  .nodered-node.func { background: linear-gradient(180deg, #7a6a4a, #6a5a3a); border-color: #b8aa7a; }
+  .nodered-node.influx { background: linear-gradient(180deg, #4a7a4a, #3a6a3a); border-color: #7ab87a; }
+  .nodered-node.dashboard { background: linear-gradient(180deg, #4a4a7a, #3a3a6a); border-color: #7a7ab8; }
+
+  /* Grafana 图表 */
+  .grafana-panel {
+    background: #181b1f;
+    border: 1px solid #2d3136;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  .grafana-panel-title {
+    color: #e4e4e7;
+    font-size: 13px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .grafana-chart {
+    width: 100%;
+    height: 150px;
+    background: #111217;
+    border-radius: 4px;
+  }
+
+  /* 告警 */
+  .alert-list { display: flex; flex-direction: column; gap: 8px; }
+  .alert-item {
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    animation: slideIn 0.4s;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .alert-item.danger { border-left: 3px solid #ff4757; }
+  .alert-item.warning { border-left: 3px solid #ffa502; }
+  .alert-item.info { border-left: 3px solid #48c78e; }
+  .alert-icon { font-size: 18px; }
+  .alert-time { color: #94a3b8; font-size: 11px; margin-left: auto; }
+
+  /* 按钮 */
+  .btn {
+    background: linear-gradient(90deg, #00d4ff, #7b2ff7);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    margin: 5px;
+    transition: all 0.3s;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,212,255,0.4); }
+  .btn-danger { background: linear-gradient(90deg, #ff4757, #ff6b6b); }
+
+  /* 步骤指示 */
+  .step-list { list-style: none; counter-reset: step; }
+  .step-list li {
+    counter-increment: step;
+    padding: 10px 0 10px 50px;
+    position: relative;
+    color: #cbd5e1;
+  }
+  .step-list li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #00d4ff, #7b2ff7);
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+  /* 提示 */
+  .tip-box {
+    background: rgba(0,212,255,0.1);
+    border-left: 4px solid #00d4ff;
+    padding: 12px 15px;
+    border-radius: 4px;
+    margin: 12px 0;
+    font-size: 13px;
+  }
+  .tip-box.warn { background: rgba(255,165,0,0.1); border-left-color: #ffa500; }
+  .tip-box.danger { background: rgba(255,71,87,0.1); border-left-color: #ff4757; }
+
+  .checklist { list-style: none; }
+  .checklist li {
+    padding: 6px 0 6px 28px;
+    position: relative;
+    color: #cbd5e1;
+    cursor: pointer;
+  }
+  .checklist li::before {
+    content: "☐";
+    position: absolute;
+    left: 0;
+    color: #94a3b8;
+    font-size: 16px;
+  }
+  .checklist li.checked { color: #48c78e; }
+  .checklist li.checked::before { content: "☑"; color: #48c78e; }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin: 15px 0;
+  }
+  .stat-card {
+    background: rgba(255,255,255,0.05);
+    padding: 12px;
+    border-radius: 6px;
+    text-align: center;
+  }
+  .stat-num {
+    font-size: 24px;
+    font-weight: bold;
+    background: linear-gradient(90deg, #00d4ff, #7b2ff7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .stat-label { color: #94a3b8; font-size: 11px; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🖨️ Klipper 数字孪生搭建指南</h1>
+  <p>互动动画版 · 从零开始搭建自己的 3D 打印机监控大屏</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="arch">📊 架构总览</div>
+  <div class="tab" data-tab="docker">🐳 Docker 部署</div>
+  <div class="tab" data-tab="mqtt">📡 MQTT 实时</div>
+  <div class="tab" data-tab="bridge">🌉 数据桥接</div>
+  <div class="tab" data-tab="nodered">🔧 Node-RED</div>
+  <div class="tab" data-tab="grafana">📈 Grafana</div>
+  <div class="tab" data-tab="alert">🚨 告警</div>
+  <div class="tab" data-tab="check">✅ 验收</div>
+</div>
+
+<!-- 1. 架构 -->
+<div class="panel active" id="arch">
+  <div class="container">
+    <h2>🎬 系统架构动画</h2>
+    <p style="margin-bottom:15px;">点击下方按钮，观看数据从打印机流向监控大屏的全过程</p>
+    <svg class="arch-svg" viewBox="0 0 900 480" id="archSvg">
+      <!-- 节点 -->
+      <rect class="node-box node-klipper" x="50" y="40" width="160" height="70" rx="8"/>
+      <text class="node-text" x="130" y="68">🖨️ Klipper</text>
+      <text class="node-sub" x="130" y="88">物理打印机</text>
+
+      <rect class="node-box" x="270" y="40" width="140" height="70" rx="8"/>
+      <text class="node-text" x="340" y="68">Moonraker</text>
+      <text class="node-sub" x="340" y="88">API 网关</text>
+
+      <rect class="node-box node-mqtt" x="470" y="40" width="160" height="70" rx="8"/>
+      <text class="node-text" x="550" y="68">📡 MQTT Broker</text>
+      <text class="node-sub" x="550" y="88">消息队列</text>
+
+      <rect class="node-box node-nodered" x="700" y="40" width="160" height="70" rx="8"/>
+      <text class="node-text" x="780" y="68">🔧 Node-RED</text>
+      <text class="node-sub" x="780" y="88">数据处理</text>
+
+      <rect class="node-box node-influx" x="270" y="200" width="160" height="70" rx="8"/>
+      <text class="node-text" x="350" y="228">💾 InfluxDB</text>
+      <text class="node-sub" x="350" y="248">时序数据库</text>
+
+      <rect class="node-box node-grafana" x="470" y="200" width="160" height="70" rx="8"/>
+      <text class="node-text" x="550" y="228">📈 Grafana</text>
+      <text class="node-sub" x="550" y="248">可视化大屏</text>
+
+      <rect class="node-box" x="700" y="200" width="160" height="70" rx="8" style="fill:rgba(255,71,87,0.15);stroke:#ff4757"/>
+      <text class="node-text" x="780" y="228">🚨 告警推送</text>
+      <text class="node-sub" x="780" y="248">微信/邮件</text>
+
+      <rect class="node-box" x="370" y="350" width="180" height="70" rx="8" style="fill:rgba(72,199,142,0.15);stroke:#48c78e"/>
+      <text class="node-text" x="460" y="378">📷 摄像头</text>
+      <text class="node-sub" x="460" y="398">AI 拉丝检测</text>
+
+      <!-- 连线 -->
+      <path class="flow-line" d="M 210 75 L 270 75"/>
+      <path class="flow-line" d="M 410 75 L 470 75"/>
+      <path class="flow-line" d="M 630 75 L 700 75"/>
+      <path class="flow-line" d="M 780 110 L 780 200"/>
+      <path class="flow-line" d="M 700 235 L 630 235"/>
+      <path class="flow-line" d="M 470 235 L 430 235"/>
+      <path class="flow-line" d="M 350 270 L 350 350"/>
+      <path class="flow-line" d="M 550 270 L 550 300"/>
+    </svg>
+
+    <div style="text-align:center;margin-top:15px;">
+      <button class="btn" onclick="startArchAnimation()">▶️ 播放数据流向</button>
+      <button class="btn btn-danger" onclick="triggerAlert()">🚨 模拟温度异常</button>
+    </div>
+
+    <div class="tip-box" style="margin-top:20px;">
+      <strong>💡 关键概念：</strong><br>
+      • <code>Klipper</code> 跑在树莓派上，控制物理打印机<br>
+      • <code>Moonraker</code> 提供 WebSocket API<br>
+      • <code>MQTT</code> 是工业级消息队列（轻量级）<br>
+      • <code>Node-RED</code> 是拖拽式数据流编排工具<br>
+      • <code>InfluxDB</code> 专门存时间序列数据<br>
+      • <code>Grafana</code> 制作漂亮的监控大屏
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>📦 你需要准备的</h2>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-num">1</div><div class="stat-label">台树莓派 4B</div></div>
+      <div class="stat-card"><div class="stat-num">30+ GB</div><div class="stat-label">存储空间</div></div>
+      <div class="stat-card"><div class="stat-num">2-4 GB</div><div class="stat-label">内存</div></div>
+      <div class="stat-card"><div class="stat-num">4个</div><div class="stat-label">Docker 容器</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Docker -->
+<div class="panel" id="docker">
+  <div class="container">
+    <h2>🐳 一键 Docker 部署</h2>
+    <p style="margin-bottom:15px;">点击播放，观看 Docker 部署全过程</p>
+    <div class="terminal" id="dockerTerm">
+      <div class="terminal-out">$ 准备就绪，点击下方按钮开始部署...</div>
+    </div>
+    <div style="text-align:center;margin-top:15px;">
+      <button class="btn" onclick="playDocker()">▶️ 开始部署</button>
+      <button class="btn" onclick="resetDocker()">🔄 重置</button>
+    </div>
+
+    <div class="tip-box warn">
+      <strong>⚠️ 注意：</strong>树莓派 4B 上 Docker 镜像要选 <code>arm64</code> 架构，本文档默认 <code>amd64</code>（普通主机/服务器）。
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>📝 docker-compose.yml 核心配置</h2>
+    <ol class="step-list">
+      <li>创建项目目录 <code>~/klipper-digital-twin</code></li>
+      <li>编写 <code>docker-compose.yml</code>（Mosquitto + Node-RED + InfluxDB + Grafana 四个服务）</li>
+      <li>配置 Mosquitto（开启 TCP 1883 + WebSocket 9001）</li>
+      <li>执行 <code>docker-compose up -d</code> 启动</li>
+      <li>浏览器验证 4 个服务端口（1883/1880/8086/3000）</li>
+    </ol>
+
+    <div class="tip-box">
+      <strong>🌐 服务端口速查：</strong>
+      <ul style="margin-top:8px;padding-left:20px;">
+        <li>MQTT: <code>1883</code>（TCP）/ <code>9001</code>（WebSocket）</li>
+        <li>Node-RED: <code>http://&lt;IP&gt;:1880</code></li>
+        <li>InfluxDB: <code>http://&lt;IP&gt;:8086</code></li>
+        <li>Grafana: <code>http://&lt;IP&gt;:3000</code>（admin / admin123）</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- 3. MQTT -->
+<div class="panel" id="mqtt">
+  <div class="container">
+    <h2>📡 实时打印状态</h2>
+    <p style="margin-bottom:15px;">下面是模拟的 KLP1 实时数据，<strong>实际效果</strong>和你的 KLP1 同步</p>
+
+    <div class="mqtt-grid">
+      <div class="mqtt-card">
+        <div class="mqtt-card-title">🌡️ 喷嘴温度</div>
+        <div class="mqtt-card-value" id="extrTemp">0.0</div>
+        <div class="mqtt-card-target">目标: <span id="extrTarget">0.0</span>°C</div>
+      </div>
+      <div class="mqtt-card bed">
+        <div class="mqtt-card-title">🔥 热床温度</div>
+        <div class="mqtt-card-value" id="bedTemp">0.0</div>
+        <div class="mqtt-card-target">目标: <span id="bedTarget">0.0</span>°C</div>
+      </div>
+      <div class="mqtt-card xy">
+        <div class="mqtt-card-title">📍 XYZ 位置</div>
+        <div class="mqtt-card-value" id="xyzPos" style="font-size:18px;">X: 0  Y: 0  Z: 0</div>
+        <div class="mqtt-card-target">打印速度: <span id="speedFactor">100</span>%</div>
+      </div>
+      <div class="mqtt-card progress">
+        <div class="mqtt-card-title">⏳ 打印进度</div>
+        <div class="mqtt-card-value" id="progressVal">0%</div>
+        <div class="progress-bar"><div class="progress-fill" id="progressBar" style="width:0%">0%</div></div>
+      </div>
+    </div>
+
+    <div style="text-align:center;">
+      <button class="btn" onclick="startMqttSim()">▶️ 启动实时模拟</button>
+      <button class="btn" onclick="stopMqttSim()">⏸️ 停止</button>
+      <button class="btn btn-danger" onclick="triggerAlert()">🚨 模拟温度异常</button>
+    </div>
+
+    <div class="terminal" id="mqttTerm" style="margin-top:20px;">
+      <div class="terminal-out">$ 等待订阅消息...</div>
+    </div>
+
+    <div class="tip-box">
+      <strong>💡 核心原理：</strong>Moonraker 持续推送打印机状态到 <code>klipper/printer/status</code> MQTT 主题，Node-RED 订阅这个主题，把数据写进 InfluxDB。
+    </div>
+  </div>
+</div>
+
+<!-- 4. Bridge -->
+<div class="panel" id="bridge">
+  <div class="container">
+    <h2>🌉 Moonraker → MQTT 桥接</h2>
+    <p style="margin-bottom:15px;">这是连接 Klipper 和整个数字孪生系统的"翻译官"</p>
+
+    <ol class="step-list">
+      <li>创建 Python 虚拟环境 <code>python3 -m venv venv</code></li>
+      <li>安装依赖 <code>pip install paho-mqtt websockets</code></li>
+      <li>编写桥接脚本 <code>bridge.py</code>（订阅 Moonraker WebSocket）</li>
+      <li>创建 systemd 服务 <code>/etc/systemd/system/moonraker-mqtt.service</code></li>
+      <li>启动 <code>systemctl start moonraker-mqtt</code></li>
+    </ol>
+
+    <div class="terminal" id="bridgeTerm">
+      <div class="terminal-out">$ 桥接脚本运行中...</div>
+    </div>
+
+    <div class="tip-box warn">
+      <strong>⚠️ 守护进程：</strong>用 systemd 守护，开机自启，断线自动重连。
+    </div>
+  </div>
+</div>
+
+<!-- 5. Node-RED -->
+<div class="panel" id="nodered">
+  <div class="container">
+    <h2>🔧 Node-RED 数据流编排</h2>
+    <p style="margin-bottom:15px;">拖拽式编程，把数据按规则加工。点击节点查看详情：</p>
+
+    <div class="nodered-canvas" id="noderedCanvas">
+      <div class="nodered-node" style="left:30px;top:50px;" onclick="showNodeInfo('mqtt')">
+        📥 MQTT In<br><small>klipper/printer/+</small>
+      </div>
+      <div class="nodered-node json" style="left:30px;top:150px;" onclick="showNodeInfo('json')">
+        🔄 JSON<br><small>解析</small>
+      </div>
+      <div class="nodered-node func" style="left:30px;top:250px;" onclick="showNodeInfo('func')">
+        ⚙️ Function<br><small>温度判断</small>
+      </div>
+      <div class="nodered-node influx" style="left:280px;top:50px;" onclick="showNodeInfo('influx')">
+        💾 InfluxDB<br><small>写入</small>
+      </div>
+      <div class="nodered-node dashboard" style="left:280px;top:150px;" onclick="showNodeInfo('alert')">
+        🚨 告警<br><small>微信推送</small>
+      </div>
+      <div class="nodered-node dashboard" style="left:280px;top:250px;" onclick="showNodeInfo('dash')">
+        📊 Dashboard<br><small>实时显示</small>
+      </div>
+    </div>
+
+    <div id="nodeInfo" style="margin-top:15px;padding:15px;background:rgba(0,0,0,0.3);border-radius:8px;min-height:80px;">
+      <p style="color:#94a3b8;">👆 点击节点查看配置说明</p>
+    </div>
+
+    <div class="tip-box">
+      <strong>💡 节点功能：</strong>
+      <ul style="margin-top:8px;padding-left:20px;">
+        <li><code>MQTT In</code>：订阅 MQTT 主题，接收打印机状态</li>
+        <li><code>JSON</code>：解析 MQTT 消息为 JavaScript 对象</li>
+        <li><code>Function</code>：写自定义逻辑（温度阈值判断、告警触发）</li>
+        <li><code>InfluxDB</code>：把数据写入时序数据库</li>
+        <li><code>Dashboard</code>：实时显示图表/数字</li>
+        <li><code>HTTP Request</code>：调用微信 API 发送告警</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- 6. Grafana -->
+<div class="panel" id="grafana">
+  <div class="container">
+    <h2>📈 Grafana 监控大屏</h2>
+    <p style="margin-bottom:15px;">以下是大屏真实效果模拟</p>
+
+    <div class="grafana-panel">
+      <div class="grafana-panel-title">
+        <span>🌡️ 喷嘴 + 热床温度（最近 5 分钟）</span>
+        <span style="color:#48c78e;font-size:11px;">● 实时</span>
+      </div>
+      <svg class="grafana-chart" viewBox="0 0 800 150" id="tempChart"></svg>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div style="color:#94a3b8;font-size:11px;">当前温度</div>
+        <div class="stat-num" id="gExtrTemp">--</div>
+        <div style="color:#94a3b8;font-size:10px;">°C</div>
+      </div>
+      <div class="stat-card">
+        <div style="color:#94a3b8;font-size:11px;">打印进度</div>
+        <div class="stat-num" id="gProgress">--</div>
+        <div style="color:#94a3b8;font-size:10px;">%</div>
+      </div>
+      <div class="stat-card">
+        <div style="color:#94a3b8;font-size:11px;">运行时长</div>
+        <div class="stat-num" id="gRuntime">--</div>
+        <div style="color:#94a3b8;font-size:10px;">分钟</div>
+      </div>
+      <div class="stat-card">
+        <div style="color:#94a3b8;font-size:11px;">预计剩余</div>
+        <div class="stat-num" id="gRemain">--</div>
+        <div style="color:#94a3b8;font-size:10px;">分钟</div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <strong>💡 面板配置技巧：</strong>
+      <ul style="margin-top:8px;padding-left:20px;">
+        <li>导入社区仪表板：Dashboard ID <code>18714</code></li>
+        <li>Flux 查询语言：从 InfluxDB 提取数据</li>
+        <li>告警配置：阈值 + 持续时间 + 通知渠道</li>
+        <li>面板类型：Graph / Stat / Gauge / Bar gauge / Table</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- 7. 告警 -->
+<div class="panel" id="alert">
+  <div class="container">
+    <h2>🚨 告警与推送</h2>
+    <p style="margin-bottom:15px;">系统检测到异常会自动告警：</p>
+
+    <div class="alert-list" id="alertList">
+      <div class="alert-item info">
+        <span class="alert-icon">✅</span>
+        <div>
+          <div>系统就绪</div>
+          <div style="color:#94a3b8;font-size:11px;">数字孪生系统已启动</div>
+        </div>
+        <span class="alert-time">刚刚</span>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin:20px 0;">
+      <button class="btn" onclick="triggerAlert()">🚨 模拟告警</button>
+      <button class="btn" onclick="triggerNormal()">✅ 恢复正常</button>
+      <button class="btn" onclick="triggerAll()">💥 压力测试</button>
+    </div>
+
+    <div class="tip-box danger">
+      <strong>🔥 告警场景：</strong>
+      <ul style="margin-top:8px;padding-left:20px;">
+        <li>喷嘴温度 > 280°C（持续 10s）→ 危险告警</li>
+        <li>加热时温度下降 → 异常告警</li>
+        <li>打印机失联 > 60s → 通讯告警</li>
+        <li>打印完成 → 完成通知</li>
+        <li>材料耗尽/堵头 → 维护告警</li>
+      </ul>
+    </div>
+
+    <div class="tip-box">
+      <strong>📲 推送方案：</strong>
+      <ul style="margin-top:8px;padding-left:20px;">
+        <li><strong>Server 酱</strong>：免费微信推送，5 分钟接入</li>
+        <li><strong>PushPlus</strong>：类似方案</li>
+        <li><strong>企业微信机器人</strong>：Webhook 推送</li>
+        <li><strong>钉钉机器人</strong>：Webhook 推送</li>
+        <li><strong>邮件</strong>：SMTP 协议</li>
+        <li><strong>短信</strong>：阿里云 / 腾讯云 API</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- 8. 验收 -->
+<div class="panel" id="check">
+  <div class="container">
+    <h2>✅ 部署验收清单</h2>
+    <p style="margin-bottom:15px;">逐项打勾，全部完成就可以用了：</p>
+
+    <ul class="checklist" id="checkList">
+      <li onclick="toggleCheck(this)">Mosquitto 启动成功，<code>mosquitto_sub</code> 能收到消息</li>
+      <li onclick="toggleCheck(this)">Node-RED 打开正常（<code>http://IP:1880</code>）</li>
+      <li onclick="toggleCheck(this)">InfluxDB 登录正常，能查到数据点</li>
+      <li onclick="toggleCheck(this)">Grafana 打开正常，能显示温度曲线</li>
+      <li onclick="toggleCheck(this)">告警测试：故意把目标温度设高，微信收到</li>
+      <li onclick="toggleCheck(this)">断电恢复：重启 Docker 容器数据不丢失</li>
+      <li onclick="toggleCheck(this)">历史数据：查 24 小时前的温度曲线</li>
+      <li onclick="toggleCheck(this)">系统资源：CPU &lt; 30%，内存 &lt; 1.5GB</li>
+    </ul>
+
+    <div class="progress-bar" style="margin-top:20px;">
+      <div class="progress-fill" id="checkProgress" style="width:0%">0 / 8</div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>❓ 常见问题 FAQ</h2>
+    <div class="tip-box warn">
+      <strong>Q：Node-RED 连不上 InfluxDB？</strong><br>
+      A：容器内用 <code>http://influxdb:8086</code>，不是 <code>localhost</code>。
+    </div>
+    <div class="tip-box warn">
+      <strong>Q：MQTT 收不到消息？</strong><br>
+      A：检查 Mosquitto 端口 <code>1883</code> 是否开放；用 <code>mosquitto_sub -h localhost -t "klipper/#" -v</code> 命令测试。
+    </div>
+    <div class="tip-box warn">
+      <strong>Q：Grafana 查询无数据？</strong><br>
+      A：时间范围选择 "Last 5 minutes"；检查 Bucket 名是否正确（区分大小写）。
+    </div>
+    <div class="tip-box warn">
+      <strong>Q：桥接脚本频繁断连？</strong><br>
+      A：增加 WebSocket 心跳；在 systemd 配置 <code>RestartSec</code>。
+    </div>
+    <div class="tip-box">
+      <strong>Q：性能开销大不大？</strong><br>
+      A：全套服务约占 树莓派 4B 内存 800MB-1.2GB，CPU 5-10%，可接受。
+    </div>
+  </div>
+
+  <div class="container">
+    <h2>🚀 下一步可以做什么</h2>
+    <div class="stat-grid">
+      <div class="stat-card" style="cursor:pointer;">
+        <div style="font-size:24px;">📷</div>
+        <div class="stat-label">摄像头实时监控</div>
+      </div>
+      <div class="stat-card" style="cursor:pointer;">
+        <div style="font-size:24px;">🤖</div>
+        <div class="stat-label">AI 拉丝检测</div>
+      </div>
+      <div class="stat-card" style="cursor:pointer;">
+        <div style="font-size:24px;">📱</div>
+        <div class="stat-label">手机 App</div>
+      </div>
+      <div class="stat-card" style="cursor:pointer;">
+        <div style="font-size:24px;">🏭</div>
+        <div class="stat-label">多机群控</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Tab 切换
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+  });
+});
+
+// 架构图动画
+let archAnimRunning = false;
+function startArchAnimation() {
+  if (archAnimRunning) return;
+  archAnimRunning = true;
+  const svg = document.getElementById('archSvg');
+  const paths = [
+    { from: 'klipper', to: 'moonraker', color: '#00d4ff' },
+    { from: 'moonraker', to: 'mqtt', color: '#ffa500' },
+    { from: 'mqtt', to: 'nodered', color: '#48c78e' },
+    { from: 'nodered', to: 'grafana', color: '#7b2ff7' },
+    { from: 'nodered', to: 'influx', color: '#7b2ff7' }
+  ];
+
+  let count = 0;
+  const maxCount = 15;
+
+  const interval = setInterval(() => {
+    if (count >= maxCount) {
+      clearInterval(interval);
+      archAnimRunning = false;
+      return;
+    }
+    count++;
+
+    paths.forEach((p, i) => {
+      setTimeout(() => {
+        const packet = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        packet.setAttribute('r', '5');
+        packet.setAttribute('fill', p.color);
+        packet.style.filter = `drop-shadow(0 0 8px ${p.color})`;
+
+        // 简化：所有数据包从左边流动到右边
+        const y = 75;
+        packet.setAttribute('cy', y);
+        packet.setAttribute('cx', '50');
+        svg.appendChild(packet);
+
+        let x = 50;
+        const moveInt = setInterval(() => {
+          x += 8;
+          packet.setAttribute('cx', x);
+          if (x > 870) {
+            clearInterval(moveInt);
+            packet.remove();
+          }
+        }, 20);
+      }, i * 200);
+    });
+  }, 1000);
+}
+
+// Docker 终端动画
+const dockerCmds = [
+  { type: 'cmd', text: '$ mkdir -p ~/klipper-digital-twin && cd ~/klipper-digital-twin' },
+  { type: 'out', text: '' },
+  { type: 'cmd', text: '$ cat > docker-compose.yml << EOF' },
+  { type: 'out', text: 'version: "3.8"' },
+  { type: 'out', text: 'services:' },
+  { type: 'out', text: '  mosquitto:  image: eclipse-mosquitto:2.0  ports: ["1883:1883"]' },
+  { type: 'out', text: '  nodered:    image: nodered/node-red:latest  ports: ["1880:1880"]' },
+  { type: 'out', text: '  influxdb:   image: influxdb:2.7  ports: ["8086:8086"]' },
+  { type: 'out', text: '  grafana:    image: grafana/grafana:latest  ports: ["3000:3000"]' },
+  { type: 'out', text: 'EOF' },
+  { type: 'cmd', text: '$ docker-compose up -d' },
+  { type: 'warn', text: '[+] Running 4/4' },
+  { type: 'ok', text: ' ✔ Network klipper-digital-twin_default  Created' },
+  { type: 'ok', text: ' ✔ Container mqtt_broker  Started' },
+  { type: 'ok', text: ' ✔ Container node_red  Started' },
+  { type: 'ok', text: ' ✔ Container influxdb  Started' },
+  { type: 'ok', text: ' ✔ Container grafana  Started' },
+  { type: 'out', text: '' },
+  { type: 'cmd', text: '$ docker ps' },
+  { type: 'out', text: 'CONTAINER  STATUS  PORTS                   NAMES' },
+  { type: 'out', text: 'a1b2c3d4   Up      0.0.0.0:1883->1883/tcp  mqtt_broker' },
+  { type: 'out', text: 'e5f6g7h8   Up      0.0.0.0:1880->1880/tcp  node_red' },
+  { type: 'out', text: 'i9j0k1l2   Up      0.0.0.0:8086->8086/tcp  influxdb' },
+  { type: 'out', text: 'm3n4o5p6   Up      0.0.0.0:3000->3000/tcp  grafana' },
+  { type: 'ok', text: '' },
+  { type: 'ok', text: '✅ 4 个服务全部启动成功！' }
+];
+
+let dockerStep = 0;
+let dockerTimer = null;
+function playDocker() {
+  if (dockerTimer) return;
+  const term = document.getElementById('dockerTerm');
+  dockerStep = 0;
+  dockerTimer = setInterval(() => {
+    if (dockerStep >= dockerCmds.length) {
+      clearInterval(dockerTimer);
+      dockerTimer = null;
+      return;
+    }
+    const cmd = dockerCmds[dockerStep];
+    const line = document.createElement('div');
+    if (cmd.type === 'cmd') {
+      line.innerHTML = '<span class="terminal-prompt">pi@klipper</span>:<span class="terminal-cmd">~</span>$ ' + cmd.text.replace('$ ', '');
+    } else if (cmd.type === 'ok') {
+      line.innerHTML = '<span class="terminal-ok">' + cmd.text + '</span>';
+    } else if (cmd.type === 'warn') {
+      line.innerHTML = '<span class="terminal-warn">' + cmd.text + '</span>';
+    } else {
+      line.innerHTML = '<span class="terminal-out">' + cmd.text + '</span>';
+    }
+    term.appendChild(line);
+    term.scrollTop = term.scrollHeight;
+    dockerStep++;
+  }, 250);
+}
+
+function resetDocker() {
+  if (dockerTimer) { clearInterval(dockerTimer); dockerTimer = null; }
+  const term = document.getElementById('dockerTerm');
+  term.innerHTML = '<div class="terminal-out">$ 准备就绪，点击下方按钮开始部署...</div>';
+  dockerStep = 0;
+}
+
+// MQTT 实时模拟
+let mqttSimTimer = null;
+let mqttState = {
+  extrTemp: 25, extrTarget: 0,
+  bedTemp: 23, bedTarget: 0,
+  x: 0, y: 0, z: 0,
+  progress: 0, speedFactor: 100,
+  heating: false, printing: false,
+  alert: false, runtime: 0
+};
+
+function startMqttSim() {
+  if (mqttSimTimer) return;
+  mqttState.heating = true;
+  mqttState.extrTarget = 210;
+  mqttState.bedTarget = 60;
+  mqttState.printing = true;
+
+  const term = document.getElementById('mqttTerm');
+  term.innerHTML = '<div class="terminal-out">$ 订阅主题 klipper/printer/status ...</div>';
+
+  let t = 0;
+  mqttSimTimer = setInterval(() => {
+    t++;
+    mqttState.runtime = t * 2;
+
+    // 温度变化
+    if (mqttState.heating) {
+      mqttState.extrTemp += (mqttState.extrTarget - mqttState.extrTemp) * 0.1;
+      mqttState.bedTemp += (mqttState.bedTarget - mqttState.bedTemp) * 0.05;
+    }
+    if (mqttState.alert) {
+      mqttState.extrTemp += 3;
+    }
+
+    // 打印进度
+    if (mqttState.printing && mqttState.progress < 100) {
+      mqttState.progress += 0.5;
+    }
+
+    // 位置移动
+    mqttState.x = (Math.sin(t / 10) * 100).toFixed(1);
+    mqttState.y = (Math.cos(t / 15) * 100).toFixed(1);
+    mqttState.z = (t / 60).toFixed(2);
+
+    // 更新 UI
+    document.getElementById('extrTemp').textContent = mqttState.extrTemp.toFixed(1);
+    document.getElementById('extrTarget').textContent = mqttState.extrTarget;
+    document.getElementById('bedTemp').textContent = mqttState.bedTemp.toFixed(1);
+    document.getElementById('bedTarget').textContent = mqttState.bedTarget;
+    document.getElementById('xyzPos').textContent = `X: ${mqttState.x}  Y: ${mqttState.y}  Z: ${mqttState.z}`;
+    document.getElementById('speedFactor').textContent = mqttState.speedFactor;
+    document.getElementById('progressVal').textContent = mqttState.progress.toFixed(1) + '%';
+    document.getElementById('progressBar').style.width = mqttState.progress + '%';
+    document.getElementById('progressBar').textContent = mqttState.progress.toFixed(1) + '%';
+
+    // Grafana 更新
+    document.getElementById('gExtrTemp').textContent = mqttState.extrTemp.toFixed(1);
+    document.getElementById('gProgress').textContent = mqttState.progress.toFixed(0);
+    document.getElementById('gRuntime').textContent = mqttState.runtime;
+    document.getElementById('gRemain').textContent = Math.max(0, Math.round((100 - mqttState.progress) * 4));
+
+    // 终端日志
+    if (t % 10 === 0) {
+      const log = document.createElement('div');
+      log.innerHTML = `<span class="terminal-out">[${new Date().toLocaleTimeString()}] MQTT 收到 → extruder: ${mqttState.extrTemp.toFixed(1)}°C, progress: ${mqttState.progress.toFixed(1)}%</span>`;
+      term.appendChild(log);
+      term.scrollTop = term.scrollHeight;
+      if (term.children.length > 8) term.removeChild(term.children[1]);
+    }
+
+    // 温度曲线
+    drawTempChart();
+  }, 500);
+}
+
+function stopMqttSim() {
+  if (mqttSimTimer) {
+    clearInterval(mqttSimTimer);
+    mqttSimTimer = null;
+  }
+}
+
+function triggerAlert() {
+  mqttState.alert = true;
+  addAlert('danger', '🔥 喷嘴温度过高', `KLP1 喷嘴温度 ${mqttState.extrTemp.toFixed(1)}°C 超过 280°C 警戒线`);
+  addAlert('warning', '⚠️ 系统告警', '已自动暂停打印，等待人工检查');
+  addAlert('info', '📲 微信推送', '已通过 Server 酱发送告警到微信');
+}
+
+function triggerNormal() {
+  mqttState.alert = false;
+  addAlert('info', '✅ 温度已恢复', `喷嘴温度回落至 ${mqttState.extrTemp.toFixed(1)}°C`);
+  addAlert('info', '✅ 打印继续', '已自动恢复打印任务');
+}
+
+function triggerAll() {
+  triggerAlert();
+  setTimeout(() => addAlert('warning', '⚠️ 料线张力低', '建议检查料丝是否打滑'), 500);
+  setTimeout(() => addAlert('info', '📦 耗材余量', 'PLA 耗材剩余 25%，请准备补充'), 1000);
+  setTimeout(() => addAlert('info', '🖨️ 打印完成', '上一个打印任务已完成'), 1500);
+}
+
+function addAlert(level, title, content) {
+  const list = document.getElementById('alertList');
+  const item = document.createElement('div');
+  item.className = `alert-item ${level}`;
+  const icon = level === 'danger' ? '🔥' : level === 'warning' ? '⚠️' : '✅';
+  item.innerHTML = `
+    <span class="alert-icon">${icon}</span>
+    <div>
+      <div>${title}</div>
+      <div style="color:#94a3b8;font-size:11px;">${content}</div>
+    </div>
+    <span class="alert-time">刚刚</span>
+  `;
+  list.insertBefore(item, list.firstChild);
+  if (list.children.length > 10) list.removeChild(list.lastChild);
+}
+
+// 温度曲线
+const tempHistory = { extr: [], bed: [], t: [] };
+let chartMaxPoints = 60;
+
+function drawTempChart() {
+  const svg = document.getElementById('tempChart');
+  if (!svg) return;
+
+  tempHistory.extr.push(mqttState.extrTemp);
+  tempHistory.bed.push(mqttState.bedTemp);
+  tempHistory.t.push(mqttState.runtime);
+
+  if (tempHistory.extr.length > chartMaxPoints) {
+    tempHistory.extr.shift();
+    tempHistory.bed.shift();
+    tempHistory.t.shift();
+  }
+
+  const W = 800, H = 150, PAD = 20;
+  const maxT = Math.max(...tempHistory.extr, ...tempHistory.bed, 250);
+  const minT = 0;
+
+  let path = '';
+  tempHistory.extr.forEach((v, i) => {
+    const x = (i / chartMaxPoints) * W;
+    const y = H - PAD - ((v - minT) / (maxT - minT)) * (H - PAD * 2);
+    path += (i === 0 ? 'M' : 'L') + x + ',' + y + ' ';
+  });
+
+  let pathBed = '';
+  tempHistory.bed.forEach((v, i) => {
+    const x = (i / chartMaxPoints) * W;
+    const y = H - PAD - ((v - minT) / (maxT - minT)) * (H - PAD * 2);
+    pathBed += (i === 0 ? 'M' : 'L') + x + ',' + y + ' ';
+  });
+
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.5"/>
+        <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <line x1="0" y1="${H-PAD}" x2="${W}" y2="${H-PAD}" stroke="#2d3136"/>
+    <line x1="0" y1="${PAD}" x2="${W}" y2="${PAD}" stroke="#2d3136" stroke-dasharray="3,3"/>
+    <text x="5" y="15" fill="#94a3b8" font-size="10">250°C</text>
+    <text x="5" y="${H-5}" fill="#94a3b8" font-size="10">0°C</text>
+    <path d="${path}" stroke="#00d4ff" stroke-width="2" fill="none"/>
+    <path d="${path + 'L' + W + ',' + (H-PAD) + ' L0,' + (H-PAD) + ' Z'}" fill="url(#g1)"/>
+    <path d="${pathBed}" stroke="#ff6b6b" stroke-width="2" fill="none"/>
+  `;
+}
+
+// Node-RED 节点信息
+function showNodeInfo(type) {
+  const info = document.getElementById('nodeInfo');
+  const content = {
+    mqtt: '<h3 style="color:#00d4ff;margin-bottom:8px;">📥 MQTT In 节点</h3><p><strong>配置：</strong></p><ul style="padding-left:20px;margin-top:5px;"><li>Server: <code>localhost:1883</code></li><li>Topic: <code>klipper/printer/+</code></li><li>QoS: 1</li></ul><p style="margin-top:8px;">订阅 MQTT 主题，接收打印机状态消息。</p>',
+    json: '<h3 style="color:#b87ab8;margin-bottom:8px;">🔄 JSON 节点</h3><p>把 MQTT 消息的 JSON 字符串解析为 JavaScript 对象，方便后续处理。</p>',
+    func: '<h3 style="color:#b8aa7a;margin-bottom:8px;">⚙️ Function 节点</h3><p><strong>判断逻辑：</strong></p><pre style="background:rgba(0,0,0,0.3);padding:8px;border-radius:4px;font-size:11px;color:#94a3b8;">if (extrTemp > 280) {\n  return { alert: "danger" };\n}\nif (extrTemp < 150 && target > 150) {\n  return { alert: "warning" };\n}</pre>',
+    influx: '<h3 style="color:#7ab87a;margin-bottom:8px;">💾 InfluxDB 节点</h3><p><strong>配置：</strong></p><ul style="padding-left:20px;margin-top:5px;"><li>URL: <code>http://influxdb:8086</code></li><li>Bucket: <code>printer_data</code></li><li>Org: <code>klipper</code></li></ul>',
+    alert: '<h3 style="color:#7a7ab8;margin-bottom:8px;">🚨 告警节点</h3><p>调用 Server 酱 API 推送微信告警。</p><pre style="background:rgba(0,0,0,0.3);padding:8px;border-radius:4px;font-size:11px;color:#94a3b8;">POST https://sctapi.ftqq.com/&lt;KEY&gt;.send\nBody: { title, desp }</pre>',
+    dash: '<h3 style="color:#7a7ab8;margin-bottom:8px;">📊 Dashboard 节点</h3><p>Node-RED 自带的 Dashboard，可以实时显示图表、数字、按钮等组件。</p>'
+  };
+  info.innerHTML = content[type];
+}
+
+// 验收清单
+function toggleCheck(li) {
+  li.classList.toggle('checked');
+  const total = document.querySelectorAll('.checklist li').length;
+  const checked = document.querySelectorAll('.checklist li.checked').length;
+  const pct = (checked / total) * 100;
+  const bar = document.getElementById('checkProgress');
+  bar.style.width = pct + '%';
+  bar.textContent = checked + ' / ' + total;
+}
+
+// 启动时自动初始化
+window.addEventListener('load', () => {
+  drawTempChart();
+});
+</script>
+
+</body>
+</html>

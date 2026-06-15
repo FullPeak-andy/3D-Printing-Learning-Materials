@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D 打印机调试完全攻略 — Andy 哥 KLP1 实战版</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #0d1117; color: #c9d1d9; line-height: 1.6; }
+.header { background: linear-gradient(135deg, #1e3a5f 0%, #0d1117 100%); padding: 24px 32px; border-bottom: 1px solid #30363d; }
+.header h1 { font-size: 26px; color: #58a6ff; margin-bottom: 6px; }
+.header .subtitle { color: #8b949e; font-size: 14px; }
+.header .meta { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+.header .meta span { background: #161b22; border: 1px solid #30363d; padding: 4px 10px; border-radius: 12px; font-size: 12px; color: #8b949e; }
+.header .meta .tag-key { color: #58a6ff; border-color: #58a6ff; }
+
+.tabs { display: flex; background: #161b22; border-bottom: 1px solid #30363d; overflow-x: auto; }
+.tab { padding: 14px 20px; cursor: pointer; color: #8b949e; border-bottom: 2px solid transparent; white-space: nowrap; font-size: 14px; transition: all 0.2s; }
+.tab:hover { color: #c9d1d9; }
+.tab.active { color: #58a6ff; border-bottom-color: #58a6ff; background: #0d1117; }
+
+.content { padding: 32px; max-width: 1200px; margin: 0 auto; }
+.panel { display: none; animation: fadeIn 0.3s ease-in; }
+.panel.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+h2 { color: #58a6ff; font-size: 22px; margin: 24px 0 12px; padding-left: 12px; border-left: 3px solid #58a6ff; }
+h3 { color: #79c0ff; font-size: 17px; margin: 20px 0 8px; }
+h4 { color: #d2a8ff; font-size: 15px; margin: 16px 0 6px; }
+p { color: #c9d1d9; margin: 8px 0; }
+ul, ol { padding-left: 28px; margin: 8px 0; }
+li { margin: 4px 0; }
+code { background: #161b22; padding: 2px 6px; border-radius: 4px; font-family: "SF Mono", Consolas, monospace; color: #ff7b72; font-size: 13px; }
+pre { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 14px 18px; overflow-x: auto; margin: 12px 0; }
+pre code { color: #c9d1d9; font-size: 13px; line-height: 1.5; }
+
+.callout { padding: 14px 18px; border-radius: 8px; margin: 12px 0; border-left: 4px solid; }
+.callout-red { background: #2d1418; border-color: #f85149; }
+.callout-yellow { background: #2d2317; border-color: #d29922; }
+.callout-green { background: #142d1e; border-color: #3fb950; }
+.callout-blue { background: #14232d; border-color: #58a6ff; }
+.callout-title { font-weight: 600; margin-bottom: 6px; }
+.callout-red .callout-title { color: #ff7b72; }
+.callout-yellow .callout-title { color: #d29922; }
+.callout-green .callout-title { color: #3fb950; }
+.callout-blue .callout-title { color: #58a6ff; }
+
+.card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 18px; margin: 12px 0; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin: 12px 0; }
+
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+th, td { padding: 10px 12px; text-align: left; border: 1px solid #30363d; }
+th { background: #1c2128; color: #58a6ff; font-weight: 600; }
+tr:nth-child(even) { background: #0d1117; }
+tr:nth-child(odd) { background: #161b22; }
+
+.btn { display: inline-block; padding: 8px 16px; background: #21262d; border: 1px solid #30363d; color: #c9d1d9; border-radius: 6px; cursor: pointer; font-size: 13px; text-decoration: none; transition: all 0.15s; }
+.btn:hover { background: #30363d; border-color: #58a6ff; color: #58a6ff; }
+.btn-primary { background: #1f6feb; border-color: #1f6feb; color: white; }
+.btn-primary:hover { background: #388bfd; color: white; }
+
+/* === 调平金字塔 === */
+.pyramid { position: relative; margin: 24px auto; max-width: 600px; }
+.pyramid-layer { position: relative; margin: 0 auto; padding: 18px 24px; text-align: center; cursor: pointer; transition: all 0.3s; border: 2px solid; }
+.pyramid-layer:hover { transform: scale(1.03); }
+.pyramid-layer h4 { margin: 0 0 4px; }
+.pyramid-l4 { width: 30%; background: #1f3a5f; border-color: #58a6ff; clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%); }
+.pyramid-l3 { width: 50%; background: #1a3a2f; border-color: #3fb950; clip-path: polygon(3% 0, 97% 0, 95% 100%, 5% 100%); }
+.pyramid-l2 { width: 70%; background: #3a2f1a; border-color: #d29922; clip-path: polygon(3% 0, 97% 0, 95% 100%, 5% 100%); }
+.pyramid-l1 { width: 90%; background: #3a1a1a; border-color: #f85149; clip-path: polygon(3% 0, 97% 0, 95% 100%, 5% 100%); padding: 24px; }
+.pyramid-layer .label { font-size: 12px; opacity: 0.8; }
+.pyramid-layer .title { font-size: 18px; font-weight: 600; }
+.pyramid-l4 .title { color: #79c0ff; }
+.pyramid-l3 .title { color: #56d364; }
+.pyramid-l2 .title { color: #e3b341; }
+.pyramid-l1 .title { color: #ff7b72; }
+.pyramid-detail { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin-top: 16px; display: none; }
+.pyramid-detail.show { display: block; animation: fadeIn 0.3s ease-in; }
+
+/* === 流程图 === */
+.flow { display: flex; align-items: stretch; gap: 6px; flex-wrap: wrap; margin: 16px 0; }
+.flow-step { flex: 1; min-width: 130px; background: #161b22; border: 2px solid #30363d; border-radius: 8px; padding: 12px; text-align: center; position: relative; transition: all 0.2s; }
+.flow-step:hover { border-color: #58a6ff; transform: translateY(-2px); }
+.flow-step .num { display: inline-block; width: 24px; height: 24px; background: #58a6ff; color: #0d1117; border-radius: 50%; font-weight: bold; line-height: 24px; margin-bottom: 6px; }
+.flow-step .name { color: #c9d1d9; font-size: 14px; font-weight: 600; }
+.flow-step .desc { color: #8b949e; font-size: 12px; margin-top: 4px; }
+.flow-arrow { display: flex; align-items: center; color: #58a6ff; font-size: 20px; }
+
+/* === Checklist === */
+.checklist { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 12px 16px; margin: 12px 0; }
+.checklist-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #21262d; cursor: pointer; }
+.checklist-item:last-child { border-bottom: none; }
+.checklist-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #58a6ff; }
+.checklist-item .text { flex: 1; color: #c9d1d9; font-size: 14px; }
+.checklist-item.done .text { text-decoration: line-through; color: #6e7681; }
+
+/* === 3D 模拟床 === */
+.bed-sim { position: relative; width: 400px; height: 400px; margin: 24px auto; background: #0d1117; border: 2px solid #30363d; border-radius: 8px; }
+.bed-corner { position: absolute; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-direction: column; cursor: pointer; transition: all 0.3s; font-size: 12px; font-weight: 600; }
+.bed-corner:hover { transform: scale(1.15); }
+.bed-c1 { top: 0; left: 0; background: #1f6feb; }
+.bed-c2 { top: 0; right: 0; background: #3fb950; }
+.bed-c3 { bottom: 0; right: 0; background: #d29922; }
+.bed-c4 { bottom: 0; left: 0; background: #f85149; }
+.bed-c1 .z { font-size: 18px; }
+.bed-c2 .z { font-size: 18px; }
+.bed-c3 .z { font-size: 18px; }
+.bed-c4 .z { font-size: 18px; }
+.bed-line { position: absolute; top: 50%; left: 5%; right: 5%; height: 2px; background: #58a6ff; opacity: 0.6; }
+
+/* === Z 高度数据柱状图 === */
+.z-bar-chart { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+.z-bar-row { display: flex; align-items: center; gap: 8px; padding: 4px; background: #0d1117; border-radius: 4px; }
+.z-bar-row .label { width: 100px; font-size: 12px; color: #8b949e; font-family: monospace; }
+.z-bar-row .bar { height: 18px; background: linear-gradient(90deg, #3fb950, #d29922, #f85149); border-radius: 3px; transition: width 0.5s; }
+.z-bar-row .value { color: #c9d1d9; font-size: 12px; font-family: monospace; min-width: 60px; text-align: right; }
+
+/* === 进度条 === */
+.progress-bar { height: 8px; background: #21262d; border-radius: 4px; overflow: hidden; margin: 6px 0; }
+.progress-bar .fill { height: 100%; background: linear-gradient(90deg, #58a6ff, #3fb950); transition: width 0.5s; }
+
+/* === 折叠面板 === */
+details { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 0; margin: 8px 0; }
+details summary { padding: 12px 16px; cursor: pointer; color: #58a6ff; font-weight: 600; }
+details[open] summary { border-bottom: 1px solid #30363d; }
+details .content { padding: 16px; }
+
+/* === 步骤计时器 === */
+.timer-display { display: inline-block; padding: 6px 14px; background: #1c2128; border: 1px solid #58a6ff; border-radius: 16px; font-family: monospace; color: #58a6ff; font-size: 14px; margin: 6px 4px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎯 3D 打印机调试完全攻略</h1>
+  <div class="subtitle">Andy 哥 KLP1 实战版 · 调平原理吃透 + 通用调试 SOP</div>
+  <div class="meta">
+    <span class="tag-key">📅 2026-06-12</span>
+    <span>🎯 KLP1 (CoreXY / 单 Z / BLTouch)</span>
+    <span>⏱️ 预计 90 分钟学完</span>
+    <span>📊 8 Tab 全攻略</span>
+    <span>🔧 0 依赖单文件</span>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-panel="p1">🎯 调平金字塔</div>
+  <div class="tab" data-panel="p2">🔧 KLP1 实战</div>
+  <div class="tab" data-panel="p3">📊 数据解读</div>
+  <div class="tab" data-panel="p4">🛠️ 通用 SOP</div>
+  <div class="tab" data-panel="p5">🚑 排错清单</div>
+  <div class="tab" data-panel="p6">📋 6 个必跑命令</div>
+  <div class="tab" data-panel="p7">💡 Andy 哥专属</div>
+  <div class="tab" data-panel="p8">📚 资源汇总</div>
+</div>
+
+<div class="content">
+
+<!-- ============== Tab 1: 调平金字塔 ============== -->
+<div id="p1" class="panel active">
+  <h2>🎯 调平金字塔 — 4 层从下到上</h2>
+  <p><strong>核心论点（来自 B 站视频）</strong>：<span style="color: #f85149; font-weight: 600;">没有 L1 物理调平，L4 Mesh 补偿就是给漏水的船刷漆。</span></p>
+
+  <div class="pyramid">
+    <div class="pyramid-layer pyramid-l4" onclick="togglePyramid('d4')">
+      <div class="title">L4 · Mesh 补偿</div>
+      <div class="label">BED_MESH_CALIBRATE</div>
+    </div>
+    <div class="pyramid-layer pyramid-l3" onclick="togglePyramid('d3')">
+      <div class="title">L3 · Z 等高</div>
+      <div class="label">Z_TILT_ADJUST（双 Z 专用）</div>
+    </div>
+    <div class="pyramid-layer pyramid-l2" onclick="togglePyramid('d2')">
+      <div class="title">L2 · 探针校准</div>
+      <div class="label">PROBE_CALIBRATE</div>
+    </div>
+    <div class="pyramid-layer pyramid-l1" onclick="togglePyramid('d1')">
+      <div class="title">L1 · 机械调平</div>
+      <div class="label">SCREWS_TILT_CALCULATE + 拧螺丝</div>
+    </div>
+  </div>
+
+  <div id="d1" class="pyramid-detail">
+    <h4 style="color: #ff7b72;">L1 · 机械调平（地基，最重要）</h4>
+    <p><strong>做什么</strong>：拧 4 角弹簧螺丝，让 4 个角的 Z 高度一致</p>
+    <p><strong>命令</strong>：<code>SCREWS_TILT_CALCULATE</code></p>
+    <p><strong>目标</strong>：4 角 Z 差 ≤ <strong style="color: #3fb950;">5 丝 (0.05mm)</strong></p>
+    <p><strong>怎么拧</strong>：按报告"顺时针 / 逆时针 + 圈数 + 分数"拧</p>
+    <p><strong>为什么重要</strong>：L2 L3 L4 都是软补偿，<strong>补偿不了机械偏差超过 0.1mm 的床</strong>。比如 L4 Mesh 测出来 X 方向差 2.67mm——软补偿的喷嘴要在 182mm 行程上补偿 2.67mm 高度差，每 1mm 高度差喷嘴会"摇头"——打印质量断崖下降。</p>
+  </div>
+
+  <div id="d2" class="pyramid-detail">
+    <h4 style="color: #e3b341;">L2 · 探针校准（Z 高度基准）</h4>
+    <p><strong>做什么</strong>：用 A4 纸测试喷嘴到床的距离，确定 z_offset</p>
+    <p><strong>命令</strong>：<code>PROBE_CALIBRATE</code></p>
+    <p><strong>目标</strong>：z_offset 准确到 <strong style="color: #3fb950;">0.01mm</strong>，A4 纸能感受到"轻轻摩擦"</p>
+    <p><strong>顺序</strong>：在 L1 物理调平之后做</p>
+    <p><strong>KLP1 现状</strong>：z_offset = 1.050mm（SAVE_CONFIG 自动生成）</p>
+  </div>
+
+  <div id="d3" class="pyramid-detail">
+    <h4 style="color: #56d364;">L3 · Z 等高（双 Z 专用，KLP1 跳过）</h4>
+    <p><strong>做什么</strong>：让 2 个 Z 电机的高度一致（双 Z 同步带同步也可以跳过）</p>
+    <p><strong>命令</strong>：<code>Z_TILT_ADJUST</code></p>
+    <p><strong>目标</strong>：2 个 Z 电机高度差 ≤ 0.05mm</p>
+    <p><strong>KLP1 现状</strong>：<span style="color: #f85149;">单 Z 同步带 + 双丝杠</span>，<strong>用不到这个命令</strong></p>
+  </div>
+
+  <div id="d4" class="pyramid-detail">
+    <h4 style="color: #79c0ff;">L4 · Mesh 补偿（喷嘴跟随床型）</h4>
+    <p><strong>做什么</strong>：把床分成 5×5 或 6×6 网格，测每个点的 Z 高度，存为 Mesh</p>
+    <p><strong>命令</strong>：<code>BED_MESH_CALIBRATE</code></p>
+    <p><strong>目标</strong>：网格 Z 范围 ≤ <strong style="color: #3fb950;">±0.2mm</strong></p>
+    <p><strong>顺序</strong>：L1 + L2 完成之后做</p>
+    <p><strong>KLP1 现状</strong>：<span style="color: #d29922;">缺 [bed_mesh] section</span>，之前只测了 2 行 12 个点（应 6×6=36 个点）</p>
+  </div>
+
+  <h2>📐 数据阈值表（什么时候算"平"）</h2>
+  <table>
+    <tr><th>层级</th><th>指标</th><th>合格</th><th>警告</th><th>严重</th></tr>
+    <tr><td>L1 螺丝</td><td>4 角 Z 差</td><td style="color:#3fb950;">≤ 0.05mm (5丝)</td><td style="color:#d29922;">0.05-0.1mm</td><td style="color:#f85149;">> 0.1mm (10丝)</td></tr>
+    <tr><td>L2 探针</td><td>z_offset 误差</td><td style="color:#3fb950;">≤ 0.01mm</td><td style="color:#d29922;">0.01-0.03mm</td><td style="color:#f85149;">> 0.03mm</td></tr>
+    <tr><td>L4 Mesh</td><td>网格 Z 范围</td><td style="color:#3fb950;">≤ ±0.2mm</td><td style="color:#d29922;">±0.2-±0.5mm</td><td style="color:#f85149;">> ±0.5mm</td></tr>
+    <tr><td>L4 Mesh</td><td>倾斜率</td><td style="color:#3fb950;">≤ 0.1%</td><td style="color:#d29922;">0.1-0.5%</td><td style="color:#f85149;">> 0.5%</td></tr>
+  </table>
+
+  <div class="callout callout-yellow">
+    <div class="callout-title">⚠️ KLP1 今晚要修的 3 个缺口</div>
+    <ul>
+      <li><strong>L1 缺 [screws_tilt_adjust] section</strong> → SCREWS_TILT_CALCULATE 用默认配置</li>
+      <li><strong>L4 缺 [bed_mesh] section</strong> → 之前只测了 12 个点（应 36 个）</li>
+      <li><strong>重复 [probe] section</strong> → z_offset 加载异常</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============== Tab 2: KLP1 实战 ============== -->
+<div id="p2" class="panel">
+  <h2>🔧 KLP1 今晚调试实战</h2>
+  <p>这一 Tab 解决 2 件事：① 修好 3 个缺口 ② 跑通完整调平流程。</p>
+
+  <h3>📋 完整流程（7 步）</h3>
+  <div class="flow">
+    <div class="flow-step"><div class="num">1</div><div class="name">修配置</div><div class="desc">加 2 section + 删重复</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="num">2</div><div class="name">归位</div><div class="desc">G28</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="num">3</div><div class="name">探针校准</div><div class="desc">PROBE_CALIBRATE</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="num">4</div><div class="name">螺丝校准</div><div class="desc">SCREWS_TILT_CALCULATE</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="num">5</div><div class="name">Mesh</div><div class="desc">BED_MESH_CALIBRATE</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="num">6</div><div class="name">共振补偿</div><div class="desc">SHAPER_CALIBRATE</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="num">7</div><div class="name">首层测试</div><div class="desc">100% 宽度单层</div></div>
+  </div>
+
+  <h3>Step 1 · 修配置（5 分钟）</h3>
+  <div class="callout callout-blue">
+    <div class="callout-title">📍 在 Mainsail 网页编辑器里操作</div>
+    <p><strong>路径</strong>：Mainsail → 设备 → printer.cfg</p>
+  </div>
+
+  <p><strong>1A. 找到 [neopixel mini12864] section</strong>（SAVE_CONFIG 块之前最后一个）</p>
+  <p><strong>1B. 在它后面粘贴</strong>：</p>
+<pre><code># ============================================
+# Andy 哥 KLP1 调平修复补丁
+# ============================================
+
+# 1. 4 角螺丝校准（单 Z 专用）
+[screws_tilt_adjust]
+screw1: 35, 35
+screw2: 185, 35
+screw3: 185, 185
+screw4: 35, 185
+screw_thread: CW-M3
+horizontal_move_z: 10
+retry_tolerance: 0.0075
+
+# 2. 床 Mesh（解决 12 个点 → 36 个点）
+[bed_mesh]
+mesh_min: 20, 20
+mesh_max: 202, 190
+probe_count: 6, 6
+algorithm: lagrange
+horizontal_move_z: 5
+fade_start: 1.0
+fade_end: 10.0
+</code></pre>
+
+  <p><strong>1C. 删第二个 [probe] section</strong>（带 <code>#z_offset: 0#2.0 #6.25</code> 那个）</p>
+  <p><strong>1D. 保存并重启</strong></p>
+
+  <h3>Step 2-3 · 归位 + 探针校准</h3>
+  <div class="flow">
+    <div class="flow-step"><div class="num">2A</div><div class="name">移动控制</div><div class="desc">点"全部归位"</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="num">2B</div><div class="name">验证</div><div class="desc">喷嘴归 X0 Y0 Z0</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="num">3A</div><div class="name">PROBE_CALIBRATE</div><div class="desc">A4 纸测试</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="num">3B</div><div class="name">ACCEPT</div><div class="desc">保存 z_offset</div></div>
+  </div>
+
+  <h3>Step 4 · SCREWS_TILT_CALCULATE 拧螺丝流程</h3>
+  <div class="callout callout-yellow">
+    <div class="callout-title">⚠️ 拧螺丝必须断电！</div>
+    <p>控制台输入 → 床自动移到螺丝位置 → Z 下降到探针附近 → <strong style="color: #f85149;">立刻断电</strong> → 手动拧螺丝 → <strong>上电</strong> → 重启 Klipper</p>
+  </div>
+
+  <h3>Step 5 · Mesh 验证清单</h3>
+  <div class="checklist" id="klp1-checklist">
+    <label class="checklist-item"><input type="checkbox"><span class="text">[screws_tilt_adjust] section 已加</span></label>
+    <label class="checklist-item"><input type="checkbox"><span class="text">[bed_mesh] section 已加</span></label>
+    <label class="checklist-item"><input type="checkbox"><span class="text">重复 [probe] section 已删</span></label>
+    <label class="checklist-item"><input type="checkbox"><span class="text">保存并重启，Mainsail 变绿</span></label>
+    <label class="checklist-item"><input type="checkbox"><span class="text">G28 归位成功（无撞床）</span></label>
+    <label class="checklist-item"><input type="checkbox"><span class="text">PROBE_CALIBRATE 跑通（A4 纸测试）</span></label>
+    <label class="checklist-item"><input type="checkbox"><span class="text">SCREWS_TILT_CALCULATE 4 角 Z 差 < 0.05mm</span></label>
+    <label class="checklist-item"><input type="checkbox"><span class="text">BED_MESH_CALIBRATE 输出 6×6=36 个点</span></label>
+    <label class="checklist-item"><input type="checkbox"><span class="text">Mesh 范围 ≤ ±0.2mm</span></label>
+    <label class="checklist-item"><input type="checkbox"><span class="text">第一层测试成功（100% 宽度）</span></label>
+  </div>
+</div>
+
+<!-- ============== Tab 3: 数据解读 ============== -->
+<div id="p3" class="panel">
+  <h2>📊 调平数据解读 — 学会看报告</h2>
+  <p>这一 Tab 让你 3 秒判断"调平成不成功"。</p>
+
+  <h3>🔬 SCREWS_TILT_CALCULATE 报告</h3>
+  <p>Andy 哥 22:10 跑的实际数据：</p>
+<pre><code>Probe at 35.000,35.000    is z=0.498000
+Probe at 185.000,35.000   is z=0.508000
+Probe at 185.000,185.000  is z=0.536000
+Probe at 35.000,185.000   is z=0.510000
+</code></pre>
+
+  <h4>4 角 Z 高度柱状图（视觉化）</h4>
+  <div class="bed-sim">
+    <div class="bed-corner bed-c1"><div class="z">0.498</div><div>左前</div></div>
+    <div class="bed-corner bed-c2"><div class="z">0.508</div><div>右前</div></div>
+    <div class="bed-corner bed-c3"><div class="z">0.536</div><div>右后</div></div>
+    <div class="bed-corner bed-c4"><div class="z">0.510</div><div>左后</div></div>
+    <div class="bed-line"></div>
+  </div>
+
+  <h4>计算倾斜</h4>
+  <div class="z-bar-chart">
+    <div class="z-bar-row">
+      <div class="label">(35, 35)</div>
+      <div class="bar" style="width: 50%;"></div>
+      <div class="value">0.498mm</div>
+    </div>
+    <div class="z-bar-row">
+      <div class="label">(185, 35)</div>
+      <div class="bar" style="width: 51%;"></div>
+      <div class="value">0.508mm</div>
+    </div>
+    <div class="z-bar-row">
+      <div class="label">(185, 185)</div>
+      <div class="bar" style="width: 54%; background: linear-gradient(90deg, #d29922, #f85149);"></div>
+      <div class="value">0.536mm</div>
+    </div>
+    <div class="z-bar-row">
+      <div class="label">(35, 185)</div>
+      <div class="bar" style="width: 51%;"></div>
+      <div class="value">0.510mm</div>
+    </div>
+  </div>
+
+  <div class="callout callout-green">
+    <div class="callout-title">✅ 4 角 Z 差 = 0.038mm（3.8 丝）</div>
+    <p><strong>判断</strong>：<span style="color: #3fb950; font-weight: 600;">合格！</span> 已经在 5 丝以内，<strong>不需要拧螺丝</strong>。</p>
+    <p><strong>但报告建议"拧 1 圈 3/12"</strong>是 SCREWS_TILT_CALCULATE 算法的误判（算法的相对参考点不是最低点）。</p>
+  </div>
+
+  <h3>🔬 BED_MESH_CALIBRATE 报告</h3>
+  <p>Andy 哥之前 12:53 跑的数据：</p>
+<pre><code>Y=20 行：X=7.15→Z=1.097 ... X=152.75→Z=3.066
+Y=54 行：X=189.15→Z=3.768（最高）... X=7.15→Z=1.191（最低）
+
+整床倾斜：2.67mm / 182mm = 1.47%  ← 严重
+</code></pre>
+
+  <div class="callout callout-red">
+    <div class="callout-title">🚨 X 方向严重倾斜 1.47%</div>
+    <p><strong>判断</strong>：<span style="color: #f85149; font-weight: 600;">严重！</span> 远超 ±0.2mm 阈值。</p>
+    <p><strong>根因</strong>：缺 [screws_tilt_adjust] section（SCREWS_TILT_CALCULATE 没法跑）+ 缺 [bed_mesh] section（Mesh 测的点不对）</p>
+  </div>
+
+  <h3>📐 倾斜率计算器（自动算）</h3>
+  <p>输入 4 角 Z 高度，自动算倾斜：</p>
+  <div style="background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin: 12px 0;">
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+      <div><label style="color: #8b949e; font-size: 12px;">左前 Z (mm)</label><input type="number" id="z1" value="0.498" step="0.001" style="width: 100%; padding: 6px; background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; border-radius: 4px;"></div>
+      <div><label style="color: #8b949e; font-size: 12px;">右前 Z (mm)</label><input type="number" id="z2" value="0.508" step="0.001" style="width: 100%; padding: 6px; background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; border-radius: 4px;"></div>
+      <div><label style="color: #8b949e; font-size: 12px;">右后 Z (mm)</label><input type="number" id="z3" value="0.536" step="0.001" style="width: 100%; padding: 6px; background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; border-radius: 4px;"></div>
+      <div><label style="color: #8b949e; font-size: 12px;">左后 Z (mm)</label><input type="number" id="z4" value="0.510" step="0.001" style="width: 100%; padding: 6px; background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; border-radius: 4px;"></div>
+    </div>
+    <button class="btn btn-primary" onclick="calcTilt()" style="margin-top: 12px;">📐 计算倾斜</button>
+    <div id="tilt-result" style="margin-top: 12px; padding: 12px; background: #0d1117; border-radius: 4px; display: none;"></div>
+  </div>
+
+  <h3>📊 报告判断速查表</h3>
+  <table>
+    <tr><th>看到的输出</th><th>含义</th><th>行动</th></tr>
+    <tr><td>"Bed is flat"</td><td>4 角 Z 差 &lt; 容差</td><td>✅ 不用拧</td></tr>
+    <tr><td>"Adjust the screws"</td><td>需要拧</td><td>按建议拧</td></tr>
+    <tr><td>"clockwise" / "CW"</td><td>顺时针 = 抬高</td><td>顺时针拧</td></tr>
+    <tr><td>"counter-clockwise" / "CCW"</td><td>逆时针 = 降低</td><td>逆时针拧</td></tr>
+    <tr><td>"Mesh Bed Leveling Complete"</td><td>Mesh 测完</td><td>看 SAVE_CONFIG 块</td></tr>
+    <tr><td>"SAVE_CONFIG will restart"</td><td>即将自动重启</td><td>✅ 正常，10-30 秒</td></tr>
+    <tr><td>"Klipper state: Disconnect"</td><td>SAVE_CONFIG 重启中</td><td>✅ 正常，等</td></tr>
+  </table>
+</div>
+
+<!-- ============== Tab 4: 通用 SOP ============== -->
+<div id="p4" class="panel">
+  <h2>🛠️ 通用 3D 打印机调试 SOP</h2>
+  <p>这一 Tab 提炼出"换任何机型都能用"的 5 步开箱 + 6 命令必跑。</p>
+
+  <h3>📦 5 步开箱 SOP</h3>
+  <div class="flow">
+    <div class="flow-step"><div class="num">1</div><div class="name">机械检查</div><div class="desc">丝杠 / 导轨 / 皮带</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="num">2</div><div class="name">接线检查</div><div class="desc">电机 / 限位 / 热端</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="num">3</div><div class="name">固件刷写</div><div class="desc">Klipper / Marlin</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="num">4</div><div class="name">配置导入</div><div class="desc">printer.cfg</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><div class="num">5</div><div class="name">必跑 6 命令</div><div class="desc">见下</div></div>
+  </div>
+
+  <h3>📋 必跑 6 命令（5 步开箱后必做）</h3>
+  <table>
+    <tr><th>#</th><th>命令</th><th>作用</th><th>用时</th></tr>
+    <tr><td>1</td><td><code>G28</code></td><td>归位（X/Y/Z 全部到限位）</td><td>10s</td></tr>
+    <tr><td>2</td><td><code>PROBE_CALIBRATE</code></td><td>探针 z_offset 校准</td><td>3min</td></tr>
+    <tr><td>3</td><td><code>SCREWS_TILT_CALCULATE</code></td><td>4 角螺丝校准（单 Z）</td><td>30s</td></tr>
+    <tr><td>4</td><td><code>BED_MESH_CALIBRATE</code></td><td>床 Mesh 测 5×5 或 6×6 网格</td><td>3min</td></tr>
+    <tr><td>5</td><td><code>SHAPER_CALIBRATE</code></td><td>共振补偿（Input Shaper）</td><td>5min</td></tr>
+    <tr><td>6</td><td><code>PID_CALIBRATE HEATER=extruder TARGET=245</code><br><code>PID_CALIBRATE HEATER=heater_bed TARGET=70</code></td><td>温度 PID 校准（挤出机 + 热床）</td><td>10min</td></tr>
+  </table>
+
+  <div class="callout callout-blue">
+    <div class="callout-title">💡 Andy 哥专属 SOP 优化</div>
+    <p>因为 KLP1 是 <strong>单 Z 同步带 + 双丝杠</strong>，第 3 步（SCREWS_TILT_CALCULATE）就够了，<strong>跳过 Z_TILT_ADJUST</strong>。</p>
+    <p>如果是双 Z 电机（Voron / K1 Max），要加 <code>Z_TILT_ADJUST</code>。</p>
+  </div>
+
+  <h3>🔄 调试顺序记忆口诀</h3>
+  <div class="card" style="font-size: 18px; text-align: center; padding: 24px;">
+    <strong style="color: #58a6ff;">"先归位，再校探，再调平，最后 Mesh 和 Shape"</strong>
+    <br><br>
+    <span style="color: #8b949e;">G28 → PROBE → SCREWS → MESH → SHAPER → PID</span>
+  </div>
+</div>
+
+<!-- ============== Tab 5: 排错清单 ============== -->
+<div id="p5" class="panel">
+  <h2>🚑 12 种异常排错清单</h2>
+  <p>这一 Tab 是 Andy 哥的"故障字典"——遇到问题 Ctrl+F 搜关键词。</p>
+
+  <details>
+    <summary>① Z 轴归零不了</summary>
+    <div class="content">
+      <p><strong>5 种表现 + 解决</strong>：</p>
+      <table>
+        <tr><th>表现</th><th>根因</th><th>解决</th></tr>
+        <tr><td>一直往下落不触发</td><td>Z 限位线断了 / BLTouch 没弹针</td><td>查线 + 手动弹针</td></tr>
+        <tr><td>一直往上跑不下降</td><td>G28 Z 找触发点失败</td><td>手动 G1 Z10 让喷嘴下降再 G28</td></tr>
+        <tr><td>归零后撞床（嘎嘎声）</td><td>position_min 配错 / z_offset 偏</td><td>改 printer.cfg + 重测 z_offset</td></tr>
+        <tr><td>归零后离床 2-3mm 太远</td><td>z_offset 偏大</td><td>PROBE_CALIBRATE 重测</td></tr>
+        <tr><td>归零后离床 &lt; 0.1mm 几乎贴</td><td>z_offset 偏小</td><td>PROBE_CALIBRATE 重测</td></tr>
+      </table>
+    </div>
+  </details>
+
+  <details>
+    <summary>② SCREWS_TILT_CALCULATE 报"section not configured"</summary>
+    <div class="content">
+      <p><strong>根因</strong>：printer.cfg 缺 <code>[screws_tilt_adjust]</code> section</p>
+      <p><strong>解决</strong>：在 printer.cfg 末尾追加 section（4 颗螺丝坐标）</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>③ BED_MESH_CALIBRATE 只测 2 行 12 个点（应 6×6=36）</summary>
+    <div class="content">
+      <p><strong>根因</strong>：缺 <code>[bed_mesh]</code> section，Klipper 用默认的 <code>mesh_min/max</code> = 整张床，导致 BLTouch 行程外</p>
+      <p><strong>解决</strong>：加 [bed_mesh] section，明确 <code>mesh_min: 20,20</code> + <code>mesh_max: 202,190</code> + <code>probe_count: 6,6</code></p>
+    </div>
+  </details>
+
+  <details>
+    <summary>④ Mainsail 工具下拉里没有"调平"按钮</summary>
+    <div class="content">
+      <p><strong>根因</strong>：工具下拉只显示 <code>[gcode_macro]</code> 定义的宏，<strong>不是 Klipper 全部命令</strong></p>
+      <p><strong>解决</strong>：在控制台直接输入命令（如 <code>BED_MESH_CALIBRATE</code> 回车）</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>⑤ Klipper 状态显示 Disconnect</summary>
+    <div class="content">
+      <p><strong>2 种情况</strong>：</p>
+      <p>A. <code>SAVE_CONFIG</code> 触发的自动重启（<span style="color: #3fb950;">正常！</span>）→ 等 10-30 秒自动重连</p>
+      <p>B. 真的挂了（<span style="color: #f85149;">异常</span>）→ SSH <code>sudo systemctl restart klipper</code></p>
+    </div>
+  </details>
+
+  <details>
+    <summary>⑥ Mesh 测出来 Z 差 > 1mm 严重倾斜</summary>
+    <div class="content">
+      <p><strong>根因</strong>：<strong>机械结构没调平</strong>（SCREWS_TILT_CALCULATE 没跑 / 跑没拧）</p>
+      <p><strong>解决</strong>：先 SCREWS_TILT_CALCULATE 拧 4 角螺丝，再 BED_MESH_CALIBRATE</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>⑦ 第一层粘不住 / 太薄 / 太厚</summary>
+    <div class="content">
+      <p><strong>粘不住</strong>：床温太低 / 喷嘴离床太远 / Z 初始高度不对</p>
+      <p><strong>太薄（透光）</strong>：z_offset 偏大 / 喷嘴离床太近</p>
+      <p><strong>太厚（糊）</strong>：z_offset 偏小 / 喷嘴离床太远</p>
+      <p><strong>解决</strong>：PROBE_CALIBRATE 重测 + 切片里调 Z 高度微调</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>⑧ 共振补偿失败 / 报告空白</summary>
+    <div class="content">
+      <p><strong>根因</strong>：ADXL345 没接 / 接线错 / [adxl345] section 错</p>
+      <p><strong>解决</strong>：检查 MKS_THR:gpio13/14/15 接线 + 跑 G40 重新校准</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>⑨ PID 校准温度波动大</summary>
+    <div class="content">
+      <p><strong>根因</strong>：风扇吹 / 室温不稳 / 热敏电阻接触不良</p>
+      <p><strong>解决</strong>：关门校准 + 室温 25℃ + 检查热敏电阻</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>⑩ 探针不触发 / 一直触发</summary>
+    <div class="content">
+      <p><strong>不触发</strong>：BLTouch 红色灯不闪 / 探针针没伸出</p>
+      <p><strong>一直触发</strong>：BLTouch 黄灯常亮 / 探针卡住</p>
+      <p><strong>解决</strong>：重启 BLTouch（断电 5 秒再上电）+ 检查线序</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>⑪ SAVE_CONFIG 块被覆盖</summary>
+    <div class="content">
+      <p><strong>根因</strong>：直接编辑了 <code>#*#</code> 开头的自动生成块</p>
+      <p><strong>解决</strong>：改前面 <code>[bed_mesh]</code> section（不带 #*#）→ SAVE_CONFIG 会更新 #*# 块</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>⑫ 重复 section 报错</summary>
+    <div class="content">
+      <p><strong>症状</strong>：klippy.log 报 "Duplicate section [probe]"</p>
+      <p><strong>解决</strong>：合并两个 section 删一个</p>
+    </div>
+  </details>
+</div>
+
+<!-- ============== Tab 6: 6 个必跑命令 ============== -->
+<div id="p6" class="panel">
+  <h2>📋 6 个必跑命令详解</h2>
+
+  <h3>1️⃣ G28 — 归位</h3>
+  <p><strong>作用</strong>：X/Y/Z 全部回到限位位置（机械原点）</p>
+  <p><strong>参数</strong>：无</p>
+  <p><strong>使用</strong>：控制台输入 <code>G28</code> 回车</p>
+  <p><strong>KLP1 特殊</strong>：X/Y 用 sensorless homing（无接触限位），Z 用 BLTouch 探针</p>
+
+  <h3>2️⃣ PROBE_CALIBRATE — 探针校准</h3>
+  <p><strong>作用</strong>：用 A4 纸测试喷嘴到床距离，确定 z_offset</p>
+  <p><strong>使用</strong>：控制台输入 <code>PROBE_CALIBRATE</code> 回车</p>
+  <p><strong>流程</strong>：</p>
+  <ol>
+    <li>喷嘴移到床中心</li>
+    <li>Z 下降到探针附近</li>
+    <li>按 TESTZ Z=-0.1 慢慢下降</li>
+    <li>A4 纸感到"轻轻摩擦"时输入 <code>ACCEPT</code></li>
+  </ol>
+  <p><strong>保存</strong>：SAVE_CONFIG</p>
+
+  <h3>3️⃣ SCREWS_TILT_CALCULATE — 4 角螺丝校准</h3>
+  <p><strong>作用</strong>：测 4 角 Z 高度差，报告拧螺丝方向 + 圈数</p>
+  <p><strong>使用</strong>：控制台输入 <code>SCREWS_TILT_CALCULATE</code> 回车</p>
+  <p><strong>注意</strong>：需要 [screws_tilt_adjust] section</p>
+  <p><strong>拧螺丝流程</strong>：<span style="color: #f85149; font-weight: 600;">断电</span> → 拧 → <span style="color: #f85149; font-weight: 600;">上电</span> → 重跑</p>
+
+  <h3>4️⃣ BED_MESH_CALIBRATE — 床 Mesh</h3>
+  <p><strong>作用</strong>：把床分成网格，测每个点 Z 高度，存为 Mesh</p>
+  <p><strong>使用</strong>：控制台输入 <code>BED_MESH_CALIBRATE</code> 回车</p>
+  <p><strong>注意</strong>：需要 [bed_mesh] section</p>
+  <p><strong>完成</strong>：自动 SAVE_CONFIG</p>
+
+  <h3>5️⃣ SHAPER_CALIBRATE — 共振补偿</h3>
+  <p><strong>作用</strong>：用 ADXL345 测 X/Y 轴共振频率，自动算 input shaper</p>
+  <p><strong>使用</strong>：控制台输入 <code>SHAPER_CALIBRATE</code> 回车</p>
+  <p><strong>需要</strong>：[adxl345] section + ADXL345 硬件</p>
+  <p><strong>KLP1 现状</strong>：已有 MKS_THR:gpio13/14/15 接线，<span style="color: #3fb950;">已配</span></p>
+
+  <h3>6️⃣ PID_CALIBRATE — 温度 PID</h3>
+  <p><strong>作用</strong>：自动测挤出机和热床的 PID 参数</p>
+  <p><strong>使用</strong>：</p>
+<pre><code>PID_CALIBRATE HEATER=extruder TARGET=245
+PID_CALIBRATE HEATER=heater_bed TARGET=70</code></pre>
+  <p><strong>完成</strong>：报告 Kp/Ki/Kd，复制到 printer.cfg 对应 section</p>
+
+  <h3>📋 命令速查表（可打印）</h3>
+  <div class="card" style="font-family: monospace; font-size: 13px;">
+<pre><code># 1. 归位
+G28
+
+# 2. 探针校准
+PROBE_CALIBRATE
+TESTZ Z=-0.1
+ACCEPT
+
+# 3. 4 角螺丝校准
+SCREWS_TILT_CALCULATE
+
+# 4. 床 Mesh
+BED_MESH_CALIBRATE
+
+# 5. 共振补偿
+SHAPER_CALIBRATE
+
+# 6. PID 校准
+PID_CALIBRATE HEATER=extruder TARGET=245
+PID_CALIBRATE HEATER=heater_bed TARGET=70</code></pre>
+  </div>
+</div>
+
+<!-- ============== Tab 7: Andy 哥专属 ============== -->
+<div id="p7" class="panel">
+  <h2>💡 Andy 哥专属 — 跟 LED 业务挂钩</h2>
+
+  <h3>🎯 你为什么需要这套调试方法论？</h3>
+  <p>你同时有 <strong>3 台打印机 + LED 库存业务 + 3D 打印定制</strong> 三个维度：</p>
+  <ul>
+    <li><strong>KLP1</strong>（220×220 / CoreXY / Klipper）→ 主用机，打 LED 灯罩 / 配件</li>
+    <li><strong>大鱼 SPA</strong>（4 色机）→ 多色打印 / ERCF V3 路线</li>
+    <li><strong>K1 改造机</strong>（220 / 改造潜力）→ 备用 + 学习</li>
+  </ul>
+  <p><strong>3 台机器的调平逻辑 90% 相同</strong>，掌握一套方法论 = 三台机器都搞定。</p>
+
+  <h3>📦 LED 灯罩打印对调平的严苛要求</h3>
+  <div class="callout callout-yellow">
+    <div class="callout-title">⚠️ 灯罩 = 透光件，调平差 0.1mm 都看得出来</div>
+    <p><strong>PETG 灯罩</strong>要求：表面光洁、无层纹、厚度均匀</p>
+    <p><strong>Mesh 范围</strong>必须 ≤ ±0.1mm（比一般打印严苛 2 倍）</p>
+    <p><strong>第一层</strong>必须 100% 完美（否则灯罩"漏光"）</p>
+  </div>
+
+  <h3>🔧 调试业务化清单</h3>
+  <div class="checklist">
+    <label class="checklist-item"><input type="checkbox"><span class="text">每次换料后跑 PROBE_CALIBRATE（PETG / PLA 系数不同）</span></label>
+    <label class="checklist-item"><input type="checkbox"><span class="text">每打印 50 小时跑 SHAPER_CALIBRATE（皮带会松）</span></label>
+    <label class="checklist-item"><input type="checkbox"><span class="text">每换新喷嘴跑 PROBE_CALIBRATE（喷嘴长度变化）</span></label>
+    <label class="checklist-item"><input type="checkbox"><span class="text">每 100 小时跑 PID_CALIBRATE（热敏电阻老化）</span></label>
+    <label class="checklist-item"><input type="checkbox"><span class="text">搬动机器后跑 SCREWS_TILT_CALCULATE（机械结构可能移位）</span></label>
+    <label class="checklist-item"><input type="checkbox"><span class="text">LED 灯罩打印前跑 BED_MESH_CALIBRATE（严苛要求）</span></label>
+  </div>
+
+  <h3>🌙 凌晨 3 点调试注意事项</h3>
+  <div class="callout callout-red">
+    <div class="callout-title">🌙 作息提醒</div>
+    <p>Andy 哥深夜工作效率高，但 3D 打印调试<strong>需要专注</strong>——</p>
+    <ul>
+      <li>❌ 困的时候不要拧螺丝（容易拧反 / 拧过头）</li>
+      <li>❌ 困的时候不要改 printer.cfg（容易改错）</li>
+      <li>✅ 困的时候只做"读"的工作（看文档 / 看代码）</li>
+      <li>✅ 调试完成立刻上床睡觉（不要"再跑一次"）</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============== Tab 8: 资源汇总 ============== -->
+<div id="p8" class="panel">
+  <h2>📚 资源汇总</h2>
+
+  <h3>📖 Klipper 官方文档</h3>
+  <ul>
+    <li><a href="https://www.klipper3d.org/" target="_blank" style="color: #58a6ff;">Klipper 官网</a></li>
+    <li><a href="https://www.klipper3d.org/Config_Reference.html" target="_blank" style="color: #58a6ff;">Config Reference（配置参考）</a></li>
+    <li><a href="https://www.klipper3d.org/Gcodes.html" target="_blank" style="color: #58a6ff;">Gcodes（命令参考）</a></li>
+    <li><a href="https://www.klipper3d.org/Bed_Level.html" target="_blank" style="color: #58a6ff;">Bed Level（床调平）</a></li>
+  </ul>
+
+  <h3>📺 必看 B 站视频</h3>
+  <ul>
+    <li><a href="https://www.bilibili.com/video/BV1ceinB7E7H" target="_blank" style="color: #58a6ff;">BV1ceinB7E7H — 3D打印热床调平深度研究（石頭a强拖幻者）</a></li>
+    <li><a href="https://www.bilibili.com/video/BV1YK4y1L7qW" target="_blank" style="color: #58a6ff;">BV1YK4y1L7qW — Klipper 入门教程（3D打印大队长）</a></li>
+  </ul>
+
+  <h3>🛠️ Andy 哥专属 HTML 速查卡</h3>
+  <div class="card-grid">
+    <div class="card">
+      <h4 style="color: #58a6ff;">KLP1 今晚完整流程</h4>
+      <p>5 步走，2 小时搞定 KLP1 全套调平</p>
+    </div>
+    <div class="card">
+      <h4 style="color: #58a6ff;">KLP1 自动调平 5 步走</h4>
+      <p>PROBE + SCREWS + MESH + SHAPER + PID 完整流程</p>
+    </div>
+    <div class="card">
+      <h4 style="color: #58a6ff;">B 站视频 KLP1 适配版</h4>
+      <p>BV1ceinB7E7H 视频总结 + KLP1 4 件事适配清单</p>
+    </div>
+    <div class="card">
+      <h4 style="color: #58a6ff;">KLP1 提速 3 招</h4>
+      <p>CHT 喷嘴 + Revo 热端 + Klipper IS</p>
+    </div>
+  </div>
+
+  <h3>📊 调平数据记录模板</h3>
+  <details>
+    <summary>每次调平后建议记录（点开看模板）</summary>
+    <div class="content">
+<pre><code># 调平记录
+日期: _______________
+机器: KLP1 / K1 / Kobra / Voron
+
+## 机械结构
+- 4 角 Z 差: ____mm
+- 倾斜方向: X / Y / X+Y
+- 拧螺丝调整: ____mm (顺时针/逆时针)
+
+## 探针
+- z_offset: ____mm
+- 探针触发状态: 正常/异常
+
+## Mesh
+- probe_count: 5×5 / 6×6
+- 网格范围: ____mm ~ ____mm
+- 倾斜率: ____%
+
+## 共振
+- shaper_freq_x: ____Hz
+- shaper_freq_y: ____Hz
+- shaper_type_x: mzv / ei / 2hump_ei / zv
+- shaper_type_y: mzv / ei / 2hump_ei / zv
+
+## PID
+- extruder: Kp=___ Ki=___ Kd=___
+- heater_bed: Kp=___ Ki=___ Kd=___
+
+## 备注
+________________________________
+</code></pre>
+    </div>
+  </details>
+</div>
+
+</div>
+
+<script>
+// Tab 切换
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById(t.dataset.panel).classList.add('active');
+  });
+});
+
+// 调平金字塔展开
+function togglePyramid(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('show');
+}
+
+// 倾斜计算
+function calcTilt() {
+  const z = [
+    parseFloat(document.getElementById('z1').value),
+    parseFloat(document.getElementById('z2').value),
+    parseFloat(document.getElementById('z3').value),
+    parseFloat(document.getElementById('z4').value)
+  ];
+  if (z.some(v => isNaN(v))) {
+    alert('请输入 4 个 Z 高度');
+    return;
+  }
+  const max = Math.max(...z);
+  const min = Math.min(...z);
+  const diff = (max - min).toFixed(3);
+  const tilt = ((max - min) / 182 * 100).toFixed(2);
+  let level, color;
+  if (diff <= 0.05) { level = '✅ 合格'; color = '#3fb950'; }
+  else if (diff <= 0.1) { level = '⚠️ 警告'; color = '#d29922'; }
+  else { level = '🚨 严重'; color = '#f85149'; }
+  const result = document.getElementById('tilt-result');
+  result.style.display = 'block';
+  result.innerHTML = `
+    <div style="font-size: 16px; margin-bottom: 8px;">${level}</div>
+    <div>4 角 Z 差: <strong style="color: ${color};">${diff} mm</strong> (${(diff * 100).toFixed(1)} 丝)</div>
+    <div>倾斜率: <strong style="color: ${color};">${tilt}%</strong></div>
+    <div>最小 Z: ${min.toFixed(3)} mm / 最大 Z: ${max.toFixed(3)} mm</div>
+  `;
+}
+
+// Checklist
+document.querySelectorAll('.checklist-item input').forEach(cb => {
+  cb.addEventListener('change', (e) => {
+    e.target.parentElement.classList.toggle('done', e.target.checked);
+  });
+});
+</script>
+
+</body>
+</html>

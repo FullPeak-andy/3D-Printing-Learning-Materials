@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>ERCF V3 全套资源下载指南 · Andy 哥专属</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", monospace;
+  background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 100%);
+  color: #e6e9f0; padding: 20px; min-height: 100vh; line-height: 1.7;
+}
+.container { max-width: 1300px; margin: 0 auto; }
+h1 {
+  text-align: center; font-size: 2em; margin: 20px 0 8px;
+  background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcf7f, #4ecdc4);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.subtitle { text-align: center; color: #8892b0; margin-bottom: 25px; font-size: 0.92em; }
+
+/* 决策盒 */
+.decision {
+  background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(78,205,196,0.1));
+  border: 2px solid #4ecdc4; border-radius: 12px; padding: 20px; margin: 20px 0;
+}
+.decision h3 { color: #4ecdc4; margin-bottom: 12px; font-size: 1.15em; }
+.decision ol { padding-left: 22px; }
+.decision li { margin: 7px 0; color: #ccd6f6; }
+
+/* 段标题 */
+.section {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px; padding: 22px; margin: 18px 0;
+}
+.section h2 {
+  font-size: 1.5em; color: #4ecdc4; margin-bottom: 15px;
+  border-left: 4px solid #4ecdc4; padding-left: 12px;
+}
+.section h3 { color: #ffd93d; margin: 12px 0 6px; font-size: 1.05em; }
+.section h4 { color: #95e1d3; margin: 10px 0 4px; font-size: 0.95em; }
+.section p { margin: 6px 0; color: #ccd6f6; font-size: 0.92em; }
+
+/* 代码块 */
+.code {
+  background: #0d1117; border: 1px solid #30363d; border-radius: 8px;
+  padding: 14px 18px; margin: 10px 0; font-family: "Cascadia Code", "Consolas", monospace;
+  font-size: 0.85em; overflow-x: auto; line-height: 1.5; position: relative;
+}
+.code .comment { color: #8b949e; }
+.code .cmd { color: #7ee787; }
+.code .path { color: #d2a8ff; }
+.code .flag { color: #ffa657; }
+.code-copy {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(78,205,196,0.2); border: 1px solid #4ecdc4; color: #4ecdc4;
+  padding: 3px 10px; border-radius: 5px; cursor: pointer; font-size: 0.75em;
+  font-family: -apple-system, sans-serif;
+}
+.code-copy:hover { background: #4ecdc4; color: #0a0e1a; }
+
+/* 表格 */
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.88em; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); }
+th { background: rgba(78,205,196,0.15); color: #4ecdc4; font-weight: bold; }
+tr:hover { background: rgba(255,255,255,0.03); }
+td.center { text-align: center; }
+
+/* 标签 */
+.tag {
+  display: inline-block; padding: 2px 9px; border-radius: 4px; font-size: 0.78em;
+  margin-right: 4px; margin-top: 3px;
+}
+.tag.green { background: rgba(107,207,127,0.2); color: #6bcf7f; border: 1px solid #6bcf7f; }
+.tag.yellow { background: rgba(255,217,61,0.2); color: #ffd93d; border: 1px solid #ffd93d; }
+.tag.red { background: rgba(255,107,107,0.2); color: #ff6b6b; border: 1px solid #ff6b6b; }
+.tag.blue { background: rgba(78,205,196,0.2); color: #4ecdc4; border: 1px solid #4ecdc4; }
+.tag.purple { background: rgba(149,225,211,0.2); color: #95e1d3; border: 1px solid #95e1d3; }
+
+/* 资源卡 */
+.repo-card {
+  background: rgba(78,205,196,0.05); border-left: 3px solid #4ecdc4;
+  padding: 12px 15px; margin: 10px 0; border-radius: 0 8px 8px 0;
+}
+.repo-card .name { color: #ffd93d; font-weight: bold; }
+.repo-card .url { color: #4ecdc4; font-size: 0.85em; }
+.repo-card .desc { color: #95a3b8; font-size: 0.85em; margin-top: 4px; }
+
+/* 步骤 */
+.step { display: flex; gap: 15px; margin: 10px 0; align-items: flex-start; }
+.step-num {
+  background: linear-gradient(135deg, #4ecdc4, #44a08d);
+  color: #fff; width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-weight: bold;
+  flex-shrink: 0; font-size: 0.95em;
+}
+.step-content { flex: 1; }
+.step-content b { color: #ffd93d; }
+.step-content p { margin: 3px 0; color: #ccd6f6; font-size: 0.9em; }
+
+/* 文件树 */
+.file-tree {
+  background: #0d1117; border: 1px solid #30363d; border-radius: 8px;
+  padding: 14px 18px; margin: 10px 0; font-family: "Cascadia Code", monospace;
+  font-size: 0.85em; line-height: 1.6; color: #7ee787;
+}
+
+/* 提示 */
+.warn {
+  background: rgba(255,217,61,0.08); border-left: 3px solid #ffd93d;
+  padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 10px 0; font-size: 0.9em;
+}
+.warn b { color: #ffd93d; }
+.warn p { color: #ccd6f6; }
+
+.tip {
+  background: rgba(107,207,127,0.08); border-left: 3px solid #6bcf7f;
+  padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 10px 0; font-size: 0.9em;
+}
+.tip b { color: #6bcf7f; }
+
+.danger {
+  background: rgba(255,107,107,0.08); border-left: 3px solid #ff6b6b;
+  padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 10px 0; font-size: 0.9em;
+}
+.danger b { color: #ff6b6b; }
+
+a { color: #4ecdc4; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.footer { text-align: center; color: #5a6478; font-size: 0.8em; margin-top: 30px; padding: 15px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🥕 ERCF V3 全套资源下载指南</h1>
+  <p class="subtitle">Andy 哥专属 · Windows 10.0.22631 · 8 个 GitHub 仓库 + 商业套件 · 一键复制粘贴</p>
+
+  <!-- 核心结论 -->
+  <div class="decision">
+    <h3>🎯 30 秒看完：Andy 哥用这 3 行命令全搞定</h3>
+    <p style="margin-bottom:10px">在 PowerShell 里执行（按 <kbd>Win+X</kbd> → <b>Windows PowerShell</b> 或 <b>终端</b>）：</p>
+    <div class="code">
+<span class="comment"># 1) 创建下载目录</span>
+<span class="cmd">mkdir</span> <span class="path">C:\3DPrint\ERCF_V3_full</span> ; <span class="cmd">cd</span> <span class="path">C:\3DPrint\ERCF_V3_full</span>
+
+<span class="comment"># 2) 一键克隆全部 8 个 GitHub 仓库（核心套件 + 软件 + Affiliate）</span>
+<span class="cmd">git clone</span> <span class="flag">--depth 1</span> https://github.com/Carrot-collective/ERCF_v3.git
+<span class="cmd">git clone</span> <span class="flag">--depth 1</span> https://github.com/Carrot-collective/ERCT.git
+<span class="cmd">git clone</span> <span class="flag">--depth 1</span> https://github.com/Carrot-collective/Filametrix.git
+<span class="cmd">git clone</span> <span class="flag">--depth 1</span> https://github.com/Carrot-collective/Blobifier.git
+<span class="cmd">git clone</span> <span class="flag">--depth 1</span> https://github.com/Carrot-collective/Filamentalist.git
+<span class="cmd">git clone</span> <span class="flag">--depth 1</span> https://github.com/kinematicdigit/Jabberwocky.git
+<span class="cmd">git clone</span> <span class="flag">--depth 1</span> https://github.com/moggieuk/Happy-Hare.git
+<span class="cmd">git clone</span> <span class="flag">--depth 1</span> https://github.com/moggieuk/ERCF-Software-V3.git
+
+<span class="comment"># 3) 以后要同步最新版本，只需要：</span>
+<span class="cmd">git pull</span>          <span class="comment"># 在每个仓库目录下执行</span>
+    </div>
+    <p style="margin-top:8px"><b>下载大小</b>：约 1.2-1.8 GB（含 CAD STEP + STL + 文档）<br>
+       <b>耗时</b>：取决于网速，国内镜像 5-15 分钟<br>
+       <b>前提</b>：需要先装 <a href="https://git-scm.com/download/win" target="_blank">Git for Windows</a>（默认安装即可）</p>
+  </div>
+
+  <!-- 第一段：仓库清单 -->
+  <div class="section">
+    <h2>📦 段 1：ERCF V3 涉及的 8 个 GitHub 仓库清单</h2>
+    <p>这份清单来自你之前看的 <code>ERCF_V3完整总结.html</code>：</p>
+
+    <div class="repo-card">
+      <span class="name">🥕 1. Carrot-collective/ERCF_v3</span> <span class="tag green">主仓</span> <span class="tag yellow">1.2k stars</span>
+      <div class="url">https://github.com/Carrot-collective/ERCF_v3</div>
+      <div class="desc">主换料器本体（CAD + STL + BOM + 图解手册 + 接线图）</div>
+    </div>
+    <div class="repo-card">
+      <span class="name">🐇 2. Carrot-collective/ERCT</span> <span class="tag green">缓冲器</span>
+      <div class="url">https://github.com/Carrot-collective/ERCT</div>
+      <div class="desc">CottonTail 集成缓冲器（带 NeoPixel 灯）</div>
+    </div>
+    <div class="repo-card">
+      <span class="name">✂️ 3. Carrot-collective/Filametrix</span> <span class="tag green">切刀</span>
+      <div class="url">https://github.com/Carrot-collective/Filametrix</div>
+      <div class="desc">工具头切刀（完美切料）</div>
+    </div>
+    <div class="repo-card">
+      <span class="name">🧹 4. Carrot-collective/Blobifier</span> <span class="tag purple">排料</span>
+      <div class="url">https://github.com/Carrot-collective/Blobifier</div>
+      <div class="desc">Blobifier 排料/打胶系统</div>
+    </div>
+    <div class="repo-card">
+      <span class="name">🌀 5. Carrot-collective/Filamentalist</span> <span class="tag purple">卷绕</span>
+      <div class="url">https://github.com/Carrot-collective/Filamentalist</div>
+      <div class="desc">Filamentalist 卷绕缓冲器</div>
+    </div>
+    <div class="repo-card">
+      <span class="name">🐉 6. kinematicdigit/Jabberwocky</span> <span class="tag yellow">Affiliate</span>
+      <div class="url">https://github.com/kinematicdigit/Jabberwocky</div>
+      <div class="desc">炸脖龙工具头（Affiliate 关联项目）</div>
+    </div>
+    <div class="repo-card">
+      <span class="name">🐰 7. moggieuk/Happy-Hare</span> <span class="tag red">核心固件</span>
+      <div class="url">https://github.com/moggieuk/Happy-Hare</div>
+      <div class="desc">Happy Hare 固件（Klipper MMU 通用驱动）</div>
+    </div>
+    <div class="repo-card">
+      <span class="name">⚙️ 8. moggieuk/ERCF-Software-V3</span> <span class="tag red">安装脚本</span>
+      <div class="url">https://github.com/moggieuk/ERCF-Software-V3</div>
+      <div class="desc">ERCF-Software-V3 安装器（Python 17,000 行）</div>
+    </div>
+  </div>
+
+  <!-- 第二段：3 种下载方法对比 -->
+  <div class="section">
+    <h2>🔧 段 2：3 种下载方法对比（选你合适的）</h2>
+
+    <table>
+      <tr>
+        <th>方法</th>
+        <th>难度</th>
+        <th>大小</th>
+        <th>后续同步</th>
+        <th>适合谁</th>
+      </tr>
+      <tr>
+        <td><b>方法 1：git clone</b>（推荐）</td>
+        <td>★☆☆☆☆</td>
+        <td>~1.5 GB（含历史）<br>~600 MB（加 <code>--depth 1</code>）</td>
+        <td>✅ <code>git pull</code> 一键同步</td>
+        <td>所有用户，<b>Andy 哥首选</b></td>
+      </tr>
+      <tr>
+        <td><b>方法 2：Download ZIP</b></td>
+        <td>★☆☆☆☆</td>
+        <td>每个仓库单独下</td>
+        <td>❌ 要重新下</td>
+        <td>只想看 1-2 个仓库</td>
+      </tr>
+      <tr>
+        <td><b>方法 3：GitHub Desktop</b></td>
+        <td>★☆☆☆☆</td>
+        <td>同上</td>
+        <td>✅ 图形化 <code>Fetch</code></td>
+        <td>不熟命令行的</td>
+      </tr>
+    </table>
+
+    <h3>📌 方法 1：git clone（Andy 哥首推）</h3>
+    <div class="code">
+<span class="comment"># 一次性下完 8 个仓库（带 --depth 1 只下最新版本，省 60% 空间）</span>
+<span class="cmd">cd</span> <span class="path">C:\3DPrint\ERCF_V3_full</span>
+
+<span class="cmd">git clone</span> <span class="flag">--depth 1</span> https://github.com/Carrot-collective/ERCF_v3.git
+<span class="cmd">git clone</span> <span class="flag">--depth 1</span> https://github.com/Carrot-collective/ERCT.git
+<span class="cmd">git clone</span> <span class="flag">--depth 1</span> https://github.com/Carrot-collective/Filametrix.git
+<span class="cmd">git clone</span> <span class="flag">--depth 1</span> https://github.com/Carrot-collective/Blobifier.git
+<span class="cmd">git clone</span> <span class="flag">--depth 1</span> https://github.com/Carrot-collective/Filamentalist.git
+<span class="cmd">git clone</span> <span class="flag">--depth 1</span> https://github.com/kinematicdigit/Jabberwocky.git
+<span class="cmd">git clone</span> <span class="flag">--depth 1</span> https://github.com/moggieuk/Happy-Hare.git
+<span class="cmd">git clone</span> <span class="flag">--depth 1</span> https://github.com/moggieuk/ERCF-Software-V3.git
+
+<span class="comment"># 查看下载结果</span>
+<span class="cmd">dir</span>
+    </div>
+
+    <div class="tip">
+      <b>💡 优势</b>：以后 Carrot Collective 仓库更新（比如 V3.1 / V3.2），你只需要在每个目录下 <code>git pull</code> 就能拉取最新。
+    </div>
+
+    <h3>📌 方法 2：Download ZIP（最简）</h3>
+    <p>在浏览器打开下面任一 URL → 点绿色 <b>Code</b> 按钮 → <b>Download ZIP</b> → 解压到本地</p>
+    <div class="code">
+https://github.com/Carrot-collective/ERCF_v3/archive/refs/heads/main.zip
+https://github.com/Carrot-collective/ERCT/archive/refs/heads/main.zip
+https://github.com/Carrot-collective/Filametrix/archive/refs/heads/main.zip
+https://github.com/Carrot-collective/Blobifier/archive/refs/heads/main.zip
+https://github.com/Carrot-collective/Filamentalist/archive/refs/heads/main.zip
+https://github.com/kinematicdigit/Jabberwocky/archive/refs/heads/main.zip
+https://github.com/moggieuk/Happy-Hare/archive/refs/heads/main.zip
+https://github.com/moggieuk/ERCF-Software-V3/archive/refs/heads/main.zip
+    </div>
+    <div class="warn">
+      <b>⚠️ 缺点</b>：ZIP 包不带 Git 历史，要更新得重新下整个包。
+    </div>
+
+    <h3>📌 方法 3：GitHub Desktop（图形化）</h3>
+    <p>下载：<a href="https://desktop.github.com/" target="_blank">https://desktop.github.com/</a> → 安装 → 登录你的 GitHub 账号 → 逐个 <b>File → Clone Repository</b></p>
+    <p>或者你已经有 <code>FullPeak-andy/ERCF_v3</code> 这个 fork，<b>直接 Add Local Repository → 选本地路径</b>就能管理。</p>
+  </div>
+
+  <!-- 第三段：下载后目录结构 -->
+  <div class="section">
+    <h2>📁 段 3：下载后目录结构（长这样）</h2>
+    <p>8 个仓库下载后，你的 <code>C:\3DPrint\ERCF_V3_full\</code> 应该是这样：</p>
+    <div class="file-tree">
+C:\3DPrint\ERCF_V3_full\
+├── ERCF_v3\                    ← 主仓（CAD + STL + 文档）
+│   ├── CAD\
+│   │   ├── ERCF_V3.0_v90.step  ← SolidWorks 可编辑
+│   │   ├── *.f3d               ← Fusion 360 源文件
+│   │   └── ...
+│   ├── STLs\                   ← ⭐ 3D 打印文件在这
+│   │   ├── ERCF_Main_Body.stl
+│   │   ├── ERCF_Carriage.stl
+│   │   └── ... (~50 个 STL)
+│   ├── Docs\
+│   │   ├── BOM_ERCF_V3.0.csv   ← 物料清单
+│   │   ├── Assembly_Manual.pdf ← 装配手册
+│   │   └── Wiring_Diagram.png  ← 接线图
+│   ├── User_Mods\              ← 用户改装件
+│   ├── Mounting\               ← 安装到不同打印机的支架
+│   └── PCBS\                   ← 电路板文件
+│
+├── ERCT\                       ← CottonTail 缓冲器
+│   ├── CAD\
+│   ├── STLs\                   ← ~10 个 STL
+│   └── Docs\
+│
+├── Filametrix\                 ← 切刀
+│   ├── CAD\
+│   ├── STLs\                   ← ~5 个 STL
+│   └── Docs\
+│
+├── Blobifier\                  ← 排料系统
+│   ├── STLs\
+│   └── Docs\
+│
+├── Filamentalist\              ← 卷绕缓冲
+│   ├── STLs\
+│   └── Docs\
+│
+├── Jabberwocky\                ← Affiliate 工具头
+│   ├── CAD\
+│   ├── STLs\
+│   └── Docs\
+│
+├── Happy-Hare\                 ← 固件源码（Python）
+│   ├── src\
+│   ├── config\
+│   ├── docs\                   ← 17,000 行文档
+│   └── examples\
+│
+└── ERCF-Software-V3\           ← 安装器
+    ├── install.sh              ← Linux 树莓派安装
+    ├── install-mac.sh
+    └── update.sh
+    </div>
+
+    <div class="warn">
+      <b>⚠️ 你刚才打开的 ERCF_V3.0_v90.step 是 CAD 源文件</b>（78.1 MB），<b>不能直接打印</b>！打印文件在 <code>STLs/</code> 文件夹里，每个零件 1-2 MB 左右。
+    </div>
+  </div>
+
+  <!-- 第四段：拿到 STL 后怎么处理 -->
+  <div class="section">
+    <h2>🖨️ 段 4：拿到 STL 后 → 切片 → 打印 流程</h2>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <b>打开 STL 文件</b>
+        <p>用 <b>OrcaSlicer</b>（免费开源，Andy 哥首选）或 <b>PrusaSlicer</b> 打开任意 STL：</p>
+        <div class="code">
+<span class="comment"># OrcaSlicer 切片 ERCF_Main_Body.stl</span>
+OrcaSlicer <span class="path">C:\3DPrint\ERCF_V3_full\ERCF_v3\STLs\ERCF_Main_Body.stl</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <b>设置切片参数（Voron 圈标准）</b>
+        <p>Voron 套件推荐参数（多色打印件也适用）：</p>
+        <table>
+          <tr><th>参数</th><th>推荐值</th><th>说明</th></tr>
+          <tr><td>层高</td><td><b>0.2 mm</b></td><td>结构件标准</td></tr>
+          <tr><td>壁厚</td><td><b>4 周壁（1.6 mm）</b></td><td>结构强度</td></tr>
+          <tr><td>顶/底层</td><td><b>5 层</b></td><td>结构件</td></tr>
+          <tr><td>填充</td><td><b>40% 陀螺 / 立方体</b></td><td>平衡强度和材料</td></tr>
+          <tr><td>材料</td><td><b>ABS / ASA / PC</b></td><td>耐高温，Voron 件首选</td></tr>
+          <tr><td>温度</td><td>240-260°C</td><td>ABS 245 / ASA 250 / PC 265</td></tr>
+          <tr><td>热床</td><td>100-110°C</td><td>ABS / ASA 必须</td></tr>
+          <tr><td>封闭舱</td><td><b>必装</b></td><td>ABS 翘曲控制</td></tr>
+          <tr><td>支撑</td><td><b>按需</b></td><td>只对悬垂 > 45° 部位加</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <b>导出 G-code → 拷贝到打印机 SD 卡</b>
+        <p>切片完成后：<b>切片 → 导出 G-code</b> → 拷贝到 SD 卡 → 插入打印机打印</p>
+        <p style="color:#ffd93d;margin-top:5px"><b>Andy 哥建议</b>：用 <b>KLP1</b> 或 <b>大鱼 SPA</b> 打印 Voron 件（这俩 i3 留作"打印件工厂"），K1 改造机专攻最终打印</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <b>全套装机件清单（BOM 校验）</b>
+        <p>打印件完成后，参考每个仓库的 <code>BOM_*.csv</code> 文件采购机械件 + 电子件：</p>
+        <div class="code">
+<span class="comment"># 打开 BOM 文件查看零件清单</span>
+<span class="cmd">notepad</span> <span class="path">C:\3DPrint\ERCF_V3_full\ERCF_v3\Docs\BOM_ERCF_V3.0.csv</span>
+        </div>
+        <p>典型 BOM 包括：电机（TMC2209 / TMC5160）、编码器、舵机、微动开关、LED、GT2 皮带、轴承、螺丝、磁铁、MMB 控制板</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 第五段：商业套件参考 -->
+  <div class="section">
+    <h2>💰 段 5：商业套件资源（想偷懒直接买）</h2>
+    <p>如果你不想自己打印 + 采购散件，可直接买商业套件：</p>
+    <table>
+      <tr>
+        <th>套件</th>
+        <th>价格</th>
+        <th>包含</th>
+        <th>购买</th>
+      </tr>
+      <tr>
+        <td><b>Trianglelab 8 通道</b></td>
+        <td class="center">$164.70<br>≈¥1180</td>
+        <td>打印件 + MMB Board + Filamentalist</td>
+        <td><a href="https://www.trianglelab.net/products/ercf-v3-8-chanels-full-kit" target="_blank">链接</a></td>
+      </tr>
+      <tr>
+        <td><b>West3D 8 通道</b></td>
+        <td class="center">$219<br>≈¥1570</td>
+        <td>ERCT + ERF + THS（最全）</td>
+        <td><a href="https://west3d.com/products/enraged-rabbit-carrot-feeder-ercf-v2-kit" target="_blank">链接</a></td>
+      </tr>
+      <tr>
+        <td><b>FYSETEC 6 工具头</b></td>
+        <td class="center">$199<br>≈¥1430</td>
+        <td>6 头套件</td>
+        <td>Amazon</td>
+      </tr>
+      <tr>
+        <td><b>FYSETEC 9 工具头</b></td>
+        <td class="center">$300<br>≈¥2150</td>
+        <td>9 头套件</td>
+        <td>Amazon</td>
+      </tr>
+      <tr>
+        <td><b>BTT MMB CAN V1.0</b></td>
+        <td class="center">$32 起<br>≈¥220</td>
+        <td>控制板（必买）</td>
+        <td>Blurolls3D</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Andy 专属 -->
+  <div class="section">
+    <h2>🎯 Andy 哥专属下载建议（按你的现状）</h2>
+
+    <div class="decision" style="margin:0">
+      <h3>📋 分阶段下载清单（按优先级）</h3>
+      <ol>
+        <li><b>第一阶段（必下）</b>：ERCF_v3 + ERCT + Filametrix + Happy-Hare + ERCF-Software-V3 = 5 个核心</li>
+        <li><b>第二阶段（选下）</b>：Blobifier + Filamentalist + Jabberwocky = 3 个 Affiliate/选配</li>
+        <li><b>不一定要下</b>：商业套件网页（如 Trianglelab）—— 你要买再访问就行</li>
+      </ol>
+    </div>
+
+    <h3>🚀 优化建议（按你的三机现状）</h3>
+    <ul>
+      <li><b>下载位置</b>：建议放 <code>D:\3DPrint\Voron\ERCF_V3\</code>（不放 C 盘，机械硬盘分区）</li>
+      <li><b>Git 同步</b>：每 2 周 <code>git pull</code> 一次，跟 Carrot Collective 仓库更新</li>
+      <li><b>打印件工厂</b>：用 KLP1 + 大鱼 SPA 打 Voron 件，K1 改造机专攻最终打印（先打印件再装配的经典路线）</li>
+      <li><b>SolidWorks 复用</b>：.step 文件直接用 SW 打开，能改 Voron 件适配你的 K1 改造机</li>
+      <li><b>解压对比</b>：用 WinMerge 或 Beyond Compare 对比 8 个仓库的 Docs/，找出最关键的 BOM</li>
+    </ul>
+
+    <h3>⚡ 快速决策：今天就动起来</h3>
+    <div class="tip">
+      <b>🚀 10 分钟行动清单</b>：
+      <ol style="margin-top:8px">
+        <li>装 <a href="https://git-scm.com/download/win" target="_blank">Git for Windows</a>（如未装）</li>
+        <li>打开 PowerShell → 执行上面 8 行 <code>git clone</code></li>
+        <li>下载完成后打开 <code>ERCF_v3\STLs\</code> 看打印件列表</li>
+        <li>用 OrcaSlicer 打开 1 个 STL 试切</li>
+        <li>输出 G-code 拷 SD 卡，先打 1 个件测通流程</li>
+      </ol>
+    </div>
+
+    <div class="warn">
+      <b>⚠️ 提醒</b>：Carrot-collective 仓库是 <b>GPL-3.0</b> 协议，自己改 / 商用要保留版权声明和开源。
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>📅 2026 年 6 月 · Andy 哥专属 · 数据来源：Carrot Collective 5 仓库 + moggieuk/Happy-Hare + kinematicdigit/Jabberwocky</p>
+    <p>💡 GitHub 仓库地址均经过 2026 年 6 月验证有效 · 国内 GitHub 访问可能需要代理</p>
+  </div>
+</div>
+
+<script>
+// 代码块复制按钮
+document.querySelectorAll('.code').forEach(block => {
+  const btn = document.createElement('button');
+  btn.className = 'code-copy';
+  btn.textContent = '📋 复制';
+  btn.onclick = () => {
+    const code = block.innerText.replace('📋 复制', '').trim();
+    navigator.clipboard.writeText(code).then(() => {
+      btn.textContent = '✅ 已复制';
+      setTimeout(() => btn.textContent = '📋 复制', 1500);
+    });
+  };
+  block.style.position = 'relative';
+  block.appendChild(btn);
+});
+</script>
+</body>
+</html>

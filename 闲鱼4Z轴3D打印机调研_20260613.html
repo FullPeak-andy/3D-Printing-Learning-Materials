@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>闲鱼4Z轴3D打印机调研 2026.06</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #16a34a;
+            --warning: #ca8a04;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 { font-size: 1.8rem; margin-bottom: 8px; color: var(--primary); }
+        h2 { font-size: 1.4rem; margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); }
+        h3 { font-size: 1.1rem; margin: 16px 0 8px; }
+        .meta { color: var(--muted); font-size: 0.85rem; margin-bottom: 20px; }
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+        .tag-diy { background: #fef3c7; color: #92400e; }
+        .tag-ready { background: #d1fae5; color: #065f46; }
+        .tag-caution { background: #fee2e2; color: #991b1b; }
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th { background: #f1f5f9; font-weight: 600; }
+        .price-high { color: var(--danger); font-weight: 600; }
+        .price-mid { color: var(--warning); font-weight: 600; }
+        .price-low { color: var(--success); font-weight: 600; }
+        .check { color: var(--success); }
+        .cross { color: var(--danger); }
+        .warn { color: var(--warning); }
+        .section { margin-bottom: 32px; }
+        .search-box {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+        .search-box h2 { color: white; border: none; margin-top: 0; }
+        .keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .keyword {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .keyword:hover { background: rgba(255,255,255,0.3); }
+        .top3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
+        .top3-item {
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 16px;
+            position: relative;
+        }
+        .top3-badge {
+            position: absolute;
+            top: -10px;
+            left: 16px;
+            background: var(--primary);
+            color: white;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .cmd {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-family: "Monaco", "Menlo", monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin: 8px 0;
+        }
+        .cmd::before { content: "$ "; color: var(--success); }
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .pros { border-left: 4px solid var(--success); padding-left: 12px; }
+        .cons { border-left: 4px solid var(--danger); padding-left: 12px; }
+        .attention {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 12px 16px;
+            margin: 12px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .danger {
+            background: #fee2e2;
+            border-left: 4px solid var(--danger);
+            padding: 12px 16px;
+            margin: 12px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .comparison-table td:nth-child(1) { font-weight: 600; }
+        .comparison-table td:nth-child(2) { text-align: center; }
+        .comparison-table td:nth-child(3) { text-align: center; }
+        .comparison-table td:nth-child(4) { text-align: center; }
+        .svg-box {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        @media (max-width: 768px) {
+            .pros-cons { grid-template-columns: 1fr; }
+            .top3 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<h1>📦 闲鱼4Z轴3D打印机调研报告</h1>
+<div class="meta">调研时间：2026年6月13日 | 目标：帮Andy哥评估升级候选</div>
+
+<!-- 搜索关键词 -->
+<div class="search-box">
+    <h2>🔍 闲鱼搜索关键词</h2>
+    <p>直接在闲鱼App搜索以下关键词：</p>
+    <div class="keywords">
+        <span class="keyword">4Z轴 3D打印机</span>
+        <span class="keyword">Voron 2.4 整机</span>
+        <span class="keyword">Voron Trident</span>
+        <span class="keyword">FLSUN S1</span>
+        <span class="keyword">Flying Bear 4Z</span>
+        <span class="keyword">创想 K1 Max</span>
+        <span class="keyword">Bambu X1C 二手</span>
+        <span class="keyword">Raise3D Pro3</span>
+    </div>
+</div>
+
+<!-- 1. 机型盘点 -->
+<div class="section">
+    <h2>📋 闲鱼常见4Z轴机型盘点</h2>
+    
+    <div class="card">
+        <h3>Voron 2.4 <span class="tag tag-diy">DIY套件</span> <span class="tag tag-caution">高风险</span></h3>
+        <table>
+            <tr><td><strong>打印尺寸</strong></td><td>250/300/350mm (可定制到500mm)</td></tr>
+            <tr><td><strong>闲鱼二手价</strong></td><td><span class="price-mid">¥1500-4000</span> (视完成度)</td></tr>
+            <tr><td><strong>新机套件价</strong></td><td><span class="price-high">¥4000-8000</span> (Formbot/LDO套件)</td></tr>
+            <tr><td><strong>结构</strong></td><td>CoreXY + 龙门式4Z轴 + 封闭舱</td></tr>
+            <tr><td><strong>固件</strong></td><td>Klipper (需树莓派/SBC)</td></tr>
+            <tr><td><strong>卖家信用要求</strong></td><td>芝麻信用 800+ / 闲鱼玩家</td></tr>
+        </table>
+        <div class="danger">⚠️ <strong>高风险：</strong>90%是半成品！缺打印件/缺PCB/缺热端是常态。需要有另一台打印机才能完成打印件。</div>
+    </div>
+
+    <div class="card">
+        <h3>Voron Trident <span class="tag tag-diy">DIY套件</span></h3>
+        <table>
+            <tr><td><strong>打印尺寸</strong></td><td>250/300mm</td></tr>
+            <tr><td><strong>闲鱼二手价</strong></td><td><span class="price-mid">¥1200-3000</span> (整机/半成品)</td></tr>
+            <tr><td><strong>新机套件价</strong></td><td><span class="price-high">¥3500-6000</span></td></tr>
+            <tr><td><strong>结构</strong></td><td>CoreXY + 固定龙门 + 3Z丝杠(可4Z)</td></tr>
+            <tr><td><strong>固件</strong></td><td>Klipper</td></tr>
+            <tr><td><strong>VS 2.4</strong></td><td>结构更简单，组装时间更短，300mm内性价比更高</td></tr>
+        </table>
+        <div class="attention">💡 固件注意：部分卖家误装Voron 2.4固件到Trident上，导致步进电机方向反等问题。</div>
+    </div>
+
+    <div class="card">
+        <h3>FLSUN S1 / T1 <span class="tag tag-ready">成品机</span></h3>
+        <table>
+            <tr><td><strong>打印尺寸</strong></td><td>S1: φ320×430mm (方形) / T1: 高塔式</td></tr>
+            <tr><td><strong>闲鱼二手价</strong></td><td><span class="price-mid">¥1800-3500</span></td></tr>
+            <tr><td><strong>新机价</strong></td><td><span class="price-high">¥5000-7000</span></td></tr>
+            <tr><td><strong>结构</strong></td><td>三角洲/矩形 + 4Z轴 + 全封闭</td></tr>
+            <tr><td><strong>速度</strong></td><td>标称1000-1200mm/s (实际高速打印质量一般)</td></tr>
+            <tr><td><strong>主板</strong></td><td>部分批次有主板锁死问题 (MKS主控)</td></tr>
+        </table>
+        <div class="danger">⚠️ <strong>主板坑：</strong>FLSUN早期批次使用MKS主板，有用户反馈主板锁死无法恢复。购买前要求视频验机。</div>
+    </div>
+
+    <div class="card">
+        <h3>Flying Bear Ghost 5 <span class="tag tag-ready">成品机</span></h3>
+        <table>
+            <tr><td><strong>打印尺寸</strong></td><td>约 260×260×260mm</td></tr>
+            <tr><td><strong>闲鱼二手价</strong></td><td><span class="price-low">¥1200-2000</span></td></tr>
+            <tr><td><strong>新机价</strong></td><td><span class="price-mid">¥3500-4500</span></td></tr>
+            <tr><td><strong>结构</strong></td><td>CoreXY + 4Z轴 + 封闭舱</td></tr>
+            <tr><td><strong>固件</strong></td><td>Klipper (部分版本)</td></tr>
+        </table>
+        <div class="attention">💡 德国品牌，国内保有量低，配件难找。闲鱼多为回国人员出售。</div>
+    </div>
+
+    <div class="card">
+        <h3>创想 K1 Max <span class="tag tag-ready">成品机</span></h3>
+        <table>
+            <tr><td><strong>打印尺寸</strong></td><td>300×300×300mm</td></tr>
+            <tr><td><strong>闲鱼二手价</strong></td><td><span class="price-mid">¥2800-4500</span></td></tr>
+            <tr><td><strong>新机价</strong></td><td><span class="price-high">¥5999</span></td></tr>
+            <tr><td><strong>结构</strong></td><td>CoreXY + 铝合金框架 + 三Z丝杠(皮带联动)</td></tr>
+            <tr><td><strong>特点</strong></td><td>AI摄像头、600mm/s高速、自动调平</td></tr>
+        </table>
+        <div class="attention">💡 注意：K1 Max不是真正的4Z独立轴，三根丝杠由一根皮带联动。Z轴精度依赖于皮带张力。</div>
+    </div>
+
+    <div class="card">
+        <h3>Bambu Lab X1 Carbon <span class="tag tag-ready">成品机</span></h3>
+        <table>
+            <tr><td><strong>打印尺寸</strong></td><td>256×256×256mm</td></tr>
+            <tr><td><strong>闲鱼二手价</strong></td><td><span class="price-mid">¥4500-7000</span></td></tr>
+            <tr><td><strong>新机价</strong></td><td><span class="price-high">¥9999</span></td></tr>
+            <tr><td><strong>结构</strong></td><td>CoreXY + 双Z轴 (非4Z)</td></tr>
+            <tr><td><strong>固件</strong></td><td>闭源 BambuStudio</td></tr>
+            <tr><td><strong>特点</strong></td><td>AMS多色、激光雷达校准、主动振动补偿</td></tr>
+        </table>
+        <div class="attention">💡 X1C是双Z轴，不是4Z！但主动补偿算法强大，小尺寸打印质量极佳。真正的多色刚需用户首选。</div>
+    </div>
+
+    <div class="card">
+        <h3>Raise3D Pro3 <span class="tag tag-ready">成品机</span></h3>
+        <table>
+            <tr><td><strong>打印尺寸</strong></td><td>300×300×300mm</td></tr>
+            <tr><td><strong>闲鱼二手价</strong></td><td><span class="price-mid">¥5000-8000</span></td></tr>
+            <tr><td><strong>新机价</strong></td><td><span class="price-high">¥12000+</span></td></tr>
+            <tr><td><strong>结构</strong></td><td>龙门架 + 双Z轴丝杠 + 双挤出头</td></tr>
+            <tr><td><strong>固件</strong></td><td>ideaMaker / 开放Marlin</td></tr>
+        </table>
+        <div class="attention">💡 专业级机器，封闭腔体可加热至60℃。适合打印ABS/ASA/尼龙。闲鱼多为工作室升级换机。</div>
+    </div>
+</div>
+
+<!-- 2. Z轴对比表 -->
+<div class="section">
+    <h2>⚖️ 单Z vs 双Z vs 4Z 轴对比</h2>
+    
+    <table class="comparison-table">
+        <tr>
+            <th>对比维度</th>
+            <th>单Z轴<br><small>(KLP1)</small></th>
+            <th>双Z轴<br><small>( Ender/SKU)</th>
+            <th>4Z轴<br><small>(Voron/高速机)</th>
+        </tr>
+        <tr>
+            <td>首层附着</td>
+            <td class="check">✅ OK</td>
+            <td class="check">✅ OK</td>
+            <td class="check">✅ 最佳</td>
+        </tr>
+        <tr>
+            <td>横梁水平度</td>
+            <td class="warn">⚠️ 依赖双丝杠</td>
+            <td class="check">✅ 良好</td>
+            <td class="check">✅ 自动调平</td>
+        </tr>
+        <tr>
+            <td>300mm+大件</td>
+            <td class="cross">❌ 倾斜风险</td>
+            <td class="warn">⚠️ 勉强可用</td>
+            <td class="check">✅ 稳定</td>
+        </tr>
+        <tr>
+            <td>重型打印头高速</td>
+            <td class="warn">⚠️ 振动大</td>
+            <td class="warn">⚠️ 一般</td>
+            <td class="check">✅ 最佳刚性</td>
+        </tr>
+        <tr>
+            <td>打印体积</td>
+            <td>220×220mm</td>
+            <td>250-300mm</td>
+            <td>350-500mm</td>
+        </tr>
+        <tr>
+            <td>维护复杂度</td>
+            <td class="check">✅ 简单</td>
+            <td class="warn">⚠️ 中等</td>
+            <td class="cross">❌ 复杂</td>
+        </tr>
+        <tr>
+            <td>适合场景</td>
+            <td>220内普通件</td>
+            <td>一般升级</td>
+            <td>Voron大尺寸/重型ABS</td>
+        </tr>
+    </table>
+
+    <div class="svg-box">
+        <svg width="100%" height="280" viewBox="0 0 700 280">
+            <defs>
+                <linearGradient id="axisGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#2563eb;stop-opacity:0.3"/>
+                    <stop offset="100%" style="stop-color:#2563eb;stop-opacity:1"/>
+                </linearGradient>
+            </defs>
+            
+            <!-- 标题 -->
+            <text x="350" y="20" text-anchor="middle" font-size="14" font-weight="bold">Z轴结构示意 (俯视+前视)</text>
+            
+            <!-- 单Z轴 -->
+            <g transform="translate(80, 50)">
+                <text x="50" y="0" text-anchor="middle" font-size="12" font-weight="bold">单Z轴 (KLP1)</text>
+                <rect x="10" y="10" width="80" height="80" fill="none" stroke="#94a3b8" stroke-width="2" rx="4"/>
+                <text x="50" y="50" text-anchor="middle" font-size="10" fill="#64748b">丝杠×1</text>
+                <text x="50" y="65" text-anchor="middle" font-size="10" fill="#64748b">光轴×2</text>
+                <!-- 喷嘴指示 -->
+                <circle cx="50" cy="130" r="8" fill="#2563eb"/>
+                <text x="50" y="160" text-anchor="middle" font-size="9">喷嘴</text>
+                <line x1="50" y1="90" x2="50" y2="122" stroke="#2563eb" stroke-width="2"/>
+            </g>
+            
+            <!-- 双Z轴 -->
+            <g transform="translate(250, 50)">
+                <text x="60" y="0" text-anchor="middle" font-size="12" font-weight="bold">双Z轴</text>
+                <rect x="10" y="10" width="100" height="80" fill="none" stroke="#94a3b8" stroke-width="2" rx="4"/>
+                <circle cx="20" cy="50" r="6" fill="#16a34a"/>
+                <circle cx="100" cy="50" r="6" fill="#16a34a"/>
+                <text x="60" y="50" text-anchor="middle" font-size="10" fill="#64748b">丝杠×2</text>
+                <text x="60" y="65" text-anchor="middle" font-size="10" fill="#64748b">同步皮带</text>
+                <circle cx="60" cy="130" r="8" fill="#16a34a"/>
+                <text x="60" y="160" text-anchor="middle" font-size="9">喷嘴</text>
+                <line x1="20" y1="90" x2="60" y2="122" stroke="#16a34a" stroke-width="2" stroke-dasharray="4"/>
+                <line x1="100" y1="90" x2="60" y2="122" stroke="#16a34a" stroke-width="2" stroke-dasharray="4"/>
+            </g>
+            
+            <!-- 4Z轴 -->
+            <g transform="translate(450, 50)">
+                <text x="90" y="0" text-anchor="middle" font-size="12" font-weight="bold">4Z轴 (Voron)</text>
+                <rect x="10" y="10" width="160" height="80" fill="none" stroke="#94a3b8" stroke-width="2" rx="4"/>
+                <circle cx="20" cy="20" r="5" fill="#dc2626"/>
+                <circle cx="160" cy="20" r="5" fill="#dc2626"/>
+                <circle cx="20" cy="80" r="5" fill="#dc2626"/>
+                <circle cx="160" cy="80" r="5" fill="#dc2626"/>
+                <text x="90" y="50" text-anchor="middle" font-size="10" fill="#64748b">4×独立丝杠</text>
+                <text x="90" y="65" text-anchor="middle" font-size="10" fill="#64748b">独立调平</text>
+                <circle cx="90" cy="130" r="8" fill="#dc2626"/>
+                <text x="90" y="160" text-anchor="middle" font-size="9">喷嘴</text>
+                <!-- 独立支撑线 -->
+                <line x1="20" y1="90" x2="90" y2="122" stroke="#dc2626" stroke-width="1"/>
+                <line x1="160" y1="90" x2="90" y2="122" stroke="#dc2626" stroke-width="1"/>
+                <line x1="20" y1="25" x2="90" y2="60" stroke="#dc2626" stroke-width="1"/>
+                <line x1="160" y1="25" x2="90" y2="60" stroke="#dc2626" stroke-width="1"/>
+            </g>
+            
+            <!-- 底部说明 -->
+            <text x="350" y="240" text-anchor="middle" font-size="11" fill="#64748b">
+                KLP1双丝杠设计 = 简化版双Z轴，220mm内精度足够
+            </text>
+            <text x="350" y="260" text-anchor="middle" font-size="11" fill="#64748b">
+                4Z真正价值：300mm+大尺寸 + 重型热端 + 高温材料(ABS/尼龙)
+            </text>
+        </svg>
+    </div>
+</div>
+
+<!-- 3. 4Z轴对KLP1升级吸引力 -->
+<div class="section">
+    <h2>🎯 4Z轴对KLP1升级吸引力分析</h2>
+    
+    <div class="card">
+        <h3>KLP1现状评估</h3>
+        <div class="pros-cons">
+            <div class="pros">
+                <strong>✅ KLP1已有优势：</strong>
+                <ul style="margin: 8px 0 8px 16px;">
+                    <li>双丝杠Z轴设计 = 更高刚性</li>
+                    <li>220×220mm尺寸，单Z轴已足够</li>
+                    <li>CoreXY结构 = 高速打印基础</li>
+                    <li>MKS THR主板 = 扩展性好</li>
+                </ul>
+            </div>
+            <div class="cons">
+                <strong>⚠️ KLP1的短板：</strong>
+                <ul style="margin: 8px 0 8px 16px;">
+                    <li>220mm限制，打不了大件</li>
+                    <li>封闭腔体？需确认（K1是封闭的）</li>
+                    <li>无自动调平(有BLTouch但未发挥)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>4Z轴真正解决的问题</h3>
+        <table>
+            <tr>
+                <th>场景</th>
+                <th>KLP1单Z</th>
+                <th>4Z轴</th>
+            </tr>
+            <tr>
+                <td>220mm内 PLA/PETG 普通件</td>
+                <td class="check">✅ 完全够用</td>
+                <td>❌ 浪费</td>
+            </tr>
+            <tr>
+                <td>250-300mm 中等尺寸</td>
+                <td class="warn">⚠️ 双丝杠勉强</td>
+                <td class="check">✅ 更稳定</td>
+            </tr>
+            <tr>
+                <td>350mm+ 大件</td>
+                <td class="cross">❌ 倾斜风险</td>
+                <td class="check">✅ 必须</td>
+            </tr>
+            <tr>
+                <td>ABS/尼龙 高温材料</td>
+                <td class="warn">⚠️ 需要封闭腔</td>
+                <td class="check">✅ 封闭舱体</td>
+            </tr>
+            <tr>
+                <td>高速打印 >400mm/s</td>
+                <td class="warn">⚠️ 看配置</td>
+                <td class="check">✅ 刚性更好</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>💰 投入产出比建议</h3>
+        <div class="attention">
+            <strong>结论：先调好KLP1，再考虑4Z升级。</strong>
+            <p style="margin-top: 8px;">理由：</p>
+            <ul style="margin: 8px 0 0 16px;">
+                <li>KLP1双丝杠已保证220mm内首层水平</li>
+                <li>¥2000-5000可以先做：PA校准、流量校准、回抽校准</li>
+                <li>这3项调好，PLA打印质量提升 >50%</li>
+                <li>4Z轴真正必要的是300mm+或高温材料需求</li>
+            </ul>
+        </div>
+        <table>
+            <tr>
+                <th>升级方向</th>
+                <th>投入</th>
+                <th>收益</th>
+            </tr>
+            <tr>
+                <td>KLP1调参优化</td>
+                <td class="price-low">¥0-300</td>
+                <td class="check">高</td>
+            </tr>
+            <tr>
+                <td>Voron 2.4 套件</td>
+                <td class="price-high">¥4000-8000</td>
+                <td class="warn">中(需要大量时间组装)</td>
+            </tr>
+            <tr>
+                <td>FLSUN S1 二手</td>
+                <td class="price-mid">¥1800-3500</td>
+                <td class="warn">中(大尺寸但质量一般)</td>
+            </tr>
+            <tr>
+                <td>K1 Max 二手</td>
+                <td class="price-mid">¥2800-4500</td>
+                <td class="check">中高(大尺寸高速)</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<!-- 4. 闲鱼验机要点 -->
+<div class="section">
+    <h2>🔧 闲鱼验机要点（通用）</h2>
+    
+    <div class="card">
+        <h3>⚡ 运动测试命令 (Klipper)</h3>
+        <div class="cmd">G28          ; 全轴归零</div>
+        <div class="cmd">G1 X0 Y0 Z5  ; 回原点</div>
+        <div class="cmd">G1 X350 Y350 Z300 F3000  ; 极限位移动</div>
+        <div class="cmd">QUERY_ENDSTOPS  ; 检查限位开关</div>
+        
+        <h3>📳 振动测试</h3>
+        <div class="cmd">SHAPER_CALIBRATE  ; 振动补偿校准</div>
+        <div class="cmd">TUNING_TOWER COMMAND=SET_VELOCITY_LIMIT VELOCITY=100 START=50 STEP=5</div>
+    </div>
+
+    <div class="card">
+        <h3>🔍 重点检查项</h3>
+        <table>
+            <tr><th>检查项</th><th>OK标准</th><th>问题信号</th></tr>
+            <tr>
+                <td>皮带张力</td>
+                <td>按压有弹性，无杂音</td>
+                <td>过松跳齿/过紧阻力大</td>
+            </tr>
+            <tr>
+                <td>TMC驱动</td>
+                <td>UART模式，正常散热</td>
+                <td>烫手/异常噪音</td>
+            </tr>
+            <tr>
+                <td>主板</td>
+                <td>无膨胀电容，无焦味</td>
+                <td>MKS板有锁死案例</td>
+            </tr>
+            <tr>
+                <td>固件</td>
+                <td>printer.cfg存在，配置正确</td>
+                <td>Trident误装2.4固件</td>
+            </tr>
+            <tr>
+                <td>PEI板</td>
+                <td>表面无明显划痕</td>
+                <td>磨损严重影响首层</td>
+            </tr>
+            <tr>
+                <td>热端</td>
+                <td>加热均匀，喉管不堵</td>
+                <td>积碳/堵塞</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>⚠️ 卖家话术识别</h3>
+        <div class="danger">
+            <strong>🚩 危险话术：</strong>
+            <ul style="margin: 8px 0 0 16px;">
+                <li>"自用99新" + 无实拍图 → 警惕</li>
+                <li>"出闲置，急出" + 价格明显低于行情 → 大概率有问题</li>
+                <li>"坏了小问题，自己修" → 实际可能是主板问题</li>
+                <li>"不刀" + 要求先款 → 拒绝</li>
+                <li>"在老家/单位" + 无法当面验机 → 风险极高</li>
+            </ul>
+        </div>
+        <div class="attention">
+            <strong>✅ 安全话术：</strong>
+            <ul style="margin: 8px 0 0 16px;">
+                <li>"同城面交" + 多角度实拍</li>
+                <li>"闲鱼玩家" + 高芝麻分(800+)</li>
+                <li>"可以视频验机" + 爽快回答技术问题</li>
+                <li>"送全套配件/耗材"</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- 5. Top3推荐 -->
+<div class="section">
+    <h2>🏆 Top3 推荐候选</h2>
+    
+    <div class="top3">
+        <div class="top3-item">
+            <span class="top3-badge">🥇 推荐</span>
+            <h3>Voron Trident 250 整机</h3>
+            <p><strong>闲鱼价格：</strong><span class="price-mid">¥1500-2500</span></p>
+            <p><strong>推荐理由：</strong>CoreXY结构，封闭舱室，可升级4Z，DIY乐+实用性兼顾</p>
+            <p><strong>验机重点：</strong></p>
+            <ul style="font-size: 0.85rem; margin: 4px 0 0 16px;">
+                <li>确认 printer.cfg 存在且为Trident配置</li>
+                <li>G28后检查Z轴4点(角)是否有明显倾斜</li>
+                <li>皮带张力测试</li>
+            </ul>
+            <p><strong>卖家筛选：</strong>芝麻信用800+，有组装经验(看评价)，同城优先</p>
+        </div>
+        
+        <div class="top3-item">
+            <span class="top3-badge">🥈 性价比</span>
+            <h3>FLSUN S1 二手</h3>
+            <p><strong>闲鱼价格：</strong><span class="price-low">¥1800-2800</span></p>
+            <p><strong>推荐理由：</strong>大尺寸(320×430mm)，便宜，封闭舱，适合打印大件</p>
+            <p><strong>验机重点：</strong></p>
+            <ul style="font-size: 0.85rem; margin: 4px 0 0 16px;">
+                <li>要求视频开机，测试热床/热端加热</li>
+                <li>检查主板型号(MKS需谨慎)</li>
+                <li>XY移动是否异响</li>
+            </ul>
+            <p><strong>卖家筛选：</strong>芝麻信用700+，标注"功能正常"，有实拍视频</p>
+        </div>
+        
+        <div class="top3-item">
+            <span class="top3-badge">🥉 品质优先</span>
+            <h3>创想 K1 Max 二手</h3>
+            <p><strong>闲鱼价格：</strong><span class="price-mid">¥3500-4500</span></p>
+            <p><strong>推荐理由：</strong>300×300×300mm大尺寸，高速打印600mm/s，AI功能，成品机省心</p>
+            <p><strong>验机重点：</strong></p>
+            <ul style="font-size: 0.85rem; margin: 4px 0 0 16px;">
+                <li>BLTouch校准测试</li>
+                <li>风扇噪音是否正常</li>
+                <li>WiFi连接稳定性</li>
+            </ul>
+            <p><strong>卖家筛选：</strong>芝麻信用800+，标注"箱说全"，有购买记录截图</p>
+        </div>
+    </div>
+</div>
+
+<!-- 6. 常见坑点 -->
+<div class="section">
+    <h2>⚠️ 4Z轴常见坑点</h2>
+    
+    <div class="card">
+        <h3>Voron 套件半成品坑</h3>
+        <div class="danger">
+            <ul style="margin: 8px 0 0 16px;">
+                <li>缺打印件：需要另一台打印机才能完成</li>
+                <li>缺PCB：接线小板缺失</li>
+                <li>缺热端：买到的是裸机框架</li>
+                <li>缺固件：SBC(RPi)未配置</li>
+            </ul>
+        </div>
+        <p><strong>建议：</strong>只买"已打印完成"或"整机交付"的Voron，要求视频验证。</p>
+    </div>
+
+    <div class="card">
+        <h3>FLSUN 主板锁死</h3>
+        <div class="danger">
+            <p>早期批次使用MKS主控，有用户反馈主板锁死，无法通过固件更新恢复。</p>
+        </div>
+        <p><strong>辨别方法：</strong>要求视频开机，观察屏幕是否正常亮起，按键是否有响应。</p>
+    </div>
+
+    <div class="card">
+        <h3>固件刷错版本</h3>
+        <div class="attention">
+            <p>闲鱼上 Voron Trident 误装 Voron 2.4 固件的案例不少。</p>
+            <p>会导致：步进电机方向反、Z轴行程不对、热端温度异常。</p>
+        </div>
+        <p><strong>检测：</strong>SSH登录后检查 cat ~/klipper_config/printer.cfg 或查看屏幕固件版本。</p>
+    </div>
+
+    <div class="card">
+        <h3>二手打印件老化</h3>
+        <table>
+            <tr><th>部件</th><th>老化表现</th><th>更换成本</th></tr>
+            <tr><td>PEI板</td><td>首层附着力下降</td><td>¥80-150</td></tr>
+            <tr><td>皮带</td><td>弹性下降，跳齿</td><td>¥20-40</td></tr>
+            <tr><td>轴承</td><td>异响/卡顿</td><td>¥10-30</td></tr>
+            <tr><td>散热风扇</td><td>噪音大/转速低</td><td>¥20-50</td></tr>
+            <tr><td>挤出齿轮</td><td>打滑，不出料</td><td>¥30-60</td></tr>
+        </table>
+    </div>
+</div>
+
+<!-- 总结 -->
+<div class="section">
+    <h2>📝 总结</h2>
+    <div class="card">
+        <div class="attention">
+            <strong>Andy哥的建议：</strong>
+            <ol style="margin: 12px 0 0 20px;">
+                <li><strong>短期：</strong>先调好KLP1。PA校准+流量校准+回抽校准，这三项免费/低投入，收益最大。</li>
+                <li><strong>中期：</strong>如果确实需要300mm+尺寸，考虑 K1 Max 二手(¥3500左右)或 Voron Trident 整机(¥1500-2500)。</li>
+                <li><strong>闲鱼策略：</strong>优先同城面交，必须视频验机，芝麻信用800+卖家优先。</li>
+                <li><strong>避坑：</strong>Voron 套件半成品不要碰，FLSUN 主板问题机不要碰。</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<div style="text-align: center; color: var(--muted); margin-top: 40px; padding: 20px;">
+    <p>📄 报告生成时间：2026年6月13日</p>
+    <p>💡 实际价格请以闲鱼当前在售为准，建议多对比几个卖家</p>
+</div>
+
+</body>
+</html>

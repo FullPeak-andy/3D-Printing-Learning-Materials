@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KLP1 V2.2 注释版 · cfg 全段讲解 · Andy 哥</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1a3a 100%);
+  color: #e0e0e0;
+  min-height: 100vh;
+  padding: 20px;
+}
+.container { max-width: 1280px; margin: 0 auto; }
+
+/* 顶部 Hero */
+.hero {
+  text-align: center;
+  padding: 50px 30px;
+  background: linear-gradient(135deg, rgba(255,107,53,0.1), rgba(0,212,255,0.1));
+  border-radius: 16px;
+  border: 2px solid rgba(255,107,53,0.3);
+  margin-bottom: 30px;
+  position: relative;
+  overflow: hidden;
+}
+.hero h1 {
+  font-size: 2.6em;
+  background: linear-gradient(90deg, #ff6b35, #00d4ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+.hero .subtitle { color: #888; font-size: 1.1em; margin-bottom: 25px; }
+.hero .stats {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.hero .stat {
+  background: rgba(0,0,0,0.4);
+  padding: 14px 22px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  min-width: 110px;
+}
+.hero .stat-num {
+  font-size: 2.2em;
+  font-weight: bold;
+  display: block;
+  line-height: 1.2;
+}
+.hero .stat-num.c1 { color: #00d4ff; }
+.hero .stat-num.c2 { color: #ff6b35; }
+.hero .stat-num.c3 { color: #2ed573; }
+.hero .stat-num.c4 { color: #ffa502; }
+.hero .stat-num.c5 { color: #ff4757; }
+.hero .stat-label { color: #aaa; font-size: 0.85em; margin-top: 4px; }
+
+/* 标签栏 */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+  position: sticky;
+  top: 10px;
+  z-index: 100;
+  background: rgba(10,14,39,0.95);
+  padding: 10px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+.tab {
+  padding: 10px 18px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #aaa;
+  font-size: 0.9em;
+}
+.tab:hover { background: rgba(255,107,53,0.2); color: #fff; }
+.tab.active {
+  background: linear-gradient(135deg, #ff6b35, #ff8c42);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 20px rgba(255,107,53,0.4);
+}
+
+.section { display: none; }
+.section.active { display: block; animation: fadeIn 0.4s; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 分类标题 */
+.cat-title {
+  font-size: 1.4em;
+  margin: 30px 0 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(255,107,53,0.3);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.cat-title .icon { font-size: 1.6em; }
+
+/* section 卡片网格 */
+.section-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+  margin-bottom: 30px;
+}
+.sec-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.sec-card:hover {
+  border-color: rgba(255,107,53,0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+.sec-card .sec-name {
+  font-family: "SF Mono", Consolas, monospace;
+  font-size: 1.05em;
+  color: #00d4ff;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+.sec-card .sec-line {
+  font-size: 0.75em;
+  color: #888;
+  background: rgba(0,0,0,0.3);
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+.sec-card .sec-desc {
+  font-size: 0.9em;
+  color: #bbb;
+  line-height: 1.5;
+}
+.sec-card .sec-key {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.sec-card .key-tag {
+  font-family: "SF Mono", Consolas, monospace;
+  font-size: 0.75em;
+  padding: 2px 8px;
+  background: rgba(255,107,53,0.15);
+  color: #ff6b35;
+  border-radius: 4px;
+  border: 1px solid rgba(255,107,53,0.3);
+}
+.sec-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+  background: var(--accent, #ff6b35);
+}
+.sec-card.layer1 { --accent: #00d4ff; }
+.sec-card.layer2 { --accent: #ffa502; }
+.sec-card.layer3 { --accent: #2ed573; }
+.sec-card.layer4 { --accent: #a55eea; }
+.sec-card.layer5 { --accent: #ff4757; }
+
+/* 详细弹窗 */
+.detail-modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(5px);
+}
+.detail-modal.show { display: flex; }
+.detail-content {
+  background: linear-gradient(135deg, #1a1a3a, #0a0e27);
+  border: 1px solid rgba(255,107,53,0.3);
+  border-radius: 12px;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 30px;
+}
+.detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.detail-header h2 {
+  font-family: "SF Mono", Consolas, monospace;
+  color: #00d4ff;
+  font-size: 1.5em;
+}
+.detail-close {
+  width: 36px; height: 36px;
+  background: rgba(255,71,87,0.2);
+  border: 1px solid #ff4757;
+  color: #ff4757;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2em;
+  display: flex; align-items: center; justify-content: center;
+}
+.detail-close:hover { background: #ff4757; color: #fff; }
+
+.detail-section {
+  margin-bottom: 20px;
+}
+.detail-section h3 {
+  color: #ff6b35;
+  font-size: 1.05em;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.detail-section p {
+  color: #ccc;
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+.code {
+  background: #0d1117;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-family: "SF Mono", Consolas, monospace;
+  font-size: 0.85em;
+  line-height: 1.6;
+  color: #c9d1d9;
+  margin: 10px 0;
+  overflow-x: auto;
+}
+.code .k { color: #ff7b72; }
+.code .v { color: #79c0ff; }
+.code .c { color: #8b949e; font-style: italic; }
+.code .x { color: #ffa657; }
+
+.tip {
+  background: rgba(0,212,255,0.08);
+  border-left: 3px solid #00d4ff;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin: 12px 0;
+  font-size: 0.9em;
+  line-height: 1.6;
+}
+.tip-title { color: #00d4ff; font-weight: bold; margin-bottom: 6px; }
+.warn {
+  background: rgba(255,71,87,0.08);
+  border-left: 3px solid #ff4757;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin: 12px 0;
+  font-size: 0.9em;
+  line-height: 1.6;
+}
+.warn-title { color: #ff4757; font-weight: bold; margin-bottom: 6px; }
+
+/* 演示区 */
+.demo {
+  background: #000;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  text-align: center;
+}
+.demo-title { color: #aaa; font-size: 0.9em; margin-bottom: 14px; }
+.demo-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.demo-btn {
+  padding: 10px 20px;
+  background: rgba(255,107,53,0.2);
+  border: 1px solid #ff6b35;
+  color: #ff6b35;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95em;
+  transition: all 0.2s;
+}
+.demo-btn:hover { background: #ff6b35; color: #fff; }
+.demo-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* 流程图 */
+.flow-diagram {
+  background: #0d1117;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+/* 关联表 */
+.rel-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 0.9em;
+}
+.rel-table th, .rel-table td {
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+  text-align: left;
+}
+.rel-table th { background: rgba(255,107,53,0.15); color: #ff6b35; }
+.rel-table td { color: #ccc; }
+.rel-table code { color: #00d4ff; }
+
+/* 数据流盒 */
+.flow-step {
+  display: inline-block;
+  background: rgba(0,212,255,0.15);
+  border: 1px solid #00d4ff;
+  color: #00d4ff;
+  padding: 8px 14px;
+  border-radius: 6px;
+  margin: 4px;
+  font-family: "SF Mono", Consolas, monospace;
+  font-size: 0.85em;
+  position: relative;
+}
+.flow-step.active {
+  background: #00d4ff;
+  color: #000;
+  box-shadow: 0 0 20px rgba(0,212,255,0.6);
+}
+
+/* 进度条 */
+.read-progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ff6b35, #00d4ff);
+  z-index: 200;
+  transition: width 0.3s;
+}
+</style>
+</head>
+<body>
+<div class="read-progress" id="readProgress"></div>
+
+<div class="container">
+
+<!-- Hero -->
+<div class="hero">
+  <h1>🏗️ KLP1 V2.2 注释版 cfg 全段讲解</h1>
+  <p class="subtitle">从 mcu 到 PURGE_NOZZLE · 50+ 段 · 数据流全景</p>
+  <div class="stats">
+    <div class="stat">
+      <span class="stat-num c1">742</span>
+      <span class="stat-label">总行数</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num c2">50+</span>
+      <span class="stat-label">[section] 数</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num c3">5</span>
+      <span class="stat-label">功能层</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num c4">12</span>
+      <span class="stat-label">可调宏 (G29-40)</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num c5">5</span>
+      <span class="stat-label">#*# 自动块</span>
+    </div>
+  </div>
+</div>
+
+<!-- 标签栏 -->
+<div class="tabs">
+  <div class="tab active" data-target="layer1">🏗️ 硬件层<span class="key-tag">12 段</span></div>
+  <div class="tab" data-target="layer2">🧠 智能层<span class="key-tag">9 段</span></div>
+  <div class="tab" data-target="layer3">🎬 动作层<span class="key-tag">18 段</span></div>
+  <div class="tab" data-target="layer4">🎨 附加功能<span class="key-tag">6 段</span></div>
+  <div class="tab" data-target="layer5">💾 自动数据<span class="key-tag">5 段</span></div>
+  <div class="tab" data-target="flow">🌊 数据流</div>
+  <div class="tab" data-target="dict">📖 段字典</div>
+</div>
+
+<!-- ========== 硬件层 ========== -->
+<div class="section active" id="layer1">
+  <h2 class="cat-title"><span class="icon">🏗️</span>硬件层 · 物理设备配置</h2>
+  <p style="color: #aaa; margin-bottom: 20px;">这一层告诉 Klipper："机器长什么样，每个引脚接了什么"。改完要 RESTART 才生效。</p>
+
+  <div class="section-grid">
+
+    <div class="sec-card layer1" data-detail="mcu">
+      <div class="sec-name">[mcu]</div>
+      <span class="sec-line">L38-44</span>
+      <div class="sec-desc">主控 STM32F103 通信配置</div>
+      <div class="sec-key">
+        <span class="key-tag">serial</span>
+        <span class="key-tag">restart_method</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer1" data-detail="printer">
+      <div class="sec-name">[printer]</div>
+      <span class="sec-line">L46-58</span>
+      <div class="sec-desc">机型 + 速度限制（CoreXY / 500mm/s / 20000 加速度）</div>
+      <div class="sec-key">
+        <span class="key-tag">kinematics: corexy</span>
+        <span class="key-tag">max_velocity</span>
+        <span class="key-tag">max_accel</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer1" data-detail="stepper">
+      <div class="sec-name">[stepper_x/y/z]</div>
+      <span class="sec-line">L60-122</span>
+      <div class="sec-desc">3 个步进电机引脚 + 限位 + 行程</div>
+      <div class="sec-key">
+        <span class="key-tag">rotation_distance</span>
+        <span class="key-tag">endstop_pin</span>
+        <span class="key-tag">position_max: 220</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer1" data-detail="tmc">
+      <div class="sec-name">[tmc2209 ...]</div>
+      <span class="sec-line">L124-176</span>
+      <div class="sec-desc">4 个 TMC2209 静音驱动配置（X/Y/Z/E）</div>
+      <div class="sec-key">
+        <span class="key-tag">run_current</span>
+        <span class="key-tag">stealthchop</span>
+        <span class="key-tag">SGTHRS</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer1" data-detail="extruder">
+      <div class="sec-name">[extruder]</div>
+      <span class="sec-line">L178-234</span>
+      <div class="sec-desc">BMG 双齿轮挤出机 + PID 控温 + 压力提前</div>
+      <div class="sec-key">
+        <span class="key-tag">rotation_distance: 23</span>
+        <span class="key-tag">pressure_advance</span>
+        <span class="key-tag">PID 控温</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer1" data-detail="heater_bed">
+      <div class="sec-name">[heater_bed]</div>
+      <span class="sec-line">L302-320</span>
+      <div class="sec-desc">NTC 100K 热敏电阻 + 220V AC 加热</div>
+      <div class="sec-key">
+        <span class="key-tag">pwm_cycle_time: 0.02</span>
+        <span class="key-tag">max_temp: 200</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer1" data-detail="temp_sensor">
+      <div class="sec-name">[temperature_sensor ...]</div>
+      <span class="sec-line">L322-336</span>
+      <div class="sec-desc">主板温度 + Pi 温度监控</div>
+      <div class="sec-key">
+        <span class="key-tag">mcu_temp</span>
+        <span class="key-tag">KINGROONpi Pi</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer1" data-detail="fan">
+      <div class="sec-name">[temperature_fan Pi_fan2]</div>
+      <span class="sec-line">L338-352</span>
+      <div class="sec-desc">主板温控风扇（Pi > 30°C 自动启动）</div>
+      <div class="sec-key">
+        <span class="key-tag">control: watermark</span>
+        <span class="key-tag">target_temp: 30.0</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer1" data-detail="probe">
+      <div class="sec-name">[probe]</div>
+      <span class="sec-line">L560-578</span>
+      <div class="sec-desc">BLTouch 探针（Z 高度检测）</div>
+      <div class="sec-key">
+        <span class="key-tag">x_offset: 12.85</span>
+        <span class="key-tag">samples: 3</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer1" data-detail="display">
+      <div class="sec-name">[display]</div>
+      <span class="sec-line">L646-666</span>
+      <div class="sec-desc">KLP1 自带 mini12864 LCD 屏幕</div>
+      <div class="key-tag">uc1701</div>
+    </div>
+
+    <div class="sec-card layer1" data-detail="neopixel">
+      <div class="sec-name">[neopixel mini12864]</div>
+      <span class="sec-line">L724-732</span>
+      <div class="sec-desc">mini12864 屏背光 RGB 灯带</div>
+      <div class="key-tag">chain_count: 3</div>
+    </div>
+
+    <div class="sec-card layer1" data-detail="beeper">
+      <div class="sec-name">[output_pin beeper]</div>
+      <span class="sec-line">L668-670</span>
+      <div class="sec-desc">蜂鸣器（报警/提示音）</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========== 智能层 ========== -->
+<div class="section" id="layer2">
+  <h2 class="cat-title"><span class="icon">🧠</span>智能层 · 自动校准和检测</h2>
+  <p style="color: #aaa; margin-bottom: 20px;">这一层告诉 Klipper："机器怎么自己变得更准、更稳"。跑一次 = 一组数据写入 cfg 末尾 #*# 块。</p>
+
+  <div class="section-grid">
+
+    <div class="sec-card layer2" data-detail="homing">
+      <div class="sec-name">[homing_override]</div>
+      <span class="sec-line">L260-300</span>
+      <div class="sec-desc">自定义回零逻辑（降流 + 加载 mesh + 分轴）</div>
+      <div class="sec-key">
+        <span class="key-tag">SET_TMC_CURRENT</span>
+        <span class="key-tag">LOAD=default</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer2" data-detail="verify_heater">
+      <div class="sec-name">[verify_heater ...]</div>
+      <span class="sec-line">L540-558</span>
+      <div class="sec-desc">温度波动检测（防 PID 失控）</div>
+      <div class="sec-key">
+        <span class="key-tag">max_error: 80</span>
+        <span class="key-tag">max_error: 5</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer2" data-detail="adxl">
+      <div class="sec-name">[adxl345] [resonance_tester]</div>
+      <span class="sec-line">L486-502</span>
+      <div class="sec-desc">ADXL345 加速度计（测振动）</div>
+      <div class="sec-key">
+        <span class="key-tag">accel_chip: adxl345</span>
+        <span class="key-tag">probe_points</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer2" data-detail="input_shaper">
+      <div class="sec-name">[input_shaper]</div>
+      <span class="sec-line">L504-510</span>
+      <div class="sec-desc">共振抑制参数（SHAPER_CALIBRATE 自动算）</div>
+      <div class="key-tag"># 被 #*# 块覆盖</div>
+    </div>
+
+    <div class="sec-card layer2" data-detail="screws">
+      <div class="sec-name">[screws_tilt_adjust]</div>
+      <span class="sec-line">L770-782</span>
+      <div class="sec-desc">4 角螺丝校准（算每颗拧几圈）</div>
+      <div class="sec-key">
+        <span class="key-tag">screw1-4</span>
+        <span class="key-tag">CW-M3</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer2" data-detail="bed_mesh">
+      <div class="sec-name">[bed_mesh]</div>
+      <span class="sec-line">L784-796</span>
+      <div class="sec-desc">36 点床面平整度网格（lagrange 插值）</div>
+      <div class="sec-key">
+        <span class="key-tag">6×6</span>
+        <span class="key-tag">lagrange</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer2" data-detail="fila">
+      <div class="sec-name">[filament_switch_sensor fila]</div>
+      <span class="sec-line">L516-532</span>
+      <div class="sec-desc">断料检测（断料自动 PAUSE）</div>
+      <div class="sec-key">
+        <span class="key-tag">pause_on_runout</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer2" data-detail="exclude_object">
+      <div class="sec-name">[exclude_object]</div>
+      <span class="sec-line">L716-718</span>
+      <div class="sec-desc">对象排除（多对象打印失败可跳过）</div>
+    </div>
+
+    <div class="sec-card layer2" data-detail="arcs">
+      <div class="sec-name">[gcode_arcs]</div>
+      <span class="sec-line">L720-722</span>
+      <div class="sec-desc">圆弧支持（G2/G3 不变折线）</div>
+      <div class="key-tag">resolution: 0.1</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========== 动作层 ========== -->
+<div class="section" id="layer3">
+  <h2 class="cat-title"><span class="icon">🎬</span>动作层 · 宏命令（用户调用）</h2>
+  <p style="color: #aaa; margin-bottom: 20px;">这一层是"按钮背后的代码"。Mainsail 上点 START_PRINT / 敲 G29 / 断料触发 PAUSE 都走这里。</p>
+
+  <div class="section-grid">
+
+    <div class="sec-card layer3" data-detail="start_print">
+      <div class="sec-name">[gcode_macro START_PRINT]</div>
+      <span class="sec-line">L380-396</span>
+      <div class="sec-desc">一键开始打印：预热 → 回零 → 首层</div>
+      <div class="sec-key">
+        <span class="key-tag">M140/M104</span>
+        <span class="key-tag">G28</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer3" data-detail="end_print">
+      <div class="sec-name">[gcode_macro END_PRINT]</div>
+      <span class="sec-line">L400-410</span>
+      <div class="sec-desc">结束打印：退料 → 抬 Z → 关电机</div>
+      <div class="key-tag">M84 + 降温</div>
+    </div>
+
+    <div class="sec-card layer3" data-detail="pause">
+      <div class="sec-name">[gcode_macro PAUSE / RESUME]</div>
+      <span class="sec-line">L412-460</span>
+      <div class="sec-desc">暂停/恢复（断料时自动调用）</div>
+      <div class="sec-key">
+        <span class="key-tag">SAVE_GCODE_STATE</span>
+        <span class="key-tag">park</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer3" data-detail="cancel">
+      <div class="sec-name">[gcode_macro CANCEL_PRINT]</div>
+      <span class="sec-line">L462-470</span>
+      <div class="sec-desc">取消打印（关加热 + 复位）</div>
+    </div>
+
+    <div class="sec-card layer3" data-detail="g29">
+      <div class="sec-name">[gcode_macro G29]</div>
+      <span class="sec-line">L588-596</span>
+      <div class="sec-desc">Z 偏移校准（弹 PROBE_CALIBRATE 窗口）</div>
+      <div class="sec-key">
+        <span class="key-tag">PROBE_CALIBRATE</span>
+        <span class="key-tag">SAVE_CONFIG</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer3" data-detail="g30">
+      <div class="sec-name">[gcode_macro G30]</div>
+      <span class="sec-line">L598-605</span>
+      <div class="sec-desc">36 点床面 mesh 校准（覆盖 default）</div>
+      <div class="sec-key">
+        <span class="key-tag">BED_MESH_CALIBRATE</span>
+        <span class="key-tag">SAVE=default</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer3" data-detail="g31_g37">
+      <div class="sec-name">[gcode_macro G31-G36 / G37]</div>
+      <span class="sec-line">L607-642</span>
+      <div class="sec-desc">TESTZ 手动微调 + ACCEPT 保存</div>
+      <div class="sec-key">
+        <span class="key-tag">TESTZ ±</span>
+        <span class="key-tag">ACCEPT</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer3" data-detail="g40">
+      <div class="sec-name">[gcode_macro G40]</div>
+      <span class="sec-line">L480-484</span>
+      <div class="sec-desc">一键共振补偿（跑完自动重启）</div>
+      <div class="sec-key">
+        <span class="key-tag">SHAPER_CALIBRATE</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer3" data-detail="shaper_calibrate">
+      <div class="sec-name">[gcode_macro SHAPER_CALIBRATE]</div>
+      <span class="sec-line">L490-494</span>
+      <div class="sec-desc">重命名包装（5-100Hz 扫频）</div>
+    </div>
+
+    <div class="sec-card layer3" data-detail="g50">
+      <div class="sec-name">[gcode_macro G50]</div>
+      <span class="sec-line">L650-670</span>
+      <div class="sec-desc">自动退料（加热→抽料→冷却→再抽）</div>
+    </div>
+
+    <div class="sec-card layer3" data-detail="load_unload">
+      <div class="sec-name">[gcode_macro LOAD_FILAMENT / UNLOAD_FILAMENT]</div>
+      <span class="sec-line">L674-700</span>
+      <div class="sec-desc">手动进料/退料（控制台敲 LOAD_FILAMENT）</div>
+    </div>
+
+    <div class="sec-card layer3" data-detail="purge">
+      <div class="sec-name">[gcode_macro PURGE_NOZZLE]</div>
+      <span class="sec-line">L820-852</span>
+      <div class="sec-desc">冲刷+擦嘴（拓竹风格，简单磁吸版）</div>
+      <div class="sec-key">
+        <span class="key-tag">X=10↔X=25</span>
+        <span class="key-tag">4 次来回</span>
+      </div>
+    </div>
+
+    <div class="sec-card layer3" data-detail="virtual_sd">
+      <div class="sec-name">[virtual_sdcard]</div>
+      <span class="sec-line">L512-514</span>
+      <div class="sec-desc">虚拟 SD 卡（G-code 文件存放路径）</div>
+    </div>
+
+    <div class="sec-card layer3" data-detail="pause_resume">
+      <div class="sec-name">[pause_resume]</div>
+      <span class="sec-line">L516</span>
+      <div class="sec-desc">暂停/恢复基础模块（PAUSE 宏调用）</div>
+    </div>
+
+    <div class="sec-card layer3" data-detail="idle_timeout">
+      <div class="sec-name">[idle_timeout]</div>
+      <span class="sec-line">L476-478</span>
+      <div class="sec-desc">空闲超时（1 小时无操作）</div>
+    </div>
+
+    <div class="sec-card layer3" data-detail="duplicate">
+      <div class="sec-name">[duplicate_pin_override]</div>
+      <span class="sec-line">L670-672</span>
+      <div class="sec-desc">重复引脚覆盖（PB5 给屏幕和别的复用）</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========== 附加功能 ========== -->
+<div class="section" id="layer4">
+  <h2 class="cat-title"><span class="icon">🎨</span>附加功能 · 屏幕 / 灯 / 圆弧 / 对象</h2>
+
+  <div class="section-grid">
+
+    <div class="sec-card layer4" data-detail="include">
+      <div class="sec-name">[include mainsail.cfg / MKS_THR.cfg]</div>
+      <span class="sec-line">L32-36</span>
+      <div class="sec-desc">外部配置文件包含（屏幕定义、THR 板引脚定义）</div>
+    </div>
+
+    <div class="sec-card layer4" data-detail="display_status">
+      <div class="sec-name">[display_status]</div>
+      <span class="sec-line">L534</span>
+      <div class="sec-desc">显示状态消息（LCD 上显示 "Printing" 等）</div>
+    </div>
+
+    <div class="sec-card layer4" data-detail="m205">
+      <div class="sec-name">[gcode_macro M205]</div>
+      <span class="sec-line">L398</span>
+      <div class="sec-desc">占位宏（兼容老切片软件）</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========== 自动数据 ========== -->
+<div class="section" id="layer5">
+  <h2 class="cat-title"><span class="icon">💾</span>自动数据 · #*# 块（SAVE_CONFIG 生成）</h2>
+  <p style="color: #aaa; margin-bottom: 20px;">这一段是 Klipper 自己写的，不要手改！每次跑 SAVE_CONFIG 命令，会重写这里的数据。</p>
+
+  <div class="section-grid">
+
+    <div class="sec-card layer5">
+      <div class="sec-name">[bed_mesh default]</div>
+      <span class="sec-line">#*# 块 1</span>
+      <div class="sec-desc">默认床面 mesh（5月/6月测的 6×6 数据）</div>
+      <div class="key-tag">36 点高度偏差</div>
+    </div>
+
+    <div class="sec-card layer5">
+      <div class="sec-name">[bed_mesh name]</div>
+      <span class="sec-line">#*# 块 2</span>
+      <div class="sec-desc">备份 mesh（备用 profile，重启不丢）</div>
+      <div class="key-tag">36 点高度偏差</div>
+    </div>
+
+    <div class="sec-card layer5">
+      <div class="sec-name">[probe] z_offset</div>
+      <span class="sec-line">#*# 块 3</span>
+      <div class="sec-desc">Z 探针偏移（1.050 = 喷嘴 → 探针距离补偿）</div>
+      <div class="key-tag">1.050</div>
+    </div>
+
+    <div class="sec-card layer5">
+      <div class="sec-name">[input_shaper] 共振</div>
+      <span class="sec-line">#*# 块 4</span>
+      <div class="sec-desc">共振抑制参数（X=64.4Hz ei / Y=43.0Hz mzv）</div>
+      <div class="key-tag">shaper_type</div>
+    </div>
+
+    <div class="sec-card layer5">
+      <div class="sec-name">[heater_bed] PID</div>
+      <span class="sec-line">#*# 块 5</span>
+      <div class="sec-desc">热床 PID 参数（72.465 / 2.166 / 605.989）</div>
+      <div class="key-tag">PID_CALIBRATE 算的</div>
+    </div>
+
+  </div>
+
+  <div class="warn">
+    <div class="warn-title">⚠️ 重要警告</div>
+    <code>#*#</code> 块是 Klipper 在每次 <code>SAVE_CONFIG</code> 时自动重写的。手动改这里：
+    <ul style="margin-top: 8px; padding-left: 24px;">
+      <li>下次执行 <code>SAVE_CONFIG</code> → 你的修改被覆盖</li>
+      <li>Mainsail 编辑器会显示这些行（因 <code>=</code> 风格触发红色），忽略</li>
+      <li>想改这些值？去对应 [section] 改 + 跑 SAVE_CONFIG</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ========== 数据流 ========== -->
+<div class="section" id="flow">
+  <h2 class="cat-title"><span class="icon">🌊</span>数据流 · cfg 各段怎么协作</h2>
+
+  <h3 style="color: #00d4ff; margin: 20px 0 12px;">📍 一次完整打印的数据流</h3>
+  <div class="demo">
+    <div class="demo-title">点击播放，看每个 section 怎么被调用</div>
+    <svg width="100%" height="380" viewBox="0 0 1000 380">
+      <defs>
+        <marker id="arr" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#00d4ff"/>
+        </marker>
+      </defs>
+
+      <!-- START_PRINT -->
+      <rect x="50" y="20" width="160" height="50" fill="rgba(0,212,255,0.2)" stroke="#00d4ff" stroke-width="2" rx="6"/>
+      <text x="130" y="50" fill="#00d4ff" font-size="13" text-anchor="middle" font-weight="bold">START_PRINT</text>
+
+      <!-- 预热 -->
+      <line x1="210" y1="45" x2="270" y2="45" stroke="#00d4ff" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="270" y="20" width="160" height="50" fill="rgba(255,165,2,0.2)" stroke="#ffa502" rx="6"/>
+      <text x="350" y="50" fill="#ffa502" font-size="13" text-anchor="middle" font-weight="bold">M140/M104/M190/M109</text>
+      <text x="350" y="65" fill="#888" font-size="10" text-anchor="middle">→ [heater_bed] [extruder]</text>
+
+      <!-- G28 -->
+      <line x1="430" y1="45" x2="490" y2="45" stroke="#00d4ff" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="490" y="20" width="160" height="50" fill="rgba(46,213,115,0.2)" stroke="#2ed573" rx="6"/>
+      <text x="570" y="50" fill="#2ed573" font-size="13" text-anchor="middle" font-weight="bold">G28</text>
+      <text x="570" y="65" fill="#888" font-size="10" text-anchor="middle">→ [homing_override]</text>
+
+      <!-- BED_MESH_CALIBRATE -->
+      <line x1="650" y1="45" x2="710" y2="45" stroke="#00d4ff" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="710" y="20" width="220" height="50" fill="rgba(255,107,53,0.2)" stroke="#ff6b35" rx="6"/>
+      <text x="820" y="50" fill="#ff6b35" font-size="13" text-anchor="middle" font-weight="bold">BED_MESH_CALIBRATE</text>
+      <text x="820" y="65" fill="#888" font-size="10" text-anchor="middle">→ [bed_mesh] + [probe]</text>
+
+      <!-- PURGE_NOZZLE -->
+      <line x1="490" y1="120" x2="490" y2="155" stroke="#00d4ff" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="400" y="155" width="220" height="50" fill="rgba(165,94,234,0.2)" stroke="#a55eea" rx="6"/>
+      <text x="510" y="185" fill="#a55eea" font-size="13" text-anchor="middle" font-weight="bold">PURGE_NOZZLE</text>
+      <text x="510" y="200" fill="#888" font-size="10" text-anchor="middle">→ [gcode_macro PURGE_NOZZLE]</text>
+
+      <!-- 打印中 -->
+      <line x1="620" y1="180" x2="700" y2="180" stroke="#00d4ff" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="700" y="155" width="220" height="50" fill="rgba(46,213,115,0.2)" stroke="#2ed573" rx="6"/>
+      <text x="810" y="185" fill="#2ed573" font-size="13" text-anchor="middle" font-weight="bold">打印中...</text>
+      <text x="810" y="200" fill="#888" font-size="10" text-anchor="middle">→ [extruder] [stepper_x/y/z]</text>
+
+      <!-- 断料检测 -->
+      <line x1="510" y1="205" x2="510" y2="245" stroke="#ff4757" stroke-width="2" marker-end="url(#arr)" stroke-dasharray="4,2"/>
+      <rect x="400" y="245" width="220" height="50" fill="rgba(255,71,87,0.2)" stroke="#ff4757" rx="6"/>
+      <text x="510" y="275" fill="#ff4757" font-size="13" text-anchor="middle" font-weight="bold">断料！</text>
+      <text x="510" y="290" fill="#888" font-size="10" text-anchor="middle">→ [filament_switch_sensor]</text>
+
+      <!-- PAUSE -->
+      <line x1="620" y1="270" x2="700" y2="270" stroke="#ff4757" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="700" y="245" width="220" height="50" fill="rgba(255,71,87,0.2)" stroke="#ff4757" rx="6"/>
+      <text x="810" y="275" fill="#ff4757" font-size="13" text-anchor="middle" font-weight="bold">PAUSE</text>
+      <text x="810" y="290" fill="#888" font-size="10" text-anchor="middle">→ [gcode_macro PAUSE]</text>
+
+      <!-- END_PRINT -->
+      <line x1="810" y1="205" x2="810" y2="345" stroke="#00d4ff" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="700" y="345" width="220" height="50" fill="rgba(0,212,255,0.2)" stroke="#00d4ff" rx="6"/>
+      <text x="810" y="375" fill="#00d4ff" font-size="13" text-anchor="middle" font-weight="bold">END_PRINT</text>
+    </svg>
+  </div>
+
+  <h3 style="color: #00d4ff; margin: 30px 0 12px;">📍 5 步调平流程动画</h3>
+  <div class="demo">
+    <div class="demo-title">每步调用哪个 section，数据写到哪里</div>
+    <div id="levelingFlow" style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 20px 0;">
+      <div class="flow-step" data-step="1" id="step1">1️⃣ G28 → [homing_override]</div>
+      <div class="flow-step" data-step="2" id="step2">2️⃣ G29 → [probe] → z_offset → #*# 块</div>
+      <div class="flow-step" data-step="3" id="step3">3️⃣ SCREWS_TILT_CALCULATE → [screws_tilt_adjust]</div>
+      <div class="flow-step" data-step="4" id="step4">4️⃣ G30 → [bed_mesh] → 36 点 → #*# 块</div>
+      <div class="flow-step" data-step="5" id="step5">5️⃣ G40 → [adxl345] → input_shaper → #*# 块</div>
+    </div>
+    <div class="demo-controls">
+      <button class="demo-btn" onclick="playLeveling()">▶️ 播放调平流程</button>
+      <button class="demo-btn" onclick="resetLeveling()">⏹️ 重置</button>
+    </div>
+  </div>
+
+  <h3 style="color: #00d4ff; margin: 30px 0 12px;">📍 section 依赖关系图</h3>
+  <div class="flow-diagram">
+    <table class="rel-table">
+      <tr>
+        <th>用户操作</th>
+        <th>触发宏</th>
+        <th>调用 section</th>
+        <th>写入数据</th>
+      </tr>
+      <tr>
+        <td>点 <code>START_PRINT</code></td>
+        <td>M140/M104/M190/M109</td>
+        <td>[heater_bed] [extruder] [verify_heater]</td>
+        <td>温度上升</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>G28</td>
+        <td>[homing_override] → [stepper_x/y/z] [tmc2209]</td>
+        <td>X/Y/Z 坐标归零</td>
+      </tr>
+      <tr>
+        <td>敲 <code>G29</code></td>
+        <td>PROBE_CALIBRATE</td>
+        <td>[probe] + [stepper_z]</td>
+        <td><code>#*# [probe] z_offset</code></td>
+      </tr>
+      <tr>
+        <td>敲 <code>G30</code></td>
+        <td>BED_MESH_CALIBRATE</td>
+        <td>[bed_mesh] + [probe]</td>
+        <td><code>#*# [bed_mesh default]</code> 36 点</td>
+      </tr>
+      <tr>
+        <td>敲 <code>SCREWS_TILT_CALCULATE</code></td>
+        <td>—</td>
+        <td>[screws_tilt_adjust]</td>
+        <td>只输出建议，不写盘</td>
+      </tr>
+      <tr>
+        <td>敲 <code>G40</code></td>
+        <td>SHAPER_CALIBRATE</td>
+        <td>[adxl345] + [input_shaper]</td>
+        <td><code>#*# [input_shaper]</code></td>
+      </tr>
+      <tr>
+        <td>断料</td>
+        <td>runout_gcode</td>
+        <td>[filament_switch_sensor fila] → PAUSE → [gcode_macro PAUSE]</td>
+        <td>暂停状态</td>
+      </tr>
+      <tr>
+        <td>点 <code>END_PRINT</code></td>
+        <td>—</td>
+        <td>[gcode_macro END_PRINT] → M84 / TURN_OFF_HEATERS</td>
+        <td>关闭电机/加热</td>
+      </tr>
+    </table>
+  </div>
+
+</div>
+
+<!-- ========== 段字典 ========== -->
+<div class="section" id="dict">
+  <h2 class="cat-title"><span class="icon">📖</span>段字典 · 每个 section 的工作原理</h2>
+  <p style="color: #aaa; margin-bottom: 20px;">点击硬件层 / 智能层 / 动作层的卡片可看详细解释；这里按字母排序列出所有 section。</p>
+
+  <input type="text" id="searchBox" placeholder="🔍 搜索 section 名称（如 mcu / stepper / G29）" style="
+    width: 100%;
+    padding: 14px 20px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1em;
+    margin-bottom: 20px;
+  ">
+
+  <div id="dictList">
+    <!-- 字典由 JS 动态生成 -->
+  </div>
+</div>
+
+</div>
+
+<!-- 详细解释弹窗 -->
+<div class="detail-modal" id="detailModal">
+  <div class="detail-content" id="detailContent">
+    <!-- JS 动态填充 -->
+  </div>
+</div>
+
+<script>
+// 标签切换
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.target).classList.add('active');
+    window.scrollTo(0, 0);
+  });
+});
+
+// 5 步调平流程动画
+let levelingActive = false;
+async function playLeveling() {
+  if (levelingActive) return;
+  levelingActive = true;
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById('step' + i);
+    el.classList.add('active');
+    await new Promise(r => setTimeout(r, 1500));
+    el.classList.remove('active');
+    if (i < 5) {
+      el.style.opacity = '0.4';
+    }
+  }
+  levelingActive = false;
+}
+
+function resetLeveling() {
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById('step' + i);
+    el.classList.remove('active');
+    el.style.opacity = '1';
+  }
+  levelingActive = false;
+}
+
+// 段字典数据
+const dict = {
+  "mcu": {
+    name: "[mcu]",
+    desc: "KLP1 主控通信配置",
+    detail: `
+      <p>KLP1 主板是 STM32F103 芯片，通过 USB 串口和树莓派通信。<code>serial: /dev/serial/by-id/...</code> 用 by-id 而不是 ttyUSB0，避免 USB 顺序变了连不上。</p>
+      <p><code>restart_method: command</code> = 重启 Klipper 用软件命令（firmware_restart），不重启 MCU 本身。</p>
+      <div class="tip"><div class="tip-title">💡 怎么找你的 by-id 路径？</div>SSH 跑 <code>ls /dev/serial/by-id/</code> 看 usb-Klipper_stm32f... 开头的那个。</div>
+    `
+  },
+  "printer": {
+    name: "[printer]",
+    desc: "机型 + 速度限制",
+    detail: `
+      <p><strong>kinematics: corexy</strong> = KLP1 是 CoreXY 结构，XY 两个步进电机一起控制 X+Y 方向。</p>
+      <p>速度参数：max_velocity 500 / max_accel 20000 是 Klipper 理论上限，KLP1 实际跑建议 max_velocity ≤300，max_accel ≤12000（4 个 1.3A 电流电机偏保守）。</p>
+      <p><strong>square_corner_velocity: 20</strong> = 方形拐角速度 20mm/s，拐角处允许的最高速度，超过会变圆角。</p>
+    `
+  },
+  "stepper": {
+    name: "[stepper_x/y/z]",
+    desc: "3 个步进电机配置",
+    detail: `
+      <p><strong>rotation_distance</strong> = 主动轮周长（mm）。X/Y 是 40mm（GT2 20 齿齿轮 × 2mm 齿距），Z 是 8mm（KLP1 用了 16 齿 GT2 同步轮）。</p>
+      <p><strong>gear_ratio: 40:20</strong>（仅 Z）= 减速比 2:1，电机转 2 圈丝杠转 1 圈。这是 KLP1 的非标齿轮比，按实际配置写。</p>
+      <p><strong>endstop_pin: tmc2209_...:virtual_endstop</strong> = X/Y 用 TMC2209 sensorless homing（检测电机堵转），Z 用 BLTouch（探针:z_virtual_endstop）。</p>
+      <p><strong>position_min: -10</strong>（仅 Z）= 允许下探到 -10mm，探针校准时需要这个负范围。</p>
+    `
+  },
+  "tmc": {
+    name: "[tmc2209 stepper_x/y/z] [tmc2209 extruder]",
+    desc: "4 个 TMC2209 静音驱动",
+    detail: `
+      <p><strong>run_current</strong> = 运行电流（A）。KLP1 标称：X/Y 1.5A、Z 1.0A、E 0.9A，cfg 留 5% 余量写 1.3/1.0/0.9。</p>
+      <p><strong>stealthchop_threshold: 0</strong> = 全程静音模式。设 99999 就是全程高速模式（运动更快但有电机声）。</p>
+      <p><strong>driver_SGTHRS: 110</strong>（仅 X/Y）= sensorless homing 失速检测阈值。100-120 比较合适，太低容易误触发，太高检测不到。</p>
+      <p><strong>interpolate: True</strong> = 256 微步插值，运动更平滑。</p>
+      <div class="tip"><div class="tip-title">💡 改电流注意</div>改完必须 RESTART 才生效。改高了会烧电机，改低了会丢步。建议 ±0.1A 微调。</div>
+    `
+  },
+  "extruder": {
+    name: "[extruder]",
+    desc: "BMG 双齿轮挤出机",
+    detail: `
+      <p><strong>rotation_distance: 23</strong> = BMG 主动轮周长 23mm（KLP1 实测值，部分打印机是 22.85）。</p>
+      <p><strong>gear_ratio: 50:10</strong> = BMG 减速比 5:1，电机转 5 圈挤出轮转 1 圈。</p>
+      <p><strong>pressure_advance: 0.04</strong> = 压力提前，拐角处提前挤出补偿。推荐 0.04-0.06 区间，<strong>想精调打印 pressure advance 标定塔</strong>。</p>
+      <p><strong>max_extrude_cross_section: 0.64</strong> = 0.4 喷嘴默认 4.0×0.4²=0.64 mm²，防止空挤出时挤料过多。</p>
+      <p><strong>PID 参数</strong> = 控温算法（kp/ki/kd），不要手改！要重新校准跑 <code>PID_CALIBRATE HEATER=extruder TARGET=245</code>。</p>
+    `
+  },
+  "homing": {
+    name: "[homing_override]",
+    desc: "自定义回零逻辑",
+    detail: `
+      <p>KLP1 用了 3 个特殊技巧：</p>
+      <ol style="margin: 10px 0 10px 20px; line-height: 1.8;">
+        <li><strong>降流</strong>：回零时把 X/Y 电流从 1.3A 降到 0.5A（防回零过猛撞坏），结束恢复</li>
+        <li><strong>降加速度</strong>：回零时 ACCEL=500（平时 20000），回零完成恢复 5000</li>
+        <li><strong>末尾加载 mesh</strong>：<code>BED_MESH_PROFILE LOAD=default</code>，回零后自动应用床面补偿</li>
+      </ol>
+      <p>支持 <code>G28 X</code> / <code>G28 Y</code> / <code>G28 Z</code> 单轴回零，<code>G28</code> 全轴回零。</p>
+      <div class="tip"><div class="tip-title">💡 set_position_z: 0</div>回零时把 Z 强制设为 0，保护 BLTouch 不会被错误信号撞坏。</div>
+    `
+  },
+  "heater_bed": {
+    name: "[heater_bed]",
+    desc: "热床 NTC 100K",
+    detail: `
+      <p>KLP1 用 NTC 100K MGB18-104F39050L32 热敏电阻（和官方默认一致）。</p>
+      <p><strong>pwm_cycle_time: 0.02</strong> = 关键参数！热床 PID 控制周期 20ms。解决 SSR 振荡问题（不开这个参数，热床温度会 ±2°C 来回飘）。</p>
+      <p>PID 参数（kp/ki/kd）= 注释掉了，被 #*# 块覆盖。要重新校准：<code>PID_CALIBRATE HEATER=heater_bed TARGET=60</code>。</p>
+    `
+  },
+  "temp_sensor": {
+    name: "[temperature_sensor ...]",
+    desc: "温度传感器",
+    detail: `
+      <p><strong>[temperature_sensor mcu_temp]</strong> = 主板 STM32 内部温度，用于保护 MCU 不过热。</p>
+      <p><strong>[temperature_sensor KINGROONpi Pi]</strong> = 树莓派 CPU 温度。</p>
+      <p>这 2 个温度显示在 Mainsail 仪表盘上，不参与控制。</p>
+    `
+  },
+  "fan": {
+    name: "[temperature_fan Pi_fan2]",
+    desc: "主板温控风扇",
+    detail: `
+      <p>Pi CPU 温度 > 30°C 启动风扇，降到 30°C 以下回到最小风速 30%。</p>
+      <p><strong>max_speed: 1</strong> = 最大 100% 转速；<strong>min_speed: 0.3</strong> = 最小 30%（避免完全停转，保护电机）。</p>
+    `
+  },
+  "verify_heater": {
+    name: "[verify_heater ...]",
+    desc: "温度波动检测",
+    detail: `
+      <p>监控加热器是否失控（比如热敏电阻脱落、温度飙到 300°C）。</p>
+      <p><strong>max_error</strong> = 目标温度 ±多少度内算正常。挤出头 80°C（打印时正常波动），热床 5°C（热床波动小）。</p>
+      <p><strong>check_gain_time: 60</strong> = 60 秒内温度没接近目标温度就报警（原版 120 太长）。</p>
+      <div class="warn"><div class="warn-title">⚠️ 触发后</div>Klipper 会 shutdown，关闭所有加热器，需要排除故障才能继续。</div>
+    `
+  },
+  "adxl": {
+    name: "[adxl345] [resonance_tester]",
+    desc: "ADXL345 加速度计",
+    detail: `
+      <p>KLP1 工具头板载了 ADXL345 加速度计，测量打印时 X/Y 方向的振动。</p>
+      <p><strong>probe_points: 100, 100, 20</strong> = 在床中心 (X=100, Y=100, Z=20) 测振动（Z=20 是为了减少打印头共振干扰）。</p>
+      <p><strong>accel_per_hz: 300</strong> = 测试加速度 = 300 × 频率。比 75 默认值快 4 倍。</p>
+      <p>SHAPER_CALIBRATE 调用这个设备，扫描 5-100Hz 找最优共振抑制参数。</p>
+    `
+  },
+  "input_shaper": {
+    name: "[input_shaper]",
+    desc: "共振抑制参数",
+    detail: `
+      <p>SHAPER_CALIBRATE 算出最优参数后写入这里。</p>
+      <p>现在 KLP1 的值：X=64.4Hz ei（弹性影响），Y=43.0Hz mzv（多零点振动）。</p>
+      <p>含义：X 方向运动时，按 64.4Hz 频率"反向冲一下"抵消 64Hz 附近的共振；Y 同理。</p>
+      <div class="tip"><div class="tip-title">💡 想要更准？</div>加速度计用一段时间会有漂移，建议每 3 个月重跑一次 G40。</div>
+    `
+  },
+  "screws": {
+    name: "[screws_tilt_adjust]",
+    desc: "4 角螺丝校准",
+    detail: `
+      <p>KLP1 是单 Z + 双丝杠，4 角各 1 颗螺丝（M3 顺螺纹）。</p>
+      <p>控制台敲 <code>SCREWS_TILT_CALCULATE</code> → 探针测 4 角高度 → 输出每颗螺丝需要拧几圈（CW = 顺时针 = 压低床，CCW = 松开 = 抬起床）。</p>
+      <p><strong>screw1-4</strong> = 4 角坐标，对应床面 35,35 / 185,35 / 185,185 / 35,185。</p>
+      <p><strong>screw_thread: CW-M3</strong> = M3 顺螺纹（顺时针拧 = 压低）。</p>
+      <p><strong>retry_tolerance: 0.0075</strong> = 重试容差 7.5μm，超出自动重测。</p>
+    `
+  },
+  "bed_mesh": {
+    name: "[bed_mesh]",
+    desc: "床面平整度网格",
+    detail: `
+      <p>36 点 (6×6) 测量床面 + lagrange 插值，比 12 点精度高 3 倍。</p>
+      <p><strong>mesh_min/max</strong> = 测点范围 (20,20)~(202,190)，留 20mm 边距（防探针撞到边轨）。</p>
+      <p><strong>algorithm: lagrange</strong> = lagrange 多项式插值，适合平整的 PEI 磁吸板。如果床面弯曲严重，改 bicubic。</p>
+      <p><strong>fade_start: 1.0 / fade_end: 10.0</strong> = Z=1mm 开始渐变，Z=10mm 完全不补偿（高层打印时床面微小起伏不重要）。</p>
+    `
+  },
+  "probe": {
+    name: "[probe]",
+    desc: "BLTouch 探针",
+    detail: `
+      <p><strong>pin: !MKS_THR:gpio21</strong> = 信号引脚（! = 低电平触发，BLTouch 探针触发时输出低）。</p>
+      <p><strong>x_offset: 12.85</strong> = 喷嘴 → 探针的水平距离 12.85mm。G29 校准的就是这个值。</p>
+      <p><strong>samples: 3</strong> = 每个点测 3 次取中位数（防止单次误差）。</p>
+      <p><strong>samples_tolerance: 0.05</strong> = 3 次之间容差 0.05mm，超出重测。</p>
+      <p><strong>sample_retract_dist: 1.2</strong> = 每点测完抬升 1.2mm 再移到下一点（防刮床）。</p>
+    `
+  },
+  "fila": {
+    name: "[filament_switch_sensor fila]",
+    desc: "断料检测",
+    detail: `
+      <p><strong>pause_on_runout: True</strong> = 断料自动暂停打印。</p>
+      <p>断料触发 → <code>runout_gcode</code> 执行：</p>
+      <ol style="margin: 10px 0 10px 20px; line-height: 1.8;">
+        <li>LCD + 控制台显示 "断料！请手动换料"</li>
+        <li>调用 PAUSE 宏（喷嘴停到 (10,10) 位置）</li>
+        <li>加热到 220°C（方便抽料 + 换料）</li>
+        <li>用户手动换料后，控制台敲 RESUME 继续</li>
+      </ol>
+      <p><strong>event_delay: 3.0</strong> = 检测延迟 3s（防抖，耗材瞬间抖动不触发）。</p>
+    `
+  },
+  "start_print": {
+    name: "[gcode_macro START_PRINT]",
+    desc: "一键开始打印",
+    detail: `
+      <p>切片软件开头会自动调用 <code>START_PRINT BED_TEMP=60 EXTRUDER_TEMP=220</code>。</p>
+      <p>执行流程：</p>
+      <ol style="margin: 10px 0 10px 20px; line-height: 1.8;">
+        <li>M140 S{BED_TEMP} + M104 S{EXTRUDER_TEMP} = 加热（不等）</li>
+        <li>M190 S{BED_TEMP} = 等热床到温</li>
+        <li>M109 S{EXTRUDER_TEMP} = 等喷嘴到温</li>
+        <li>G90 + G28 = 绝对模式 + 全轴回零</li>
+        <li>G1 Z0.15 = 慢慢下降到首层高度 0.15mm</li>
+      </ol>
+      <div class="tip"><div class="tip-title">💡 想加 PURGE_NOZZLE？</div>在末尾加一行 <code>PURGE_NOZZLE</code> 即可。注释版 cfg 没加，自己加一下。</div>
+    `
+  },
+  "end_print": {
+    name: "[gcode_macro END_PRINT]",
+    desc: "结束打印",
+    detail: `
+      <p>切片软件结尾自动调用。</p>
+      <p>执行流程：</p>
+      <ol style="margin: 10px 0 10px 20px; line-height: 1.8;">
+        <li>G91 + G1 X-2 Y-2 E-3 = 相对模式 + 退料 3mm + 后退 X/Y 2mm</li>
+        <li>G1 Z10 = 抬 Z 10mm</li>
+        <li>G90 + M84 = 绝对模式 + 关闭电机</li>
+        <li>M140 S60 + M104 S200 = 热床降温 60°C + 喷嘴降温 200°C（防冷料堵）</li>
+        <li>M106 S0 = 关风扇</li>
+      </ol>
+    `
+  },
+  "pause": {
+    name: "[gcode_macro PAUSE / RESUME]",
+    desc: "暂停/恢复",
+    detail: `
+      <p><strong>PAUSE 流程</strong>：</p>
+      <ol style="margin: 10px 0 10px 20px; line-height: 1.8;">
+        <li>保存当前打印位置（SAVE_GCODE_STATE NAME=PAUSE）</li>
+        <li>抬 Z 10mm（不撞床）</li>
+        <li>退料 1mm（防漏料）</li>
+        <li>喷嘴移到 (10, 10)（床前部中心）</li>
+        <li>设置 12 小时超时（防空闲超时）</li>
+      </ol>
+      <p><strong>RESUME 流程</strong>：</p>
+      <ol style="margin: 10px 0 10px 20px; line-height: 1.8;">
+        <li>恢复喷嘴位置（RESTORE_GCODE_STATE）</li>
+        <li>重新加热到暂停前温度（M109）</li>
+        <li>慢慢下降到原 Z + 补料 2.5mm</li>
+        <li>恢复打印（BASE_RESUME）</li>
+      </ol>
+    `
+  },
+  "g29": {
+    name: "[gcode_macro G29]",
+    desc: "Z 偏移校准",
+    detail: `
+      <p>控制台敲 <code>G29</code> 启动 Z 偏移校准。</p>
+      <p>执行流程：</p>
+      <ol style="margin: 10px 0 10px 20px; line-height: 1.8;">
+        <li>G28 = 全轴回零</li>
+        <li>G0 Z10 + G1 X105 Y105 = 喷嘴到床中心 (105, 105)</li>
+        <li>PROBE_CALIBRATE = 弹出"Z 偏移校准"窗口（带 ACCEPT 按钮）</li>
+        <li>放 A4 纸，拧探针上下按钮调到"轻微摩擦"</li>
+        <li>点 ACCEPT → SAVE_CONFIG 写入 #*# [probe] z_offset</li>
+      </ol>
+      <div class="warn"><div class="warn-title">⚠️ 注意</div>ACCEPT 和 SAVE_CONFIG 必须拆成 2 行（注释版已拆），写成一行 <code>ACCEPT + SAVE_CONFIG</code> 会报错。</div>
+    `
+  },
+  "g30": {
+    name: "[gcode_macro G30]",
+    desc: "36 点 mesh 校准",
+    detail: `
+      <p>控制台敲 <code>G30</code> 启动床面 mesh 校准。</p>
+      <p>执行流程：</p>
+      <ol style="margin: 10px 0 10px 20px; line-height: 1.8;">
+        <li>BED_MESH_CLEAR = 清空旧 mesh</li>
+        <li>G28 = 全轴回零</li>
+        <li>BED_MESH_CALIBRATE = 自动测 36 个点（6×6）</li>
+        <li>BED_MESH_PROFILE SAVE="default" = 保存到 default profile（覆盖旧的）</li>
+        <li>SAVE_CONFIG = 写入硬盘（触发 Klipper 重启）</li>
+      </ol>
+      <p>重启后 [homing_override] 末尾的 LOAD=default 自动加载新数据。</p>
+    `
+  },
+  "g31_g37": {
+    name: "[gcode_macro G31-G36 / G37]",
+    desc: "TESTZ 手动微调 + 保存",
+    detail: `
+      <p><strong>G31-G36</strong> = TESTZ 调整 Z 偏移，单位 mm：</p>
+      <ul style="margin: 10px 0 10px 20px; line-height: 1.8;">
+        <li>G31: Z=-1（喷嘴往床靠近 1mm）</li>
+        <li>G32: Z=-0.5</li>
+        <li>G33: Z=-0.1（精调）</li>
+        <li>G34: Z=+0.1（精调）</li>
+        <li>G35: Z=+0.5</li>
+        <li>G36: Z=+1（喷嘴远离床 1mm）</li>
+      </ul>
+      <p><strong>G37</strong> = 确认保存：</p>
+      <ul style="margin: 10px 0 10px 20px; line-height: 1.8;">
+        <li>ACCEPT = 接受 TESTZ 偏移</li>
+        <li>SAVE_CONFIG = 写入硬盘</li>
+      </ul>
+    `
+  },
+  "g40": {
+    name: "[gcode_macro G40]",
+    desc: "一键共振补偿",
+    detail: `
+      <p>控制台敲 <code>G40</code> 启动共振测试。</p>
+      <p>执行流程：</p>
+      <ol style="margin: 10px 0 10px 20px; line-height: 1.8;">
+        <li>ACCELEROMETER_QUERY = 检查 ADXL345 连接</li>
+        <li>SET_INPUT_SHAPER SHAPER_FREQ_X=0 SHAPER_FREQ_Y=0 = 清空旧参数</li>
+        <li>G28 = 回零</li>
+        <li>M106 S255 = 开风扇（保护 ADXL345 不被热端烤坏）</li>
+        <li>SHAPER_CALIBRATE = 自动扫频 5-100Hz，找 X/Y 最优频率</li>
+        <li>SAVE_CONFIG = 写入硬盘（重启）</li>
+      </ol>
+      <p>重启后 #*# [input_shaper] 自动更新。</p>
+      <div class="tip"><div class="tip-title">💡 跑前注意</div>关闭房间空调/风扇，避免外部振动干扰。KLP1 默认 Z=20 测试点，要先 G28 到原位。</div>
+    `
+  },
+  "shaper_calibrate": {
+    name: "[gcode_macro SHAPER_CALIBRATE]",
+    desc: "共振测试包装",
+    detail: `
+      <p>这是 Klipper 内置 SHAPER_CALIBRATE 的"包装版"，改名为 RESHAPER_CALIBRATE 后重新定义：</p>
+      <p><code>RESHAPER_CALIBRATE FREQ_START=5 FREQ_END=100</code> = 扫描 5-100Hz 频率范围。</p>
+      <p>默认范围是 5-133Hz，但 KLP1 实测超过 100Hz 信号已经衰减，扫到 100 就够。</p>
+    `
+  },
+  "g50": {
+    name: "[gcode_macro G50]",
+    desc: "自动退料",
+    detail: `
+      <p>控制台敲 <code>G50</code> 自动退料：</p>
+      <ol style="margin: 10px 0 10px 20px; line-height: 1.8;">
+        <li>加热到 220°C（M104 + M109）</li>
+        <li>挤 30mm + 抽 27mm（先松料）</li>
+        <li>开风扇冷却</li>
+        <li>冷到 62°C（PLA 软化点）</li>
+        <li>再抽 50mm（彻底抽出耗材）</li>
+        <li>关加热、关电机</li>
+      </ol>
+    `
+  },
+  "load_unload": {
+    name: "[gcode_macro LOAD_FILAMENT / UNLOAD_FILAMENT]",
+    desc: "手动进料/退料",
+    detail: `
+      <p><strong>LOAD_FILAMENT</strong>：加热 220°C → 推 100mm（直接把耗材推到喷嘴）。</p>
+      <p><strong>UNLOAD_FILAMENT</strong>：加热 220°C → 推 30mm + 抽 27mm → 冷到 62°C → 再抽 50mm。</p>
+      <p>控制台敲 LOAD_FILAMENT 或 UNLOAD_FILAMENT 调用。</p>
+    `
+  },
+  "purge": {
+    name: "[gcode_macro PURGE_NOZZLE]",
+    desc: "冲刷+擦嘴",
+    detail: `
+      <p>拓竹风格冲刷+擦嘴，简单磁吸版，Andy 哥专用。</p>
+      <p>执行流程：</p>
+      <ol style="margin: 10px 0 10px 20px; line-height: 1.8;">
+        <li>抬 Z 5mm（留擦嘴空间）</li>
+        <li>走到冲刷桶 (X=25, Y=200) → 挤 8mm + 抽 2mm（断料准备）</li>
+        <li>走到擦嘴片 (X=10, Y=210) → Z=0.5 贴擦嘴片</li>
+        <li>X=10↔X=25 来回 4 次（擦嘴）</li>
+        <li>抬 Z 10mm 离开</li>
+      </ol>
+      <p><strong>关键点</strong>：所有坐标都在 mesh 范围外（mesh 是 X=20-202, Y=20-190），不触发 Z 补偿。</p>
+      <div class="tip"><div class="tip-title">💡 怎么调用？</div>在 START_PRINT 末尾加一行 <code>PURGE_NOZZLE</code>。注释版 cfg 没加，自己加一下。</div>
+    `
+  },
+  "virtual_sd": {
+    name: "[virtual_sdcard]",
+    desc: "虚拟 SD 卡",
+    detail: `
+      <p><strong>path: /home/mks/printer_data/gcodes</strong> = G-code 文件存放路径。</p>
+      <p>上传的 .gcode 文件放在这个目录，Mainsail 就能在文件列表里看到。</p>
+    `
+  },
+  "pause_resume": {
+    name: "[pause_resume]",
+    desc: "暂停/恢复基础模块",
+    detail: `
+      <p>Klipper 内置模块，PAUSE 宏调用 BASE_PAUSE 实现真正的暂停。</p>
+      <p>不要加额外参数，留空即可。</p>
+    `
+  },
+  "idle_timeout": {
+    name: "[idle_timeout]",
+    desc: "空闲超时",
+    detail: `
+      <p><strong>timeout: 3600</strong> = 1 小时无操作触发 END_PRINT。</p>
+      <p>防呆：忘记关打印机时自动结束打印 + 关电机。</p>
+    `
+  },
+  "exclude_object": {
+    name: "[exclude_object]",
+    desc: "对象排除",
+    detail: `
+      <p>多对象打印时，某个对象失败可以跳过它继续打别的。</p>
+      <p>OrcaSlicer / PrusaSlicer 切片时勾选"按对象排除"，切片文件里每个对象有名字。</p>
+      <p>打印中控制台敲 <code>EXCLUDE_OBJECT_START NAME=A</code> 跳过对象 A。</p>
+    `
+  },
+  "arcs": {
+    name: "[gcode_arcs]",
+    desc: "圆弧支持",
+    detail: `
+      <p>切片软件生成 G2/G3 圆弧命令时，Klipper 不再拆成 N 段折线。</p>
+      <p><strong>resolution: 0.1</strong> = 弧线分段精度 0.1mm。</p>
+      <p>效果：圆弧打印速度更快、表面更光滑（没有折线锯齿）。</p>
+    `
+  },
+  "display": {
+    name: "[display]",
+    desc: "KLP1 mini12864 LCD",
+    detail: `
+      <p>KLP1 自带的 mini12864 屏幕（128×64 点阵），用 uc1701 驱动芯片。</p>
+      <p><strong>encoder_pins: ^PE13, ^PE14</strong> = 旋钮 A/B 相信号。</p>
+      <p><strong>click_pin: ^!PE15</strong> = 按键（^ = 内部上拉，! = 低电平触发）。</p>
+      <p><strong>spi_software_*</strong> = 软件 SPI（KLP1 没硬件 SPI 引出屏幕）。</p>
+    `
+  },
+  "neopixel": {
+    name: "[neopixel mini12864]",
+    desc: "屏背光 RGB 灯带",
+    detail: `
+      <p>mini12864 屏背光的 RGB 灯带（3 颗 WS2812）。</p>
+      <p><strong>initial_RED/GREEN/BLUE</strong> = 初始颜色 (1.0, 1.0, 0.0) = 黄色。</p>
+      <p>可以在 Mainsail 控制颜色（红=加热中/绿=就绪/蓝=打印中/黄=待机）。</p>
+    `
+  },
+  "beeper": {
+    name: "[output_pin beeper]",
+    desc: "蜂鸣器",
+    detail: `
+      <p>KLP1 主板的蜂鸣器，报警/提示音用。</p>
+      <p>控制台敲 <code>SET_PIN PIN=beeper VALUE=1</code> 响，<code>VALUE=0</code> 停。</p>
+    `
+  },
+  "cancel": {
+    name: "[gcode_macro CANCEL_PRINT]",
+    desc: "取消打印",
+    detail: `
+      <p>切片软件调用，强制取消当前打印：</p>
+      <ol style="margin: 10px 0 10px 20px; line-height: 1.8;">
+        <li>TURN_OFF_HEATERS = 关闭所有加热</li>
+        <li>CANCEL_PRINT_BASE = Klipper 基础取消</li>
+        <li>G1 X10 F3000 = 喷嘴回 X=10</li>
+        <li>M84 = 关闭电机</li>
+        <li>M106 S0 = 关风扇</li>
+      </ol>
+    `
+  },
+  "duplicate": {
+    name: "[duplicate_pin_override]",
+    desc: "重复引脚覆盖",
+    detail: `
+      <p><strong>pins: PB5</strong> = 允许 PB5 被多个 section 复用（KLP1 的屏幕和 display_status 都用 PB5）。</p>
+      <p>不加这句 Klipper 会报错"重复引脚"。</p>
+    `
+  },
+  "m205": {
+    name: "[gcode_macro M205]",
+    desc: "占位宏（兼容老切片）",
+    detail: `
+      <p>老切片软件（Cura 等）会发 M205 命令，加这个空宏防止 Klipper 报错。</p>
+      <p>实际什么都不做。</p>
+    `
+  },
+  "include": {
+    name: "[include mainsail.cfg / MKS_THR.cfg]",
+    desc: "外部配置文件",
+    detail: `
+      <p><strong>[include mainsail.cfg]</strong> = Mainsail 默认配置（红黑配色、状态显示）。</p>
+      <p><strong>[include MKS_THR.cfg]</strong> = MKS 工具头板配置（挤出机、加热棒、风扇、ADXL345 的 GPIO 映射）。</p>
+      <p>这 2 个文件是 KINGROON 官方预装在 <code>/home/mks/printer_data/config/</code> 的，不要手改。</p>
+    `
+  },
+  "display_status": {
+    name: "[display_status]",
+    desc: "显示状态消息",
+    detail: `
+      <p>让 LCD 屏幕显示自定义消息。</p>
+      <p>控制台敲 <code>M117 消息内容</code> 在 LCD 上显示。</p>
+      <p>比如 <code>M117 断料！请手动换料</code> = LCD 显示"断料！请手动换料"。</p>
+    `
+  }
+};
+
+// 详细解释弹窗
+document.querySelectorAll('.sec-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const key = card.dataset.detail;
+    const data = dict[key];
+    if (!data) return;
+    const modal = document.getElementById('detailModal');
+    const content = document.getElementById('detailContent');
+    content.innerHTML = `
+      <div class="detail-header">
+        <h2>${data.name}</h2>
+        <button class="detail-close" onclick="document.getElementById('detailModal').classList.remove('show')">✕</button>
+      </div>
+      <div class="detail-section">
+        <h3>📋 用途</h3>
+        <p>${data.desc}</p>
+      </div>
+      <div class="detail-section">
+        <h3>🔍 工作原理</h3>
+        ${data.detail}
+      </div>
+    `;
+    modal.classList.add('show');
+  });
+});
+
+// 段字典列表
+const dictList = document.getElementById('dictList');
+Object.entries(dict).sort((a, b) => a[0].localeCompare(b[0])).forEach(([key, data]) => {
+  const div = document.createElement('div');
+  div.className = 'sec-card layer1';
+  div.style.marginBottom = '12px';
+  div.innerHTML = `
+    <div class="sec-name">${data.name}</div>
+    <div class="sec-desc">${data.desc}</div>
+  `;
+  div.addEventListener('click', () => {
+    const modal = document.getElementById('detailModal');
+    const content = document.getElementById('detailContent');
+    content.innerHTML = `
+      <div class="detail-header">
+        <h2>${data.name}</h2>
+        <button class="detail-close" onclick="document.getElementById('detailModal').classList.remove('show')">✕</button>
+      </div>
+      <div class="detail-section">
+        <h3>📋 用途</h3>
+        <p>${data.desc}</p>
+      </div>
+      <div class="detail-section">
+        <h3>🔍 工作原理</h3>
+        ${data.detail}
+      </div>
+    `;
+    modal.classList.add('show');
+  });
+  dictList.appendChild(div);
+});
+
+// 搜索
+document.getElementById('searchBox').addEventListener('input', (e) => {
+  const q = e.target.value.toLowerCase();
+  document.querySelectorAll('#dictList .sec-card').forEach(card => {
+    const text = card.textContent.toLowerCase();
+    card.style.display = text.includes(q) ? '' : 'none';
+  });
+});
+
+// 顶部进度条
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const b = document.body;
+  const st = 'scrollTop';
+  const sh = 'scrollHeight';
+  const percent = (h[st] || b[st]) / ((h[sh] || b[sh]) - h.clientHeight) * 100;
+  document.getElementById('readProgress').style.width = percent + '%';
+});
+
+// 点击弹窗背景关闭
+document.getElementById('detailModal').addEventListener('click', (e) => {
+  if (e.target.id === 'detailModal') {
+    e.target.classList.remove('show');
+  }
+});
+</script>
+</body>
+</html>

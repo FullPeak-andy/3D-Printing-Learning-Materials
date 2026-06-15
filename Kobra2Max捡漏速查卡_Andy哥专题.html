@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Kobra 2 Max 捡漏速查卡 · Andy 哥</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(135deg,#0f1419 0%,#1a2332 100%);color:#e6edf3;min-height:100vh;padding:16px;line-height:1.6}
+  .container{max-width:760px;margin:0 auto}
+  .header{text-align:center;padding:18px 0 12px;border-bottom:1px solid #30363d;margin-bottom:18px}
+  .header h1{font-size:22px;background:linear-gradient(90deg,#ffd700,#ff6b35);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
+  .header .sub{color:#8b949e;font-size:13px}
+
+  /* 核心数据卡 */
+  .data-card{background:linear-gradient(135deg,#1f2937,#111827);border:1px solid #f0b429;border-radius:12px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden}
+  .data-card::before{content:"🎯";position:absolute;top:8px;right:12px;font-size:36px;opacity:0.15}
+  .data-card .row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed #30363d}
+  .data-card .row:last-child{border-bottom:none}
+  .data-card .row .k{color:#8b949e;font-size:13px}
+  .data-card .row .v{color:#e6edf3;font-weight:600;font-size:14px;text-align:right}
+  .data-card .row .v.hot{color:#ffd700}
+  .data-card .row .v.danger{color:#f85149}
+
+  /* 决策树 */
+  .decision{margin-bottom:14px}
+  .decision h2{font-size:15px;color:#ffd700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+  .decision-tree{display:flex;flex-direction:column;gap:8px}
+  .dnode{padding:10px 12px;border-radius:8px;border-left:4px solid;background:#0d1117;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all 0.2s}
+  .dnode:hover{transform:translateX(4px);background:#161b22}
+  .dnode.go{border-color:#3fb950}
+  .dnode.talk{border-color:#f0b429}
+  .dnode.stop{border-color:#f85149}
+  .dnode .icon{font-size:20px}
+  .dnode .label{font-weight:600;font-size:14px}
+  .dnode .sub{color:#8b949e;font-size:12px;margin-top:2px}
+  .dnode .price{font-family:monospace;font-size:16px;font-weight:700;margin-left:auto}
+
+  /* 私信话术 */
+  .msg{margin-bottom:14px}
+  .msg h2{font-size:15px;color:#58a6ff;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .msg-box{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:12px;position:relative;font-size:14px;line-height:1.7;color:#c9d1d9}
+  .copy-btn{position:absolute;top:8px;right:8px;background:#21262d;border:1px solid #30363d;color:#58a6ff;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;transition:all 0.2s}
+  .copy-btn:hover{background:#30363d}
+  .copy-btn.copied{background:#238636;color:#fff;border-color:#238636}
+
+  /* 风险清单 */
+  .risk{margin-bottom:14px}
+  .risk h2{font-size:15px;color:#f85149;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .checklist{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:8px 12px}
+  .check-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed #30363d;cursor:pointer}
+  .check-item:last-child{border-bottom:none}
+  .check-item input{width:18px;height:18px;cursor:pointer;accent-color:#3fb950}
+  .check-item label{flex:1;font-size:14px;cursor:pointer;user-select:none}
+  .check-item.done label{color:#8b949e;text-decoration:line-through}
+  .check-item .tip{color:#8b949e;font-size:12px}
+
+  /* 对比表 */
+  .compare{margin-bottom:14px}
+  .compare h2{font-size:15px;color:#a371f7;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .ctable{width:100%;border-collapse:collapse;font-size:12px;background:#0d1117;border-radius:8px;overflow:hidden}
+  .ctable th,.ctable td{padding:8px 6px;text-align:center;border-bottom:1px solid #21262d}
+  .ctable th{background:#161b22;color:#8b949e;font-weight:600;font-size:11px}
+  .ctable tr.hl{background:#1f2937}
+  .ctable tr.hl td{color:#ffd700;font-weight:600}
+  .ctable .star{color:#ffd700}
+  .ctable .ok{color:#3fb950}
+  .ctable .meh{color:#f0b429}
+
+  /* 行动按钮 */
+  .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  .abtn{padding:12px;border-radius:8px;border:none;font-weight:600;font-size:14px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px}
+  .abtn:active{transform:scale(0.97)}
+  .abtn.primary{background:linear-gradient(90deg,#ffd700,#ff6b35);color:#0d1117}
+  .abtn.secondary{background:#21262d;color:#58a6ff;border:1px solid #30363d}
+
+  /* LED 业务挂钩 */
+  .led{margin-bottom:14px;padding:12px;background:linear-gradient(90deg,rgba(63,185,80,0.1),rgba(35,134,54,0.05));border-left:3px solid #3fb950;border-radius:6px}
+  .led h3{font-size:13px;color:#3fb950;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+  .led p{font-size:12px;color:#c9d1d9;line-height:1.6}
+
+  .footer{text-align:center;color:#6e7681;font-size:11px;padding:14px 0 4px;border-top:1px solid #21262d;margin-top:8px}
+
+  @media(max-width:480px){
+    body{padding:10px}
+    .header h1{font-size:18px}
+    .data-card .row .k,.data-card .row .v{font-size:12px}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>🎯 Kobra 2 Max 捡漏速查卡</h1>
+    <div class="sub">420×420×500mm · ¥30 起拍 · 深圳 · 卖家信用极好</div>
+  </div>
+
+  <!-- 核心数据 -->
+  <div class="data-card">
+    <div class="row"><span class="k">📐 打印体积</span><span class="v hot">420 × 420 × 500 mm</span></div>
+    <div class="row"><span class="k">⚙️ 固件</span><span class="v hot">Klipper（Anycubic 自家改版）</span></div>
+    <div class="row"><span class="k">🏗️ 结构</span><span class="v">CoreXY · 300mm/s</span></div>
+    <div class="row"><span class="k">💰 当前价</span><span class="v danger">¥30 起拍（诱饵价）</span></div>
+    <div class="row"><span class="k">🎯 心理价位</span><span class="v hot">≤ ¥1500</span></div>
+    <div class="row"><span class="k">📍 卖家</span><span class="v">深圳 · 6年 · 106件 · 100%好评</span></div>
+    <div class="row"><span class="k">⚠️ 标题警示</span><span class="v danger">"拆配件出！都可以拆"</span></div>
+  </div>
+
+  <!-- 决策树 -->
+  <div class="decision">
+    <h2>🌳 拍卖现场决策树</h2>
+    <div class="decision-tree">
+      <div class="dnode go">
+        <div class="icon">✅</div>
+        <div>
+          <div class="label">直接拍</div>
+          <div class="sub">拍到 ≤ ¥1500 闭眼入</div>
+        </div>
+        <div class="price" style="color:#3fb950">≤ ¥1500</div>
+      </div>
+      <div class="dnode talk">
+        <div class="icon">🤝</div>
+        <div>
+          <div class="label">磨一磨</div>
+          <div class="sub">¥1500-2000 区间看卖家急不急</div>
+        </div>
+        <div class="price" style="color:#f0b429">¥1500-2000</div>
+      </div>
+      <div class="dnode stop">
+        <div class="icon">❌</div>
+        <div>
+          <div class="label">撤单走人</div>
+          <div class="sub">¥2000+ 不值，蹲 Sidewinder 或 Trident</div>
+        </div>
+        <div class="price" style="color:#f85149">≥ ¥2000</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 私信话术 -->
+  <div class="msg">
+    <h2>💬 私信话术（直接复制）</h2>
+    <div class="msg-box" id="msgBox">
+      老板 Kobra 2 Max 整机出吗？带主板+6 个电机+热端+PEI 床面+液晶屏吗？包邮多少？我深圳同城可以直接面交验机。
+      <button class="copy-btn" onclick="copyMsg()">📋 复制</button>
+    </div>
+  </div>
+
+  <!-- 风险清单 -->
+  <div class="risk">
+    <h2>⚠️ 拍前必问清单（5 件不能少）</h2>
+    <div class="checklist">
+      <div class="check-item" onclick="toggleCheck(this)">
+        <input type="checkbox"><label>主板（Anycubic 定制版 · 含 Klipper 固件）</label>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <input type="checkbox"><label>6 个步进电机（X/Y/Z + 挤出机 + 2 个 CoreXY）</label>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <input type="checkbox"><label>热端（Anycubic 标配 · 看是否堵过）</label>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <input type="checkbox"><label>PEI 弹簧钢床面（磨损严重的别要）</label>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <input type="checkbox"><label>液晶触摸屏 + 接线（看是否花屏）</label>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <input type="checkbox"><label>皮带 + 同步轮（看老化程度）</label>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <input type="checkbox"><label>导轨/光轴（磨损/异响 = 砍价）</label>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <input type="checkbox"><label>电源（Anycubic 24V · 功率 400W 起）</label>
+      </div>
+    </div>
+    <p style="font-size:12px;color:#8b949e;margin-top:8px">💡 缺 1-2 个小件（皮带/导轨）可以接受砍价；缺主板/电机/热端 = 直接放弃</p>
+  </div>
+
+  <!-- 跟之前选型对比 -->
+  <div class="compare">
+    <h2>📊 3 候选机对比（这次是最大候选）</h2>
+    <table class="ctable">
+      <thead>
+        <tr>
+          <th>机型</th>
+          <th>闲鱼价</th>
+          <th>体积 (mm)</th>
+          <th>固件</th>
+          <th>结构</th>
+          <th>推荐</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="hl">
+          <td><b>Kobra 2 Max</b><br><span style="font-size:10px;color:#8b949e">这个</span></td>
+          <td>¥30 起拍<br><span style="font-size:10px;color:#8b949e">估 800-1500</span></td>
+          <td>420×420×500</td>
+          <td><span class="ok">Klipper</span></td>
+          <td>CoreXY</td>
+          <td><span class="star">⭐⭐⭐⭐</span></td>
+        </tr>
+        <tr>
+          <td>Sidewinder X2</td>
+          <td>¥1200-2000</td>
+          <td>300×300×400</td>
+          <td><span class="meh">Marlin</span></td>
+          <td>Cartesian</td>
+          <td><span class="star">⭐⭐⭐</span></td>
+        </tr>
+        <tr>
+          <td>Voron Trident 350</td>
+          <td>¥3500-5000<br><span style="font-size:10px;color:#8b949e">DIY 套件</span></td>
+          <td>350×350×250</td>
+          <td><span class="ok">Klipper</span></td>
+          <td>CoreXY</td>
+          <td><span class="star">⭐⭐⭐⭐⭐</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:#8b949e;margin-top:8px">💡 这次 Kobra 2 Max 同价位大一圈 + Klipper 同生态 → 直接顶替 Sidewinder X2 角色</p>
+  </div>
+
+  <!-- 行动按钮 -->
+  <div class="actions">
+    <button class="abtn primary" onclick="decisionMade('拍')">✅ 我要拍</button>
+    <button class="abtn secondary" onclick="decisionMade('再问')">💬 再问卖家</button>
+  </div>
+
+  <!-- LED 业务挂钩 -->
+  <div class="led">
+    <h3>💡 LED 业务怎么用这台</h3>
+    <p>
+      <b>角色：业务出货机</b>（替代 Sidewinder X2 计划）<br>
+      • 420×420 一次打 2-3 个 LED 大灯罩 → 闲鱼零售日产能翻倍<br>
+      • 500mm 高度 = 一次性打 30cm 长筒灯/路灯外壳 → 大订单交付神器<br>
+      • Klipper 同生态 = KLP1 调好的耗材配置 / 温度塔数据可一键复制<br>
+      • FullPeak 灯罩：200×200 小件 KLP1 打，300×300+ 大件转这台
+    </p>
+  </div>
+
+  <div class="footer">
+    🎯 闲鱼现场打开这个页面 · 5 秒决策 · 保存到手机收藏夹
+  </div>
+</div>
+
+<script>
+function copyMsg(){
+  const text = "老板 Kobra 2 Max 整机出吗？带主板+6 个电机+热端+PEI 床面+液晶屏吗？包邮多少？我深圳同城可以直接面交验机。";
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.querySelector('.copy-btn');
+    btn.textContent='✅ 已复制';
+    btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='📋 复制';btn.classList.remove('copied')},2000);
+  });
+}
+function toggleCheck(el){
+  const cb=el.querySelector('input[type=checkbox]');
+  cb.checked=!cb.checked;
+  el.classList.toggle('done',cb.checked);
+}
+function decisionMade(choice){
+  const map={'拍':'✅ 已决定拍下 → 私信问清单 → 设闹钟盯着拍卖','再问':'💬 已决定再问 → 复制话术发出去 → 等回复再决定'};
+  alert(map[choice]||'');
+}
+</script>
+</body>
+</html>

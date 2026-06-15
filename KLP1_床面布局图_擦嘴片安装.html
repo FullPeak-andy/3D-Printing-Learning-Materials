@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>KLP1 擦嘴片安装布局图</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #e0e0e0;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; }
+  h1 {
+    text-align: center;
+    color: #00d4ff;
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  .sub { text-align: center; color: #888; font-size: 13px; margin-bottom: 20px; }
+
+  /* 主床图 */
+  .bed-stage {
+    background: #0f1626;
+    border: 1px solid #2a3a55;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .bed-title {
+    color: #00d4ff;
+    font-size: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .bed {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 660px;
+    margin: 0 auto;
+    background: #2a3a55;
+    border: 3px solid #4a5a75;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  /* 各层 */
+  .layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .bed-build {
+    position: absolute;
+    background: rgba(255, 215, 0, 0.08);
+    border: 2px dashed rgba(255, 215, 0, 0.6);
+  }
+  .bed-mesh {
+    position: absolute;
+    background: rgba(0, 255, 128, 0.06);
+    border: 1px solid rgba(0, 255, 128, 0.4);
+  }
+  .bed-dead {
+    position: absolute;
+    background: rgba(255, 80, 80, 0.08);
+    border: 1px dashed rgba(255, 80, 80, 0.3);
+  }
+
+  .screw {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: radial-gradient(circle, #ff5050 30%, #aa0000 80%);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 8px rgba(255, 80, 80, 0.6);
+    z-index: 5;
+  }
+  .screw-label {
+    position: absolute;
+    color: #ff8080;
+    font-size: 11px;
+    font-weight: bold;
+    transform: translate(-50%, 14px);
+    z-index: 5;
+    text-shadow: 0 0 3px #000;
+  }
+  .wiper {
+    position: absolute;
+    background: rgba(0, 212, 255, 0.25);
+    border: 2px solid #00d4ff;
+    border-radius: 4px;
+    z-index: 3;
+  }
+  .wiper-label {
+    position: absolute;
+    color: #00d4ff;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    z-index: 4;
+  }
+  .bucket {
+    position: absolute;
+    background: rgba(255, 165, 0, 0.25);
+    border: 2px solid #ffa500;
+    border-radius: 4px;
+    z-index: 3;
+  }
+  .bucket-label {
+    position: absolute;
+    color: #ffa500;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    z-index: 4;
+  }
+
+  .axis-x, .axis-y {
+    position: absolute;
+    color: #888;
+    font-size: 10px;
+  }
+  .axis-x { left: 4px; transform: rotate(-90deg); transform-origin: top left; top: 10px; }
+
+  /* 三个 toggle 按钮 */
+  .controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+    justify-content: center;
+  }
+  .ctrl-btn {
+    background: #1a2a4a;
+    color: #e0e0e0;
+    border: 1px solid #3a4a6a;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+  .ctrl-btn:hover { background: #2a3a5a; }
+  .ctrl-btn.active { background: #00aaff; color: #fff; border-color: #00aaff; }
+
+  /* 信息卡 */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+  }
+  .card {
+    background: #0f1626;
+    border: 1px solid #2a3a55;
+    border-radius: 8px;
+    padding: 14px;
+  }
+  .card h3 {
+    color: #00d4ff;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .card-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 3px 0;
+    border-bottom: 1px dashed #2a3a55;
+  }
+  .card-row:last-child { border: none; }
+  .card-row span:first-child { color: #888; }
+  .card-row span:last-child { color: #fff; font-weight: bold; }
+
+  .legend {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 12px;
+    font-size: 12px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🛏️ KLP1 热床布局：擦嘴片 + 冲刷桶 装哪不打架？</h1>
+  <p class="sub">点切换按钮看不同层 · KLP1 220×220 方床</p>
+
+  <div class="controls">
+    <button class="ctrl-btn active" data-layer="all">✅ 全部显示</button>
+    <button class="ctrl-btn" data-layer="mesh">🟢 Mesh 范围</button>
+    <button class="ctrl-btn" data-layer="screws">🔴 4 角螺丝</button>
+    <button class="ctrl-btn" data-layer="build">🟡 实际打印区</button>
+    <button class="ctrl-btn" data-layer="dead">❌ Mesh 外死区</button>
+  </div>
+
+  <div class="bed-stage">
+    <div class="bed-title">
+      <span>KLP1 220×220 热床俯视图（XY 坐标系）</span>
+      <span style="color:#888;font-size:12px">单位：mm</span>
+    </div>
+
+    <div class="bed" id="bed">
+      <!-- 轴标 -->
+      <div class="axis-x" style="left:2px;top:50%;transform:translateY(-50%) rotate(-90deg);">Y 轴</div>
+      <div style="position:absolute;bottom:2px;right:8px;color:#888;font-size:10px">X 轴</div>
+
+      <!-- 实际打印区（Build Volume）-->
+      <div class="layer" data-name="build">
+        <div class="bed-build" style="left:5%;top:5%;width:90%;height:90%;"></div>
+        <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#ffd700;font-size:11px;font-weight:bold;">打印区 200×200</div>
+      </div>
+
+      <!-- Mesh 范围（用 220×220 床的比例） -->
+      <div class="layer" data-name="mesh">
+        <div class="bed-mesh" style="left:9.09%;top:9.09%;width:82.7%;height:77.3%;"></div>
+        <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#00ff80;font-size:11px;font-weight:bold;">Mesh 范围 20-202 × 20-190</div>
+      </div>
+
+      <!-- Mesh 外的死区（边距） -->
+      <div class="layer" data-name="dead">
+        <div style="position:absolute;left:0;top:0;width:9.09%;height:100%;background:rgba(255,80,80,0.1);border-right:1px dashed rgba(255,80,80,0.4);"></div>
+        <div style="position:absolute;right:0;top:0;width:9.09%;height:100%;background:rgba(255,80,80,0.1);border-left:1px dashed rgba(255,80,80,0.4);"></div>
+        <div style="position:absolute;left:0;top:0;width:100%;height:9.09%;background:rgba(255,80,80,0.1);border-bottom:1px dashed rgba(255,80,80,0.4);"></div>
+        <div style="position:absolute;left:0;bottom:0;width:100%;height:9.09%;background:rgba(255,80,80,0.1);border-top:1px dashed rgba(255,80,80,0.4);"></div>
+        <div style="position:absolute;right:8px;bottom:30%;color:#ff8080;font-size:10px;writing-mode:vertical-rl;">边距 18-30mm</div>
+      </div>
+
+      <!-- 4 角螺丝位置 (35,35) (185,35) (185,185) (35,185) -->
+      <div class="layer" data-name="screws">
+        <div class="screw" style="left:15.9%;top:15.9%;"></div>
+        <div class="screw-label" style="left:15.9%;top:15.9%;">螺丝1<br>(35,35)</div>
+
+        <div class="screw" style="left:84.1%;top:15.9%;"></div>
+        <div class="screw-label" style="left:84.1%;top:15.9%;">螺丝2<br>(185,35)</div>
+
+        <div class="screw" style="left:84.1%;top:84.1%;"></div>
+        <div class="screw-label" style="left:84.1%;top:84.1%;">螺丝3<br>(185,185)</div>
+
+        <div class="screw" style="left:15.9%;top:84.1%;"></div>
+        <div class="screw-label" style="left:15.9%;top:84.1%;">螺丝4<br>(35,185)</div>
+      </div>
+
+      <!-- 冲刷桶 (0-50, 170-220) — 左下角死区 -->
+      <div class="bucket" style="left:0;bottom:0;width:22.7%;height:22.7%;">
+        <div class="bucket-label" style="left:50%;top:50%;transform:translate(-50%,-50%);">冲刷桶<br>50×50<br>(0-50, 170-220)</div>
+      </div>
+
+      <!-- 擦嘴片 (0-50, 70-170) — 左侧边中间 -->
+      <div class="wiper" style="left:0;top:31.8%;width:22.7%;height:45.4%;">
+        <div class="wiper-label" style="left:50%;top:50%;transform:translate(-50%,-50%);">擦嘴片<br>50×100<br>(0-50, 70-170)</div>
+      </div>
+
+      <!-- 喷嘴走位示意（虚线箭头） -->
+      <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#00ff80" />
+          </marker>
+        </defs>
+        <!-- 冲刷桶动作 -->
+        <path d="M 60 60 L 11 195" stroke="#ffa500" stroke-width="0.4" fill="none" stroke-dasharray="1,1" marker-end="url(#arrow)" opacity="0.7"/>
+        <!-- 擦嘴动作 -->
+        <path d="M 11 195 L 11 75" stroke="#00ff80" stroke-width="0.4" fill="none" stroke-dasharray="1,1" marker-end="url(#arrow)" opacity="0.7"/>
+        <path d="M 11 75 L 11 195" stroke="#00ff80" stroke-width="0.4" fill="none" stroke-dasharray="1,1" marker-end="url(#arrow)" opacity="0.7"/>
+        <!-- 起点标 -->
+        <circle cx="60" cy="60" r="1.5" fill="#00ff80" stroke="#fff" stroke-width="0.3"/>
+        <text x="62" y="60" fill="#00ff80" font-size="3">打印起点</text>
+      </svg>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(0,255,128,0.2);border:1px solid #00ff80"></div>Mesh 范围</div>
+      <div class="legend-item"><div class="legend-dot" style="background:radial-gradient(#ff5050,#aa0000);border-radius:50%"></div>4 角螺丝</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(0,212,255,0.4);border:1px solid #00d4ff"></div>擦嘴片</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(255,165,0,0.4);border:1px solid #ffa500"></div>冲刷桶</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(255,80,80,0.3);border:1px dashed #ff5050"></div>Mesh 外死区</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(255,215,0,0.3);border:1px dashed #ffd700"></div>实际打印区</div>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <h3>📐 床参数</h3>
+      <div class="card-row"><span>床总尺寸</span><span>220 × 220 mm</span></div>
+      <div class="card-row"><span>实际打印区</span><span>200 × 200 mm</span></div>
+      <div class="card-row"><span>Mesh 范围</span><span>20-202 × 20-190</span></div>
+      <div class="card-row"><span>边距（X）</span><span>18 mm</span></div>
+      <div class="card-row"><span>边距（Y）</span><span>20-30 mm</span></div>
+    </div>
+    <div class="card">
+      <h3>🔴 4 角螺丝</h3>
+      <div class="card-row"><span>螺丝 1</span><span>(35, 35)</span></div>
+      <div class="card-row"><span>螺丝 2</span><span>(185, 35)</span></div>
+      <div class="card-row"><span>螺丝 3</span><span>(185, 185)</span></div>
+      <div class="card-row"><span>螺丝 4</span><span>(35, 185)</span></div>
+      <div class="card-row"><span>边到边距离</span><span>150 mm</span></div>
+    </div>
+    <div class="card">
+      <h3>🧽 擦嘴片位置</h3>
+      <div class="card-row"><span>坐标范围</span><span>X: 0-50</span></div>
+      <div class="card-row"><span>Y 方向</span><span>70-170</span></div>
+      <div class="card-row"><span>尺寸</span><span>50 × 100 mm</span></div>
+      <div class="card-row"><span>距最近螺丝</span><span>40 mm</span></div>
+      <div class="card-row"><span>磁吸方式</span><span>直接吸 PEI 板</span></div>
+    </div>
+    <div class="card">
+      <h3>🪣 冲刷桶位置</h3>
+      <div class="card-row"><span>坐标范围</span><span>X: 0-50</span></div>
+      <div class="card-row"><span>Y 方向</span><span>170-220</span></div>
+      <div class="card-row"><span>尺寸</span><span>50 × 50 mm</span></div>
+      <div class="card-row"><span>在 Mesh 外？</span><span style="color:#00ff80">✅ 全部在 Mesh 外</span></div>
+      <div class="card-row"><span>距螺丝 4</span><span>15 mm</span></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px;background:#0a1a2a;border:1px solid #0080aa;">
+    <h3>💡 关键原理：为什么这么布局？</h3>
+    <p style="font-size:13px;line-height:1.8;margin-top:8px">
+      ① <b>4 角螺丝位置（35,35）→（185,185）</b>在 35-185 范围，<span style="color:#00d4ff">擦嘴片必须离开这 4 个点至少 15mm</span>（PEI 板开孔位置差）<br>
+      ② <b>Mesh 范围是 20-202 × 20-190</b>，床有 18-30mm 边距没用 —— 冲刷桶必须装在 Mesh 外才不影响网格校准<br>
+      ③ <b>冲刷桶放左下角（X: 0-50, Y: 170-220）</b>：X 方向 0-20 在 Mesh 外，Y 方向 190-220 在 Mesh 外，全部死区，不干扰 mesh 数据<br>
+      ④ <b>擦嘴片放左侧边（X: 0-50, Y: 70-170）</b>：X 方向有 20mm 在 Mesh 内（会经过 mesh 测量），但 mesh 测量和擦嘴片不冲突，擦嘴片位置在 mesh 时喷嘴不在那<br>
+      ⑤ <b>距螺丝 4（35,185）15mm</b>：PEI 板开螺丝孔是 25mm 直径圆孔，擦嘴片和螺丝孔位不重叠<br>
+      ⑥ <b>距 mesh 边界 20mm</b>：足够缓冲，就算擦嘴片稍微贴边也不会影响 mesh 测量
+    </p>
+  </div>
+</div>
+
+<script>
+  const btns = document.querySelectorAll('.ctrl-btn');
+  const layers = document.querySelectorAll('.layer');
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      btns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const target = btn.dataset.layer;
+      if (target === 'all') {
+        layers.forEach(l => l.style.display = 'block');
+      } else {
+        layers.forEach(l => l.style.display = 'none');
+        document.querySelectorAll(`.layer[data-name="${target}"]`).forEach(l => l.style.display = 'block');
+      }
+    });
+  });
+</script>
+</body>
+</html>

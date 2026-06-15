@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>K1 SE vs K1 Max 主板配置对比</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #0a0e1a; color: #e8eaf0; padding: 20px; line-height: 1.6; }
+  .container { max-width: 1280px; margin: 0 auto; }
+  h1 { text-align: center; color: #4fc3f7; font-size: 28px; margin-bottom: 8px; }
+  .subtitle { text-align: center; color: #8b96a8; margin-bottom: 24px; font-size: 14px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 0; border-bottom: 2px solid #2a3142; }
+  .tab { padding: 12px 24px; cursor: pointer; background: #1a1f2e; color: #8b96a8; border-radius: 8px 8px 0 0; transition: all 0.2s; user-select: none; font-weight: 500; }
+  .tab.active { background: linear-gradient(135deg, #4fc3f7, #2196f3); color: #fff; box-shadow: 0 -2px 12px rgba(33,150,243,0.3); }
+  .tab:hover:not(.active) { background: #232a3d; color: #e8eaf0; }
+  .panel { display: none; background: #1a1f2e; border-radius: 0 8px 8px 8px; padding: 24px; border: 1px solid #2a3142; border-top: none; }
+  .panel.active { display: block; animation: fadeIn 0.3s; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* 架构图 */
+  .arch-grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .arch-col { background: #232a3d; border-radius: 8px; padding: 14px; border: 1px solid #2a3142; }
+  .arch-col.shared { border-top: 3px solid #66bb6a; }
+  .arch-col.diff-se { border-top: 3px solid #42a5f5; }
+  .arch-col.diff-max { border-top: 3px solid #ff7043; }
+  .arch-title { font-size: 13px; color: #8b96a8; text-align: center; margin-bottom: 8px; }
+  .arch-chip { background: linear-gradient(135deg, #2c3e50, #1a2530); border-radius: 6px; padding: 10px; text-align: center; margin-bottom: 8px; }
+  .arch-chip-name { font-size: 15px; font-weight: 700; color: #4fc3f7; margin-bottom: 4px; }
+  .arch-chip-spec { font-size: 11px; color: #8b96a8; }
+  .arch-row { font-size: 12px; padding: 4px 0; border-bottom: 1px dashed #2a3142; display: flex; justify-content: space-between; }
+  .arch-row:last-child { border-bottom: none; }
+  .arch-row-label { color: #8b96a8; }
+  .arch-row-val { color: #e8eaf0; font-weight: 500; }
+
+  /* 对比表 */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #2a3142; }
+  th { background: #232a3d; color: #4fc3f7; font-weight: 600; position: sticky; top: 0; }
+  th:first-child { width: 30%; }
+  td.k1se { color: #42a5f5; font-weight: 500; }
+  td.k1max { color: #ff7043; font-weight: 500; }
+  td.same { color: #66bb6a; font-weight: 500; }
+  tr:hover { background: rgba(79,195,247,0.05); }
+
+  /* 兼容矩阵 */
+  .matrix { display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 8px; font-size: 13px; }
+  .matrix-h { background: #2c3e50; padding: 10px; font-weight: 600; text-align: center; border-radius: 6px; color: #4fc3f7; }
+  .matrix-cell { background: #232a3d; padding: 10px; border-radius: 6px; text-align: center; display: flex; align-items: center; justify-content: center; }
+  .matrix-label { background: #1a1f2e; padding: 10px; border-radius: 6px; color: #e8eaf0; font-weight: 500; }
+  .ok { color: #66bb6a; font-weight: 700; }
+  .no { color: #ef5350; font-weight: 700; }
+  .warn { color: #ffa726; font-weight: 700; }
+
+  /* 建议卡片 */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+  .card { background: linear-gradient(135deg, #232a3d, #1a2530); border-radius: 8px; padding: 16px; border-left: 3px solid #4fc3f7; }
+  .card.green { border-left-color: #66bb6a; }
+  .card.orange { border-left-color: #ff7043; }
+  .card.red { border-left-color: #ef5350; }
+  .card-title { font-size: 15px; font-weight: 700; color: #4fc3f7; margin-bottom: 8px; }
+  .card.green .card-title { color: #66bb6a; }
+  .card.orange .card-title { color: #ff7043; }
+  .card.red .card-title { color: #ef5350; }
+  .card ul { margin-left: 18px; font-size: 13px; color: #cdd2da; }
+  .card li { margin-bottom: 4px; }
+
+  .legend { display: flex; gap: 16px; margin-bottom: 16px; font-size: 12px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+  .dot-shared { background: #66bb6a; }
+  .dot-se { background: #42a5f5; }
+  .dot-max { background: #ff7043; }
+  .tip { background: rgba(255,167,38,0.1); border-left: 3px solid #ffa726; padding: 12px; border-radius: 6px; margin: 16px 0; font-size: 13px; color: #ffd180; }
+  .success { background: rgba(102,187,106,0.1); border-left: 3px solid #66bb6a; padding: 12px; border-radius: 6px; margin: 16px 0; font-size: 13px; color: #a5d6a7; }
+  .info { background: rgba(79,195,247,0.1); border-left: 3px solid #4fc3f7; padding: 12px; border-radius: 6px; margin: 16px 0; font-size: 13px; color: #b3e5fc; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🔧 K1 SE vs K1 Max 主板配置对比</h1>
+  <p class="subtitle">核心三件套完全相同，差异在固件签名 + 适配板 + 电机参数 + AI 配套外设</p>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="1">① 主板三件套架构</div>
+    <div class="tab" data-tab="2">② 周边配置对比</div>
+    <div class="tab" data-tab="3">③ 兼容性矩阵</div>
+    <div class="tab" data-tab="4">④ 实操建议</div>
+  </div>
+
+  <!-- Tab 1: 架构图 -->
+  <div class="panel active" id="p1">
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot dot-shared"></div>两机完全相同</div>
+      <div class="legend-item"><div class="legend-dot dot-se"></div>K1 SE 专属</div>
+      <div class="legend-item"><div class="legend-dot dot-max"></div>K1 Max 专属</div>
+    </div>
+
+    <div class="arch-grid">
+      <!-- 上位机 SoC -->
+      <div class="arch-col shared">
+        <div class="arch-title">上位机 SoC（运行 Klipper）</div>
+        <div class="arch-chip">
+          <div class="arch-chip-name">Ingenic X2000E</div>
+          <div class="arch-chip-spec">君正 MIPS 架构</div>
+        </div>
+        <div class="arch-row"><span class="arch-row-label">CPU</span><span class="arch-row-val">2× XBurst2 1.2 GHz + 1× XBurst0 240 MHz</span></div>
+        <div class="arch-row"><span class="arch-row-label">指令集</span><span class="arch-row-val">MIPS32 + 128-bit SIMD</span></div>
+        <div class="arch-row"><span class="arch-row-label">内存</span><span class="arch-row-val">256MB LPDDR2 内置</span></div>
+        <div class="arch-row"><span class="arch-row-label">存储</span><span class="arch-row-val">8GB eMMC</span></div>
+        <div class="arch-row"><span class="arch-row-label">VPU</span><span class="arch-row-val">H.264 编解码 1080P@30</span></div>
+        <div class="arch-row"><span class="arch-row-label">无线</span><span class="arch-row-val">AP6212 WiFi 2.4G 单频</span></div>
+        <div class="arch-row"><span class="arch-row-label">USB</span><span class="arch-row-val">2.0 OTG ×1（板载无 Type-A）</span></div>
+      </div>
+
+      <!-- mcu0 -->
+      <div class="arch-col shared">
+        <div class="arch-title">主控 MCU0（XYZ 步进+风扇）</div>
+        <div class="arch-chip">
+          <div class="arch-chip-name">GD32F303RET6</div>
+          <div class="arch-chip-spec">兆易创新 Cortex-M4</div>
+        </div>
+        <div class="arch-row"><span class="arch-row-label">架构</span><span class="arch-row-val">ARM Cortex-M4</span></div>
+        <div class="arch-row"><span class="arch-row-label">主频</span><span class="arch-row-val">120 MHz</span></div>
+        <div class="arch-row"><span class="arch-row-label">Flash</span><span class="arch-row-val">512KB</span></div>
+        <div class="arch-row"><span class="arch-row-label">封装</span><span class="arch-row-val">LQFP-64</span></div>
+        <div class="arch-row"><span class="arch-row-label">作用</span><span class="arch-row-val">XYZ/E 步进、加热、风扇</span></div>
+      </div>
+
+      <!-- Nozzle MCU -->
+      <div class="arch-col shared">
+        <div class="arch-title">喷嘴 MCU（热端工具板）</div>
+        <div class="arch-chip">
+          <div class="arch-chip-name">GD32F303CBT6</div>
+          <div class="arch-chip-spec">兆易创新 Cortex-M4</div>
+        </div>
+        <div class="arch-row"><span class="arch-row-label">架构</span><span class="arch-row-val">ARM Cortex-M4</span></div>
+        <div class="arch-row"><span class="arch-row-label">主频</span><span class="arch-row-val">120 MHz</span></div>
+        <div class="arch-row"><span class="arch-row-label">Flash</span><span class="arch-row-val">128KB</span></div>
+        <div class="arch-row"><span class="arch-row-label">封装</span><span class="arch-row-val">LQFP-48</span></div>
+        <div class="arch-row"><span class="arch-row-label">作用</span><span class="arch-row-val">热端加热+温控+断料</span></div>
+      </div>
+
+      <!-- Leveling MCU -->
+      <div class="arch-col shared">
+        <div class="arch-title">热床 MCU（调平工具板）</div>
+        <div class="arch-chip">
+          <div class="arch-chip-name">GD32E230F8P6</div>
+          <div class="arch-chip-spec">兆易创新 Cortex-M23</div>
+        </div>
+        <div class="arch-row"><span class="arch-row-label">架构</span><span class="arch-row-val">ARM Cortex-M23</span></div>
+        <div class="arch-row"><span class="arch-row-label">主频</span><span class="arch-row-val">72 MHz</span></div>
+        <div class="arch-row"><span class="arch-row-label">Flash</span><span class="arch-row-val">64KB</span></div>
+        <div class="arch-row"><span class="arch-row-label">封装</span><span class="arch-row-val">TSSOP-20</span></div>
+        <div class="arch-row"><span class="arch-row-label">作用</span><span class="arch-row-val">热床 + Z 探针</span></div>
+      </div>
+    </div>
+
+    <div class="success">
+      ✅ <b>核心结论：</b>两台机器的<b>上位机 SoC（Ingenic X2000E）</b> + <b>三块 MCU（GD32F303RET6 + GD32F303CBT6 + GD32E230F8P6）</b>完全相同。
+      也就是说<b>主板 PCB 走线、芯片布局、硬件接口基本同源</b>（同源 PCB 修订版 CR-K1-MB-V3R2）。
+    </div>
+
+    <div class="info">
+      💡 <b>性能参考：</b>Ingenic X2000E 是 2020 年君正推出的多核异构跨界处理器，典型功耗 &lt;380mW。1.2 GHz 双核 MIPS + 240 MHz 实时核的组合，
+      跑 Klipper + LVGL 触摸屏完全够用，但跑大模型 / 复杂图像识别是绝对不行的——这就是为什么 K1 Max 的 AI 摄像头和 AI LiDAR 都需要专用处理。
+    </div>
+  </div>
+
+  <!-- Tab 2: 周边对比 -->
+  <div class="panel" id="p2">
+    <table>
+      <thead>
+        <tr><th>配置项</th><th>K1 SE</th><th>K1 Max</th><th>差异</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>上位机 SoC</td><td class="same">Ingenic X2000E</td><td class="same">Ingenic X2000E</td><td class="same">✅ 完全相同</td></tr>
+        <tr><td>主控 MCU0</td><td class="same">GD32F303RET6</td><td class="same">GD32F303RET6</td><td class="same">✅ 完全相同</td></tr>
+        <tr><td>喷嘴 MCU</td><td class="same">GD32F303CBT6</td><td class="same">GD32F303CBT6</td><td class="same">✅ 完全相同</td></tr>
+        <tr><td>热床 MCU</td><td class="same">GD32E230F8P6</td><td class="same">GD32E230F8P6</td><td class="same">✅ 完全相同</td></tr>
+        <tr><td>内存</td><td class="same">256MB LPDDR2</td><td class="same">256MB LPDDR2</td><td class="same">✅ 完全相同</td></tr>
+        <tr><td>存储</td><td class="same">8GB eMMC</td><td class="same">8GB eMMC</td><td class="same">✅ 完全相同</td></tr>
+        <tr><td>步进驱动</td><td>TMC2209（开环）</td><td>TMC2209（开环）</td><td class="same">✅ 芯片相同</td></tr>
+        <tr><td>X/Y 电机</td><td>42-40 ×2</td><td>42-40 ×2</td><td class="same">✅ 相同</td></tr>
+        <tr><td>Z 电机</td><td class="k1se">双 Z 同步</td><td class="k1max">双 Z 同步（G34）</td><td>差异：算法/同步精度</td></tr>
+        <tr><td>E 挤出电机</td><td>双齿轮直驱</td><td>双齿轮直驱</td><td class="same">✅ 相同</td></tr>
+        <tr><td>电机电流参考电阻</td><td class="k1se">R_sense = 0.08Ω</td><td class="k1max">R_sense = 0.1Ω</td><td>❌ 不同</td></tr>
+        <tr><td>Nozzle 适配板型号</td><td class="k1se">NOZZLE-LC-V13（短版）</td><td class="k1max">NOZZLE-C-V13（长版）</td><td>⚠️ 物理不同</td></tr>
+        <tr><td>Z 探针逻辑电平</td><td class="k1se">光电 active-low</td><td class="k1max">机械微动 pull-high</td><td>❌ 触发逻辑反向</td></tr>
+        <tr><td>风扇 PWM 曲线</td><td class="k1se">40℃ 线性启动</td><td class="k1max">180℃ 指数启动</td><td>❌ 算法不同</td></tr>
+        <tr><td>WiFi 模块</td><td>AP6212 2.4G</td><td>AP6212 2.4G</td><td class="same">✅ 相同</td></tr>
+        <tr><td>RJ45 千兆网口</td><td class="k1se">❌ 无</td><td class="k1max">✅ 有</td><td>差异</td></tr>
+        <tr><td>AI 摄像头</td><td class="k1se">可选（USB 外挂）</td><td class="k1max">1080P 内置</td><td>差异</td></tr>
+        <tr><td>AI LiDAR 激光雷达</td><td class="k1se">❌ 无</td><td class="k1max">✅ 内置</td><td>差异</td></tr>
+        <tr><td>断电续打</td><td>✅</td><td>✅</td><td class="same">✅ 相同</td></tr>
+        <tr><td>断料检测</td><td>✅</td><td>✅</td><td class="same">✅ 通用模块</td></tr>
+        <tr><td>电源功率</td><td class="k1se">350W</td><td class="k1max">1000W</td><td>差异 2.86×</td></tr>
+        <tr><td>热床最高温度</td><td class="k1se">100℃</td><td class="k1max">120℃</td><td>差异</td></tr>
+        <tr><td>热端最高温度</td><td class="k1max">300℃</td><td class="k1max">300℃</td><td class="same">✅ 相同</td></tr>
+        <tr><td>支持耗材</td><td class="k1se">PLA/PETG/TPU</td><td class="k1max">PLA/PETG/ABS/ASA/PC/PA/CF</td><td>差异</td></tr>
+        <tr><td>PCB 修订版</td><td class="same">CR-K1-MB-V3R2</td><td class="same">CR-K1-MB-V3R2</td><td class="same">✅ 同源</td></tr>
+        <tr><td>固件签名（EEPROM）</td><td class="k1se">SE 专属</td><td class="k1max">Max 专属</td><td>❌ 不能互刷</td></tr>
+        <tr><td>空闲整机功耗</td><td class="k1se">~ 8W</td><td class="k1max">~ 15W（多 RJ45+AI）</td><td>差异</td></tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      ⚠️ <b>重要：</b>虽然核心三件套 SoC + MCU 完全相同，但因为<b>固件签名 + EEPROM 校验 + Z 探针逻辑 + 电机电阻 + 风扇曲线 + 适配板物理尺寸</b>都不同，
+      <b>K1 SE 和 K1 Max 主板不能互换，刷错固件直接锁机</b>。这是创想故意的"反 DIY"设计。
+    </div>
+  </div>
+
+  <!-- Tab 3: 兼容性矩阵 -->
+  <div class="panel" id="p3">
+    <h3 style="color:#4fc3f7;margin-bottom:16px;">🔄 配件互换兼容矩阵</h3>
+
+    <div class="matrix">
+      <div class="matrix-h">配件</div>
+      <div class="matrix-h">K1 SE 装 K1 Max 配件</div>
+      <div class="matrix-h">K1 Max 装 K1 SE 配件</div>
+      <div class="matrix-h">备注</div>
+
+      <div class="matrix-label">主板 PCB（整套）</div>
+      <div class="matrix-cell"><span class="no">❌ 不行</span></div>
+      <div class="matrix-cell"><span class="no">❌ 不行</span></div>
+      <div class="matrix-cell">固件签名不同，刷错锁机</div>
+
+      <div class="matrix-label">Nozzle 适配板（2025 新版）</div>
+      <div class="matrix-cell"><span class="warn">⚠️ 物理可装</span></div>
+      <div class="matrix-cell"><span class="warn">⚠️ 物理可装</span></div>
+      <div class="matrix-cell">T9_GD32F303CBT6 K1C/Max/SE 通用（须改线序）</div>
+
+      <div class="matrix-label">喷嘴 MCU（GD32F303CBT6）</div>
+      <div class="matrix-cell"><span class="ok">✅ 可换</span></div>
+      <div class="matrix-cell"><span class="ok">✅ 可换</span></div>
+      <div class="matrix-cell">芯片级通用，需重刷固件</div>
+
+      <div class="matrix-label">热床 MCU（GD32E230F8P6）</div>
+      <div class="matrix-cell"><span class="ok">✅ 可换</span></div>
+      <div class="matrix-cell"><span class="ok">✅ 可换</span></div>
+      <div class="matrix-cell">芯片级通用，需重刷固件</div>
+
+      <div class="matrix-label">主控 MCU0（GD32F303RET6）</div>
+      <div class="matrix-cell"><span class="ok">✅ 可换</span></div>
+      <div class="matrix-cell"><span class="ok">✅ 可换</span></div>
+      <div class="matrix-cell">芯片级通用，但 PCB 走线不同</div>
+
+      <div class="matrix-label">断料检测模块</div>
+      <div class="matrix-cell"><span class="ok">✅ 通用</span></div>
+      <div class="matrix-cell"><span class="ok">✅ 通用</span></div>
+      <div class="matrix-cell">K1/K1C/K1 Max/SE 通用 ¥15-30</div>
+
+      <div class="matrix-label">TMC2209 步进驱动</div>
+      <div class="matrix-cell"><span class="ok">✅ 通用</span></div>
+      <div class="matrix-cell"><span class="ok">✅ 通用</span></div>
+      <div class="matrix-cell">5 颗步进槽 + 2 颗 Z 同步</div>
+
+      <div class="matrix-label">Z 探针</div>
+      <div class="matrix-cell"><span class="no">❌ 不通用</span></div>
+      <div class="matrix-cell"><span class="no">❌ 不通用</span></div>
+      <div class="matrix-cell">光电 vs 机械，触发逻辑反向</div>
+
+      <div class="matrix-label">4.3 寸触摸屏</div>
+      <div class="matrix-cell"><span class="ok">✅ 通用</span></div>
+      <div class="matrix-cell"><span class="ok">✅ 通用</span></div>
+      <div class="matrix-cell">10-pin JST-XH，+5V EDID 自动识别</div>
+
+      <div class="matrix-label">电源（350W vs 1000W）</div>
+      <div class="matrix-cell"><span class="warn">⚠️ 可用</span></div>
+      <div class="matrix-cell"><span class="warn">⚠️ 可用</span></div>
+      <div class="matrix-cell">SE 电源装 Max 加热功率不足</div>
+
+      <div class="matrix-label">机架（一体压铸铝合金）</div>
+      <div class="matrix-cell"><span class="no">❌ 不通用</span></div>
+      <div class="matrix-cell"><span class="no">❌ 不通用</span></div>
+      <div class="matrix-cell">尺寸完全不同（220³ vs 300³）</div>
+
+      <div class="matrix-label">WiFi 模块 AP6212</div>
+      <div class="matrix-cell"><span class="ok">✅ 通用</span></div>
+      <div class="matrix-cell"><span class="ok">✅ 通用</span></div>
+      <div class="matrix-cell">芯片级通用</div>
+    </div>
+
+    <div class="info" style="margin-top:20px;">
+      💡 <b>采购启示：</b>如果你的 K1 Max 主板坏了，<b>不要去买 K1 SE 主板来换</b>（刷错固件锁机），必须买 K1 Max 专属主板。
+      但如果只是某个 MCU 或模块坏了，<b>这三块 MCU 芯片 + 断料器 + 步进驱动 + 触摸屏都是可以互换的</b>。
+    </div>
+  </div>
+
+  <!-- Tab 4: 实操建议 -->
+  <div class="panel" id="p4">
+    <div class="cards">
+      <div class="card green">
+        <div class="card-title">🟢 同源优势（K1 SE 借鉴 K1 Max）</div>
+        <ul>
+          <li><b>PCB 走线相同</b>，从 K1 Max 主板照片就能 100% 复刻 K1 SE 主板维修</li>
+          <li><b>三块 MCU 芯片相同</b>，买 GD32F303RET6 / GD32F303CBT6 / GD32E230F8P6 都是同型号替换</li>
+          <li><b>断料器模块通用</b>，闲鱼 ¥15-30 任意买（K1/K1C/SE/Max 互通）</li>
+          <li><b>5 颗 TMC2209 步进驱动</b>通用，K1 SE 二手主板单买驱动也划算</li>
+          <li><b>4.3 寸触摸屏通用</b>，Max 屏坏了能买 SE 屏顶替</li>
+        </ul>
+      </div>
+
+      <div class="card orange">
+        <div class="card-title">🟠 必须专属的部件</div>
+        <ul>
+          <li><b>主板整套</b>（SE/Max 不能互换）</li>
+          <li><b>Nozzle 适配板</b>：SE = LC-V13（短），Max = C-V13（长）</li>
+          <li><b>Z 探针</b>：SE 光电 vs Max 机械微动</li>
+          <li><b>机架</b>：220³ vs 300³，尺寸完全不同</li>
+          <li><b>电源</b>：350W vs 1000W，加热能力差 2.86×</li>
+        </ul>
+      </div>
+
+      <div class="card red">
+        <div class="card-title">🔴 维修踩坑点</div>
+        <ul>
+          <li><b>刷固件前先看 EEPROM 签名</b>，刷错同系列板子也会锁机</li>
+          <li><b>EEPROM ID 与外壳绑定</b>，换主板后必须重新刷机</li>
+          <li><b>电机参考电阻不同</b>（0.08 vs 0.1），互换 TMC2209 没问题但电流配置需改</li>
+          <li><b>风扇 PWM 曲线不同</b>，刷错固件风扇要么不转要么狂转</li>
+          <li><b>Nozzle 适配板换错型号</b>会触发热端温度异常</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">💰 闲鱼采购参考价（2026-06）</div>
+        <ul>
+          <li>K1 Max 主板整套：<b>¥150-250</b>（单主板）</li>
+          <li>K1 SE 主板整套：<b>¥120-200</b>（单主板）</li>
+          <li>GD32F303RET6 单芯片：<b>¥8-15</b>（10 颗批发）</li>
+          <li>GD32F303CBT6 单芯片：<b>¥5-10</b>（10 颗批发）</li>
+          <li>TMC2209 步进驱动：<b>¥6-10/颗</b></li>
+          <li>断料器模块：<b>¥15-30</b>（通用）</li>
+          <li>4.3 寸触摸屏：<b>¥80-150</b></li>
+        </ul>
+      </div>
+
+      <div class="card green">
+        <div class="card-title">🎯 主板故障排查顺序</div>
+        <ul>
+          <li>① 屏幕不亮 → 查电源（350W vs 1000W）</li>
+          <li>② 屏幕亮但 Klipper 不启动 → 查 eMMC / 刷固件</li>
+          <li>③ 步进电机不动 → 查 TMC2209 + MCU0（GD32F303RET6）</li>
+          <li>④ 热端不加热 → 查 Nozzle MCU（GD32F303CBT6）</li>
+          <li>⑤ 热床不加热 → 查热床 MCU（GD32E230F8P6）</li>
+          <li>⑥ TR0116 误报 → 查断料器（机械弹簧臂）</li>
+          <li>⑦ Z 探针不触发 → 区分光电/机械</li>
+        </ul>
+      </div>
+
+      <div class="card orange">
+        <div class="card-title">⚡ 创想反 DIY 设计</div>
+        <ul>
+          <li><b>EEPROM 签名 + 机壳绑定</b>，换主板必须重新配对</li>
+          <li><b>新版 CreOS 固件</b>隐藏了断料检测菜单（你的 K1 Max 现在就是）</li>
+          <li><b>创想云</b>不开放断料检测、Z 偏移、流量等底层设置</li>
+          <li><b>必须刷 Root + Klipper</b>才能解锁所有功能（V1.3.5.5+）</li>
+          <li>想完全 DIY → 走社区版 <b>K1-Klipper</b> 或 <b>cryoz/klipper</b></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tip" style="margin-top:20px;">
+      📌 <b>给你 K1 Max 的实操建议：</b>
+      <ul style="margin-top:8px;margin-left:18px;">
+        <li>你目前 TR0116 误报 → 先查<b>断料器机械结构</b>（清洁弹簧臂润滑 + 万用表测微动开关通断）</li>
+        <li>想关闭断料检测 → 创想云 + 屏幕菜单都关不了，<b>物理断开排线</b>是最稳方案</li>
+        <li>想玩 Klipper 完整功能 → 刷 <b>V1.3.5.5+ 固件</b> + 走社区版 K1-Klipper</li>
+        <li>主板备件 → 闲鱼 K1 Max 主板 ¥150-250，三块 MCU 单独买芯片更划算</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('p' + tab.dataset.tab).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

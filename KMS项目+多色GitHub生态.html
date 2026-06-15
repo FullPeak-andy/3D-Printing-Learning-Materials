@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>🔍 KMS 多色系统 + GitHub 多色生态全解析</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, "Microsoft YaHei", "PingFang SC", sans-serif;
+  background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 50%, #0d1b2a 100%);
+  color: #e0e0e8;
+  min-height: 100vh;
+  padding: 20px;
+}
+.container { max-width: 1200px; margin: 0 auto; }
+
+header {
+  text-align: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, rgba(0,180,180,0.15), rgba(80,200,120,0.1));
+  border-radius: 20px;
+  margin-bottom: 30px;
+  border: 1px solid rgba(0,200,200,0.3);
+}
+.title { font-size: 40px; background: linear-gradient(90deg, #00d4d4, #4caf50, #00d4d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; font-weight: 800; }
+.subtitle { color: #00d4d4; font-size: 18px; margin-bottom: 8px; }
+.tagline { color: #a0a0b0; font-size: 14px; }
+
+.section {
+  background: rgba(255,255,255,0.05);
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 25px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.section h2 { color: #00d4d4; font-size: 22px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid rgba(0,212,212,0.3); }
+.section h3 { color: #4caf50; font-size: 17px; margin: 18px 0 8px; }
+.section p, .section li { line-height: 1.7; color: #d0d0d8; }
+.section ul { padding-left: 20px; }
+.section code { background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; color: #4caf50; font-family: "Cascadia Code", monospace; }
+
+.alert {
+  background: linear-gradient(135deg, rgba(255,152,0,0.15), rgba(255,152,0,0.05));
+  border: 1px solid #ff9800;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 15px 0;
+  color: #ffcc80;
+}
+.alert strong { color: #fff176; }
+
+.project-card {
+  background: rgba(0,0,0,0.3);
+  border-left: 4px solid;
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 15px;
+  position: relative;
+  transition: all 0.3s;
+}
+.project-card:hover { transform: translateX(5px); background: rgba(0,0,0,0.4); }
+.project-card .name { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 5px; }
+.project-card .meta { font-size: 12px; color: #888; margin-bottom: 8px; }
+.project-card .desc { font-size: 14px; color: #c0c0c8; line-height: 1.6; margin-bottom: 10px; }
+.project-card .links a {
+  display: inline-block;
+  background: rgba(0,212,212,0.2);
+  border: 1px solid #00d4d4;
+  color: #00d4d4;
+  padding: 5px 12px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 12px;
+  margin-right: 6px;
+  margin-bottom: 5px;
+  transition: all 0.3s;
+}
+.project-card .links a:hover { background: #00d4d4; color: #0d1b2a; }
+
+.tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; margin-right: 5px; }
+.tag-cn { background: rgba(255,87,34,0.2); color: #ff8a65; }
+.tag-en { background: rgba(33,150,243,0.2); color: #64b5f6; }
+.tag-active { background: rgba(76,175,80,0.2); color: #81c784; }
+.tag-stop { background: rgba(244,67,54,0.2); color: #e57373; }
+
+.method-box {
+  background: linear-gradient(135deg, rgba(156,39,176,0.15), rgba(156,39,176,0.05));
+  border: 1px solid #ce93d8;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 15px;
+}
+.method-box h4 { color: #ce93d8; font-size: 16px; margin-bottom: 8px; }
+.method-box ol { padding-left: 20px; color: #e0c0e0; }
+.method-box li { margin-bottom: 6px; line-height: 1.6; }
+
+.tab-row { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+.tab-row span { padding: 4px 10px; background: rgba(0,212,212,0.15); border-radius: 6px; color: #00d4d4; font-size: 12px; }
+
+.decision-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+.decision {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid;
+  border-radius: 10px;
+  padding: 18px;
+}
+.decision h4 { font-size: 16px; margin-bottom: 8px; }
+.decision.yes { border-color: #4caf50; }
+.decision.no { border-color: #f44336; }
+.decision.warn { border-color: #ff9800; }
+.decision.yes h4 { color: #81c784; }
+.decision.no h4 { color: #e57373; }
+.decision.warn h4 { color: #ffb74d; }
+.decision p { font-size: 13px; color: #c0c0c8; line-height: 1.6; }
+
+footer { text-align: center; color: #707080; font-size: 12px; margin-top: 40px; padding: 20px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="title">🔍 KMS 多色打印系统 + GitHub 多色生态</div>
+  <div class="subtitle">从 B 站视频 → GitHub 仓库 → 找到所有类似项目</div>
+  <div class="tagline">muzixiaoyang/KMS · Happy Hare · ERCF · 3MS · 商业方案</div>
+</header>
+
+<div class="section">
+  <h2>1️⃣ KMS-V1.0 是什么？</h2>
+  <p>你在 B 站看到的视频展示的 <strong>GitHub 仓库：<code>muzixiaoyang/KMS</code></strong>，作者是 muzixiaoyang。</p>
+
+  <div class="alert">
+    <strong>📌 一句话定位：</strong>KMS = Klipper Multi-Color System，基于 <strong>Happy Hare TYPE-B 软件方案</strong> + <strong>独立通道硬件设计</strong>（不依赖选择器/舵机），KLP 圈中国开发者 muzixiaoyang 的开源项目。
+  </div>
+
+  <h3>🔧 核心特性</h3>
+  <ul>
+    <li><strong>独立通道设计</strong>：每个料管独立路径，没有传统 MMU 的选择器/servo，简化控制流程，提高可靠性</li>
+    <li><strong>Happy Hare TYPE-B 软件</strong>：使用 moggieuk 开发的通用 MMU 驱动，社区最主流的 Klipper 多色固件</li>
+    <li><strong>温度湿度监控</strong>：PCB 集成传感器，监控密封盒内环境（防潮）</li>
+    <li><strong>KMS-Buffer 同步系统</strong>：保证打印机端和 KMS 端料丝传输同步</li>
+    <li><strong>电动卷绕器</strong>：模块化设计，方便料管回收</li>
+    <li><strong>MMB-Board（Beta）</strong>：配套 BigTreeTech 控制板</li>
+    <li><strong>3D 打印外壳</strong>：含亚克力透明窗，可视化外观</li>
+    <li><strong>开源协议</strong>：GPL-3.0</li>
+  </ul>
+
+  <h3>💰 商业化情况</h3>
+  <p>Trianglelab（深圳三绿）有卖成品套件，标价 <strong>$112 / 折后 $106.40</strong>，不含打印件（需自打 STL）。<strong>注意：商业套件是别人基于开源方案量产的，不含税，国际运费贵。</strong></p>
+
+  <h3>📊 项目活跃度</h3>
+  <div class="tab-row">
+    <span>⭐ 12 stars</span>
+    <span>🍴 0 forks</span>
+    <span>📅 3 个月前更新</span>
+    <span>📜 GPL-3.0</span>
+    <span class="tag tag-active">活跃</span>
+  </div>
+
+  <div class="project-card" style="border-color: #00d4d4;">
+    <div class="name">🌐 KMS GitHub 仓库</div>
+    <div class="meta">GPL-3.0 · Klipper 通用 · 中国开发者</div>
+    <div class="desc">独立通道式 Klipper 多色换料器，基于 Happy Hare TYPE-B 方案。3D 打印外壳 + MMB-Board 配套。商用版由 Trianglelab 卖 $112。</div>
+    <div class="links">
+      <a href="https://github.com/muzixiaoyang/KMS" target="_blank">👉 KMS GitHub</a>
+      <a href="https://www.trianglelab.net/products/kms-v10-klipper-multi-color-system" target="_blank">👉 Trianglelab 销售页</a>
+      <a href="https://makerworld.com/en/models/1516538-kms-kms-box-print-chinese" target="_blank">👉 MakerWorld 外壳文件</a>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>2️⃣ 怎么找到这类 GitHub 项目？（搜索方法论）</h2>
+
+  <div class="method-box">
+    <h4>🅰️ GitHub 站内搜索（最直接）</h4>
+    <ol>
+      <li>打开 <code>https://github.com/search</code></li>
+      <li>关键词组合：<code>filament changer</code> / <code>MMU Klipper</code> / <code>multi color</code> / <code>multi material</code></li>
+      <li>加筛选：<code>Stars > 100</code> + <code>Language: Python</code>（Klipper 模块多用 Python）</li>
+      <li>排序：<code>Most stars</code> 或 <code>Recently updated</code></li>
+    </ol>
+  </div>
+
+  <div class="method-box">
+    <h4>🅱️ GitHub Topics（主题标签，必看）</h4>
+    <ol>
+      <li>打开 <code>https://github.com/topics/klipper</code> → 拉到 Multi-material / MMU 标签</li>
+      <li>打开 <code>https://github.com/topics/3d-printing</code> → 搜索 multi-color</li>
+      <li>打开 <code>https://github.com/topics/filament-runout-sensor</code>（延伸）</li>
+      <li>关注 awesome 列表：<code>https://github.com/topics/awesome-list</code> + 搜索 <code>3d printing</code></li>
+    </ol>
+  </div>
+
+  <div class="method-box">
+    <h4>🅲 B 站视频反查法（你刚才用的方法）</h4>
+    <ol>
+      <li>B 站搜"3D 打印多色" / "MMU 改装" / "ERCF 教程"</li>
+      <li>UP 主视频简介里通常贴 GitHub 链接（如视频左上角的水印）</li>
+      <li>UP 主置顶评论 / 简介栏 / 视频里的 README 截图</li>
+      <li>关注头部 UP 主：B 站搜"3D 打印多色"按播放量排序，前 10 个的 UP 主 GitHub 全扫一遍</li>
+    </ol>
+  </div>
+
+  <div class="method-box">
+    <h4>🅳 Klipper Discourse 论坛（国外核心圈）</h4>
+    <ol>
+      <li>打开 <code>https://klipper.discourse.group/</code></li>
+      <li>搜 "MMU" / "filament changer" / "ERCF" / "3MS"</li>
+      <li>每个帖子都带 GitHub 链接和实装案例</li>
+    </ol>
+  </div>
+</div>
+
+<div class="section">
+  <h2>3️⃣ GitHub 多色打印项目全家桶（开源 + 商业）</h2>
+
+  <h3>🥇 Tier 1：核心开源方案（Andy 必看）</h3>
+
+  <div class="project-card" style="border-color: #ffd700;">
+    <div class="name">🐰 Happy Hare <span class="tag tag-en">通用驱动</span> <span class="tag tag-active">核心</span></div>
+    <div class="meta">moggieuk · 17,000 行 Python + 10,000 行文档 + 160 插图</div>
+    <div class="desc">MMU 通用驱动，Klipper 多色打印的"中央控制器"。支持 ERCF / Tradrack / Box Turtle / Angry Beaver / Night Owl / <strong>3MS</strong> / 3D Chameleon / Quattro Box / PicoMMU / MMX / <strong>KMS</strong> / Open AMS / 任何自定义怪物。Spoolman 集成 / KlipperScreen / Mainsail UI / 自动工具切换 / EndlessSpool 切换不中断。MMU 圈的"瑞士军刀"。</div>
+    <div class="links">
+      <a href="https://github.com/moggieuk/Happy-Hare" target="_blank">👉 Happy-Hare</a>
+      <a href="https://discord.gg/aABQUjkZPk" target="_blank">👉 Discord 社区</a>
+    </div>
+  </div>
+
+  <div class="project-card" style="border-color: #ff8a50;">
+    <div class="name">🥕 EnragedRabbitProject（ERP） <span class="tag tag-en">老牌</span></div>
+    <div class="meta">EtteGit · 800+ stars · GPL-3.0</div>
+    <div class="desc">兔子项目发源地！包含 ERCF（最多 9 通道换料器）+ ERCP 缓冲 + ERKS 颗粒料清除 + 料丝传感器。主要为 Voron 设计，也支持 Klipper/RRF 的任何 CoreXY。ERCF v1/v2 是当前 Voron 圈最稳的开源 MMU 方案。200 次换料 0 故障。</div>
+    <div class="links">
+      <a href="https://github.com/EtteGit/EnragedRabbitProject" target="_blank">👉 EnragedRabbitProject</a>
+      <a href="https://github.com/Carrot-collective/ERCF_v3" target="_blank">👉 ERCF V3（Carrot 续作）</a>
+    </div>
+  </div>
+
+  <div class="project-card" style="border-color: #4caf50;">
+    <div class="name">🐇 3MS（Modular Multimaterial System） <span class="tag tag-en">轻量</span></div>
+    <div class="meta">3DCoded · 简单紧凑 · GPL-3.0</div>
+    <div class="desc">模块化多材料系统，专为 Klipper 设计。设计理念：简单、紧凑、可靠、经济。支持 2-4 色（起步 2 色，按需扩展）。<strong>MK8 挤出机</strong>，<strong>无需在切片器中写自定义工具切换 G-code</strong>，配置 < 300 行宏 + ~200 行 MCU 配置。Prusa MK3S+ Bear 上实装验证。</div>
+    <div class="links">
+      <a href="https://github.com/3DCoded/3MS" target="_blank">👉 3MS</a>
+      <a href="https://klipper.discourse.group/t/3ms-modular-multi-material-system-for-klipper/17582" target="_blank">👉 Discourse 讨论</a>
+    </div>
+  </div>
+
+  <div class="project-card" style="border-color: #00d4d4;">
+    <div class="name">🥕 KMS（你看的项目） <span class="tag tag-cn">中国</span></div>
+    <div class="meta">muzixiaoyang · 12 stars · GPL-3.0</div>
+    <div class="desc">基于 Happy Hare TYPE-B，独立通道设计（无选择器/servo）。Trianglelab 量产 $112。中国开发者，文档/教程对中文用户友好。3D 打印外壳，集成温湿度传感器。</div>
+    <div class="links">
+      <a href="https://github.com/muzixiaoyang/KMS" target="_blank">👉 KMS</a>
+    </div>
+  </div>
+
+  <h3>🥈 Tier 2：商业/集成方案</h3>
+
+  <div class="project-card" style="border-color: #ff9800;">
+    <div class="name">🌈 BIGTREETECH ViViD <span class="tag tag-active">2026 商业</span></div>
+    <div class="meta">$329.99 · 4 色/单元，可链 4 个 = 16 色 · 支持 Happy Hare</div>
+    <div class="desc">BTT 的开源多色系统，4 色模块 + 主动干燥 + RFID + 备份卷。开源友好（支持 BTT MMS 或 Happy Hare 固件）。需要工具头带 Filametrix 或 A4T 切刀。兼容 Voron 2.4 / Trident / VzBot / RatRig。</div>
+    <div class="links">
+      <a href="https://kb-3d.com/store/btt/9667-bigtreetech-vivid-multi-material-filament-changer-for-klipper-3d-printers-1777275005694.html" target="_blank">👉 KB-3D 销售页</a>
+    </div>
+  </div>
+
+  <div class="project-card" style="border-color: #e91e63;">
+    <div class="name">🎨 YUMI C Series（ChromaX12） <span class="tag tag-active">2026 商业</span></div>
+    <div class="meta">1-12 色 · 700mm/s · Klipper + YMS 模组</div>
+    <div class="desc">YUMI Lab 的下一代多色整机，YMS 模组 1-12 色。ChromaX12 头 = 12 色独立挤出，免擦料塔，少量浪费，自动排废。无 purge tower / 10cm 短回抽 / AI 监控 / 远程 YUMI app。C235 / C335 / C435 三种尺寸。</div>
+    <div class="links">
+      <a href="https://wiki.yumi-lab.com/Yumi_C_Series/YUMI_C_SERIES/" target="_blank">👉 YUMI Wiki</a>
+    </div>
+  </div>
+
+  <div class="project-card" style="border-color: #9c27b0;">
+    <div class="name">🌈 Prusa ColorMix <span class="tag tag-active">2026 新</span></div>
+    <div class="meta">MIT · 5 色 CMYKW 变 40 色</div>
+    <div class="desc">Prusa 2026 发布的整层色彩混合方案！5 卷 CMYKW → 40 种色。用 Yule-Nielsen 方程 + FDM 实测校准。集成 PrusaSlicer 2.9.6 + EasyPrint 浏览器版。适配任何多材料系统（Prusa XL / INDX / MMU3 / Bambu AMS）。</div>
+    <div class="links">
+      <a href="https://github.com/prusa3d/prusa-fdm-mixer" target="_blank">👉 prusa-fdm-mixer</a>
+    </div>
+  </div>
+
+  <h3>🥉 Tier 3：彩色打印新尝试（2024-2026 新趋势）</h3>
+
+  <div class="project-card" style="border-color: #f06292;">
+    <div class="name">🎨 PolyDye <span class="tag tag-active">2024 新</span></div>
+    <div class="meta">$199 套件 · 白线 + CMY 喷墨上色</div>
+    <div class="desc">用 2D 喷墨墨盒 + ESP32 + FDM 3D 打印，每层用白线打完再喷墨上色。基于 Marlin 固件（需 CH34x/FT23x USB 芯片）。已验证 CR6-SE 可用。开源代码在 GitHub。</div>
+  </div>
+
+  <div class="project-card" style="border-color: #7e57c2;">
+    <div class="name">🎨 Primed3D <span class="tag tag-active">2026 新</span></div>
+    <div class="meta">开源 · 照片/渐变投影到 FDM 打印件</div>
+    <div class="desc">抖动算法，CMY 混合后用细线"画"出色块。3D Revolution YouTube 频道作品。开源，浏览器端运行。</div>
+  </div>
+
+  <div class="project-card" style="border-color: #ff7043;">
+    <div class="name">🖍️ 3DPrintColorizer <span class="tag tag-en">小众</span></div>
+    <div class="meta">Sakati84 · 适合 Ender 3 + Sharpies 记号笔</div>
+    <div class="desc">把记号笔架在打印头上，每层打完上色。Cura 插件 + G-code 注入。简单但慢，仅适合装饰件。</div>
+    <div class="links">
+      <a href="https://github.com/Sakati84/3DPrintColorizer" target="_blank">👉 3DPrintColorizer</a>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>4️⃣ 给 Andy 哥的建议</h2>
+
+  <div class="decision-grid">
+    <div class="decision warn">
+      <h4>❌ KMS 现阶段不适合你</h4>
+      <p>KMS 是给 Klipper + CoreXY（Voron/改造机）设计的。KLP1 是 i3 + Marlin，硬件方案不同，装不上也跑不动。</p>
+    </div>
+    <div class="decision warn">
+      <h4>⚠️ ERCF 也不适合 KLP1</h4>
+      <p>ERCF 整套（Voron + Klipper）你要是上 KLP1 等于把宝马发动机塞到 QQ 里。但是 Voron 圈是开源 MMU 老大，值得看视频学设计思路。</p>
+    </div>
+    <div class="decision yes">
+      <h4>✅ K1 改造机能上</h4>
+      <p>CoreXY + 改装 Klipper + 加 StealthChanger 码头可以玩 ERCF / KMS / 3MS。预算 +200-500 元（材料 + 控制板）就能体验。改造成本远低于买大鱼 SPA 4 色机。</p>
+    </div>
+    <div class="decision no">
+      <h4>❌ 大鱼 SPA 4 色机不用 ERCF</h4>
+      <p>大鱼 SPA 是 i3 + 4 色 Z 轴切换（料塔式），跟 ERCF 走的是完全不同的硬件路线。装了 ERCF 也用不上。</p>
+    </div>
+    <div class="decision yes">
+      <h4>✅ 现在该做的</h4>
+      <p>看 B 站「ERCF 实装」+「Happy Hare 教程」+「KMS 视频」3 个入门视频，先搞懂原理。等 K1 改造机真上了 Klipper，再决定上哪个方案。</p>
+    </div>
+    <div class="decision yes">
+      <h4>💡 收藏优先级</h4>
+      <p>必收藏：Happy Hare + 兔子 Carrot ERCF V3 + 3MS。<br>看视频：B 站 UP 主拆解视频 + Klipper Discourse 论坛。</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  🔍 整理自 GitHub / Klipper Discourse / Trianglelab / MakerWorld / B 站 · 2026-06-10
+</footer>
+
+</div>
+</body>
+</html>

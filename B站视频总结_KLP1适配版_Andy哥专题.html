@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>B站视频总结 · 热床调平深度研究 · KLP1 适配版</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(135deg,#0f1419 0%,#1a2332 100%);color:#e6edf3;min-height:100vh;padding:16px;line-height:1.6}
+  .container{max-width:780px;margin:0 auto}
+  .header{text-align:center;padding:18px 0 14px;border-bottom:1px solid #30363d;margin-bottom:18px}
+  .header h1{font-size:20px;background:linear-gradient(90deg,#00aeec,#fb7299);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+  .header .sub{color:#8b949e;font-size:12px;line-height:1.6}
+  .header .sub a{color:#58a6ff;text-decoration:none}
+  .header .sub a:hover{text-decoration:underline}
+
+  /* 视频卡片 */
+  .video-card{background:linear-gradient(135deg,#1f2937,#111827);border:1px solid #00aeec;border-radius:12px;padding:14px;margin-bottom:14px}
+  .video-card .title{font-size:15px;font-weight:600;color:#00aeec;margin-bottom:8px}
+  .video-card .meta{display:flex;flex-wrap:wrap;gap:8px;font-size:12px;color:#8b949e}
+  .video-card .meta span{padding:3px 8px;background:#0d1117;border-radius:4px}
+  .video-card .meta span.author{color:#fb7299;font-weight:600}
+
+  /* 核心论点 */
+  .core{margin-bottom:14px;padding:14px;background:linear-gradient(135deg,rgba(248,81,73,0.08),rgba(248,81,73,0.03));border-left:4px solid #f85149;border-radius:8px}
+  .core h2{font-size:15px;color:#f85149;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+  .core p{font-size:13px;color:#c9d1d9;line-height:1.7;margin-bottom:8px}
+  .core p:last-child{margin-bottom:0}
+  .core p strong{color:#ffd700}
+
+  /* 3P 内容 */
+  .playlist{margin-bottom:14px}
+  .playlist h2{font-size:15px;color:#58a6ff;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+  .parts{display:flex;flex-direction:column;gap:8px}
+  .part{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:10px 12px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;transition:all 0.2s;cursor:pointer}
+  .part:hover{border-color:#58a6ff;transform:translateX(3px)}
+  .part.p1{border-left:4px solid #3fb950}
+  .part.p2{border-left:4px solid #58a6ff}
+  .part.p3{border-left:4px solid #ffd700}
+  .part .pn{font-size:24px;font-weight:700;color:#8b949e;font-family:monospace}
+  .part .pname{font-size:13px;font-weight:600;margin-bottom:2px}
+  .part .pdesc{font-size:11px;color:#8b949e;line-height:1.5}
+  .part .ptime{font-family:monospace;font-size:12px;color:#ffd700;font-weight:600}
+
+  /* KLP1 适配 */
+  .adapt{margin-bottom:14px}
+  .adapt h2{font-size:15px;color:#a371f7;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+  .adapt-grid{display:grid;gap:8px}
+  .aitem{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:10px 12px;display:flex;align-items:flex-start;gap:10px}
+  .aitem .dot{width:10px;height:10px;border-radius:50%;margin-top:6px;flex-shrink:0}
+  .aitem .dot.red{background:#f85149;box-shadow:0 0 8px #f85149}
+  .aitem .dot.yellow{background:#f0b429;box-shadow:0 0 8px #f0b429}
+  .aitem .dot.green{background:#3fb950;box-shadow:0 0 8px #3fb950}
+  .aitem .dot.blue{background:#58a6ff;box-shadow:0 0 8px #58a6ff}
+  .aitem .atext{flex:1}
+  .aitem .aname{font-size:13px;font-weight:600;margin-bottom:2px}
+  .aitem .adesc{font-size:11px;color:#8b949e;line-height:1.5}
+  .aitem .acmd{margin-top:4px;padding:3px 6px;background:#161b22;border-radius:3px;font-family:monospace;font-size:11px;color:#58a6ff;display:inline-block}
+
+  /* 关键命令 */
+  .cmds{margin-bottom:14px}
+  .cmds h2{font-size:15px;color:#3fb950;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+  .cmd{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:10px 12px;margin-bottom:6px}
+  .cmd .name{font-size:12px;color:#8b949e;margin-bottom:4px}
+  .cmd .code{font-family:monospace;font-size:13px;color:#3fb950;background:#161b22;padding:6px 8px;border-radius:4px;word-break:break-all}
+  .cmd .note{font-size:11px;color:#8b949e;margin-top:4px}
+
+  /* 行动 */
+  .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  .abtn{padding:12px;border-radius:8px;border:none;font-weight:600;font-size:14px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px}
+  .abtn:active{transform:scale(0.97)}
+  .abtn.primary{background:linear-gradient(90deg,#00aeec,#fb7299);color:#fff}
+  .abtn.secondary{background:#21262d;color:#58a6ff;border:1px solid #30363d}
+
+  /* 链接 */
+  .links{margin-bottom:14px;padding:10px 12px;background:#0d1117;border-radius:8px;font-size:12px;color:#8b949e;line-height:1.7}
+  .links a{color:#58a6ff;text-decoration:none;word-break:break-all}
+  .links a:hover{text-decoration:underline}
+  .links strong{color:#e6edf3}
+
+  /* LED 挂钩 */
+  .led{margin-bottom:14px;padding:12px;background:linear-gradient(90deg,rgba(63,185,80,0.1),rgba(35,134,54,0.05));border-left:3px solid #3fb950;border-radius:6px}
+  .led h3{font-size:13px;color:#3fb950;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+  .led p{font-size:12px;color:#c9d1d9;line-height:1.6}
+
+  .footer{text-align:center;color:#6e7681;font-size:11px;padding:14px 0 4px;border-top:1px solid #21262d;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>🎬 B站视频总结 + KLP1 适配版</h1>
+    <div class="sub">
+      UP：<span style="color:#fb7299">石頭a强拖幻者</span> · 2026-01-04 · 3P 合集 1P<br>
+      <a href="https://www.bilibili.com/video/BV1ceinB7E7H" target="_blank">BV1ceinB7E7H · 硬件结构篇（1h31m）</a>
+    </div>
+  </div>
+
+  <!-- 视频卡片 -->
+  <div class="video-card">
+    <div class="title">📐 3D打印 热床调平 深度研究、综合方案及Klipper配置教程</div>
+    <div class="meta">
+      <span class="author">👤 石頭a强拖幻者</span>
+      <span>🕐 1h31m15s</span>
+      <span>👁 1731 播放</span>
+      <span>📅 2026-01-04</span>
+      <span>🏷 螺丝调平 / 结构 / Klipper</span>
+    </div>
+  </div>
+
+  <!-- 核心论点 -->
+  <div class="core">
+    <h2>💡 核心论点（一句话）</h2>
+    <p><strong>"没有物理上稳定可靠的基础结构，所有自动调平和床网补偿都是意义不大的。"</strong></p>
+    <p>UP 批评了行业普遍现象：<strong>只讲电子器件/程序/配置，不讲机械结构</strong>。折腾多年调不好平的根因 = <strong>结构基础没打好</strong>，再调电子也是歪的。</p>
+    <p>正确流程：<strong>稳定机械结构 → 双Z等高校准 → Klipper Screws_Tilt_Adjust → 扔掉 A4 纸</strong></p>
+  </div>
+
+  <!-- 3P 内容 -->
+  <div class="playlist">
+    <h2>📺 3P 合集内容速览</h2>
+    <div class="parts">
+      <div class="part p1" onclick="openBilibili('BV1ceinB7E7H')">
+        <div class="pn">P1</div>
+        <div>
+          <div class="pname">🔧 硬件结构篇（你看这个）</div>
+          <div class="pdesc">螺丝调平组件结构详解 · 双Z轴螺丝调平 · 起迪 Qidi Q2 物理基础</div>
+        </div>
+        <div class="ptime">1:31:15</div>
+      </div>
+      <div class="part p2" onclick="openBilibili('BV1VL6QBvEBX')">
+        <div class="pn">P2</div>
+        <div>
+          <div class="pname">⚙️ Klipper 配置篇（最实用）</div>
+          <div class="pdesc">Screws_Tilt_Adjust 命令详解 · 双Z等高校准配置 · 扔 A4 纸流程</div>
+        </div>
+        <div class="ptime">1:22:10</div>
+      </div>
+      <div class="part p3" onclick="openBilibili('BV1VL6QBvEBX',true)">
+        <div class="pn">P3</div>
+        <div>
+          <div class="pname">🎬 实操篇（最快上手）</div>
+          <div class="pdesc">Qidi Q2 真机演示 · 螺丝调整全过程 · 20 分钟跑通</div>
+        </div>
+        <div class="ptime">0:19:58</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KLP1 适配 -->
+  <div class="adapt">
+    <h2>🔧 KLP1 适配清单（4 件事）</h2>
+    <div class="adapt-grid">
+      <div class="aitem">
+        <div class="dot red"></div>
+        <div class="atext">
+          <div class="aname">① 机械结构稳定性（你可能没做）</div>
+          <div class="adesc">检查 KLP1 的弹簧是否压平、Z 丝杠是否磨损、平台螺丝是否拧紧。这是 UP 强调的<strong>"先有结构"基础</strong>。</div>
+        </div>
+      </div>
+      <div class="aitem">
+        <div class="dot red"></div>
+        <div class="atext">
+          <div class="aname">② 双 Z 等高校准（核心新知）</div>
+          <div class="adesc">KLP1 是双 Z 电机，<strong>必须先做"双Z同步"</strong>——否则一边高一边低，Mesh 测出来也是歪的。这是 UP 视频的核心方法。</div>
+          <span class="acmd">Mainsail → SET_DUAL_CARRIAGE / Z_TILT_ADJUST</span>
+        </div>
+      </div>
+      <div class="aitem">
+        <div class="dot yellow"></div>
+        <div class="atext">
+          <div class="aname">③ Screws_Tilt_Adjust（你可能没用过）</div>
+          <div class="adesc">Klipper 命令测螺丝倾斜角度，告诉你哪颗螺丝要拧多少。比 A4 纸精确 10 倍，<strong>你 KLP1 4 角螺丝都能用</strong>。</div>
+          <span class="acmd">Mainsail 控制台 → SCREWS_TILT_CALCULATE</span>
+        </div>
+      </div>
+      <div class="aitem">
+        <div class="dot green"></div>
+        <div class="atext">
+          <div class="aname">④ Mesh + Z 偏移（你已经做了 ✅）</div>
+          <div class="adesc">电子补偿层——在①②③做好的基础上才有意义。UP 称之为"治标"，①②③才是"治本"。</div>
+          <span class="acmd">BED_MESH_CALIBRATE + BABYSTEPPING Z</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 关键命令 -->
+  <div class="cmds">
+    <h2>⌨️ KLP1 立刻能用的 4 个 Klipper 命令</h2>
+    <div class="cmd">
+      <div class="name">① 测螺丝倾斜（替换 A4 纸）</div>
+      <div class="code">SCREWS_TILT_CALCULATE</div>
+      <div class="note">返回类似："front_left: 03:05 → turn 1/4 clockwise"= 第几颗螺丝要拧 1/4 圈</div>
+    </div>
+    <div class="cmd">
+      <div class="name">② 双 Z 等高校准（核心）</div>
+      <div class="code">Z_TILT_ADJUST</div>
+      <div class="note">测两个 Z 电机的高度差，自动补偿。需要 printer.cfg 配 [z_tilt] section</div>
+    </div>
+    <div class="cmd">
+      <div class="name">③ Mesh 网格调平（你会的）</div>
+      <div class="code">BED_MESH_CALIBRATE</div>
+      <div class="note">5×5=25 点 Z 偏移测量，存到 default profile</div>
+    </div>
+    <div class="cmd">
+      <div class="name">④ Z 偏移微调（你会的）</div>
+      <div class="code">SET_GCODE_OFFSET Z=+0.025</div>
+      <div class="note">每步 0.025mm，第一层不出料=加，挤料过多=减</div>
+    </div>
+  </div>
+
+  <!-- 行动 -->
+  <div class="actions">
+    <button class="abtn primary" onclick="action('now')">⚡ 立刻跑双 Z 等高</button>
+    <button class="abtn secondary" onclick="action('p3')">🎬 跳到 P3 看实操</button>
+  </div>
+
+  <!-- 链接 -->
+  <div class="links">
+    <strong>📺 视频链接：</strong><br>
+    • <a href="https://www.bilibili.com/video/BV1ceinB7E7H" target="_blank">P1 硬件结构篇（1h31m）</a><br>
+    • <a href="https://www.bilibili.com/video/BV1VL6QBvEBX" target="_blank">P2 Klipper 配置篇（1h22m）</a><br>
+    • <a href="https://space.bilibili.com/1759962358/" target="_blank">UP 主页：石頭a强拖幻者</a>（Qidi Q2 全系列教程 + Klipper 整合包"思兼 QQOP"）
+  </div>
+
+  <!-- LED 业务挂钩 -->
+  <div class="led">
+    <h3>💡 LED 业务挂钩</h3>
+    <p>
+      <b>结构稳定 = 大批量打印良品率</b><br>
+      • 你 KLP1 打 LED 灯罩，第一层不粘 = 整个件废 = 浪费 2 小时打印 + ¥3 回收料<br>
+      • <b>①②③全做完 = 灯罩一次成型率从 80% → 95%</b><br>
+      • 100 个灯罩多出 15 个成品 = 闲鱼多卖 ¥150-300<br>
+      • <b>UP 思兼的 Klipper 整合包 "QQOP" 可以借鉴</b>（虽然是 Q2 的，但 Klipper 通用）
+    </p>
+  </div>
+
+  <div class="footer">
+    🎬 视频总结 + KLP1 适配版 · 收藏到手机随时查 4 个 Klipper 命令
+  </div>
+</div>
+
+<script>
+function openBilibili(bv, related){
+  let url = `https://www.bilibili.com/video/${bv}`;
+  if(related) url = 'https://space.bilibili.com/1759962358/channel/collectiondetail?sid=7144086';
+  window.open(url, '_blank');
+}
+function action(choice){
+  const map={
+    'now':'⚡ KLP1 双 Z 等高校准流程：\n\n1. Mainsail → 控制台\n2. 输入：Z_TILT_ADJUST（先测试）\n3. 如果报错找不到 [z_tilt] section：\n   → SSH 进 KLP1：cd ~/printer_data/config\n   → 编辑 printer.cfg，加 [z_tilt] section\n   → sudo systemctl restart klipper\n4. 跑：SCREWS_TILT_CALCULATE\n5. 按提示拧螺丝\n6. 再跑：Z_TILT_ADJUST 确认\n7. 跑：BED_MESH_CALIBRATE 存 default',
+    'p3':'🎬 跳过 P1/P2 直接看 P3（19:58 实操）\n\n但是：P3 是 Qidi Q2 演示，KLP1 界面略有不同\n建议顺序：\n1. 先看我做的 4 个 Klipper 命令速查卡（在 HTML 里）\n2. 直接打开 Mainsail 控制台跑命令\n3. 遇到错再回去看 P2 找配置示例'
+  };
+  alert(map[choice]||'');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>热敏孔剖面图</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+    color: #e0e0e0; min-height: 100vh; padding: 20px;
+  }
+  .container { max-width: 1000px; margin: 0 auto; }
+  h1 { text-align: center; color: #ffaa44; font-size: 26px; margin: 20px 0 8px; }
+  .subtitle { text-align: center; color: #aaa; margin-bottom: 24px; font-size: 14px; }
+
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; background: rgba(0,0,0,0.25); padding: 10px; border-radius: 12px 12px 0 0; }
+  .tab-btn {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    color: #ccc; padding: 10px 16px; border-radius: 8px; cursor: pointer;
+    font-size: 14px; transition: all 0.25s; flex: 1; min-width: 120px;
+  }
+  .tab-btn:hover { background: rgba(255,170,68,0.15); color: #ffaa44; }
+  .tab-btn.active {
+    background: linear-gradient(135deg, #ff7733, #ffaa44); color: #1a1a1a;
+    font-weight: 600; border-color: #ffaa44; box-shadow: 0 0 12px rgba(255,170,68,0.4);
+  }
+
+  .tab-content { background: rgba(0,0,0,0.35); border-radius: 0 0 12px 12px; padding: 30px; min-height: 580px; }
+  .tab-pane { display: none; animation: fadeIn 0.4s ease; }
+  .tab-pane.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  h2 { color: #ffaa44; margin-bottom: 16px; font-size: 20px; }
+  h3 { color: #66d9ef; margin: 16px 0 8px; font-size: 16px; }
+  p, li { line-height: 1.7; }
+  ul, ol { margin-left: 24px; margin-bottom: 12px; }
+
+  .svg-stage {
+    background: radial-gradient(circle at center, #1a2a3a, #0a1520);
+    border: 1px solid #334; border-radius: 10px;
+    padding: 20px; margin: 16px 0; text-align: center;
+  }
+
+  .info-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px; margin: 16px 0;
+  }
+  .info-card {
+    background: rgba(255,255,255,0.04); border-left: 3px solid #ffaa44;
+    padding: 12px 14px; border-radius: 6px;
+  }
+  .info-card.green { border-left-color: #44dd88; }
+  .info-card.red { border-left-color: #ff4422; }
+  .info-card.blue { border-left-color: #66d9ef; }
+  .info-card .title { color: #ffaa44; font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .info-card.green .title { color: #44dd88; }
+  .info-card.red .title { color: #ff6644; }
+  .info-card.blue .title { color: #66d9ef; }
+  .info-card .content { color: #ccc; font-size: 13px; line-height: 1.6; }
+
+  .alert {
+    background: linear-gradient(90deg, rgba(255,68,34,0.18), rgba(255,68,34,0.05));
+    border: 1px solid #ff4422; border-left: 4px solid #ff4422;
+    padding: 14px 18px; border-radius: 6px; margin: 12px 0;
+  }
+  .alert-title { color: #ff6644; font-weight: 600; margin-bottom: 6px; }
+  .alert-body { color: #fdd; font-size: 14px; line-height: 1.6; }
+
+  .tip {
+    background: linear-gradient(90deg, rgba(102,217,239,0.15), rgba(102,217,239,0.04));
+    border: 1px solid #66d9ef; border-left: 4px solid #66d9ef;
+    padding: 14px 18px; border-radius: 6px; margin: 12px 0;
+  }
+  .tip-title { color: #66d9ef; font-weight: 600; margin-bottom: 6px; }
+
+  .checklist { list-style: none; }
+  .checklist li { padding: 6px 0 6px 28px; position: relative; }
+  .checklist li::before { content: "✓"; position: absolute; left: 0; top: 6px; color: #44dd88; font-weight: 700; }
+  .checklist li.bad::before { content: "✗"; color: #ff4422; }
+
+  .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; padding: 16px; }
+
+  .pulse { animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🔍 热敏孔剖面图（2 根线怎么走）</h1>
+  <p class="subtitle">你拍的实物图 + 内部剖面 · 一目了然</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="1">① 实物对照</button>
+    <button class="tab-btn" data-tab="2">② 剖面结构</button>
+    <button class="tab-btn" data-tab="3">③ 2 根线怎么放</button>
+    <button class="tab-btn" data-tab="4">④ 错误的装法</button>
+    <button class="tab-btn" data-tab="5">⑤ 装入步骤</button>
+  </div>
+
+  <div class="tab-content">
+
+    <!-- Tab 1: 实物对照 -->
+    <div class="tab-pane active" id="tab1">
+      <h2>① 你图里的实物辨认</h2>
+      <div class="svg-stage">
+        <svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg">
+          <!-- 模拟你拍的图：加热块 -->
+          <g>
+            <!-- 加热块主体（黄铜） -->
+            <rect x="100" y="100" width="280" height="180" rx="8" fill="#d4a96a" stroke="#8b6914" stroke-width="2"/>
+            <ellipse cx="240" cy="100" rx="140" ry="12" fill="#b8941f" opacity="0.7"/>
+            <ellipse cx="240" cy="280" rx="140" ry="12" fill="#8b6914" opacity="0.7"/>
+            <!-- 顶部螺纹 -->
+            <line x1="380" y1="100" x2="380" y2="280" stroke="#6b5610" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <line x1="100" y1="100" x2="380" y2="100" stroke="#6b5610" stroke-width="0.5" stroke-dasharray="3,3"/>
+
+            <!-- 5/10 标记 -->
+            <text x="365" y="135" fill="#1a1a1a" font-size="11" font-weight="700">5/10</text>
+            <text x="365" y="150" fill="#1a1a1a" font-size="11" font-weight="700">5/10</text>
+
+            <!-- 你看到的那个小圆孔 = 热敏孔 -->
+            <circle cx="220" cy="180" r="9" fill="#1a1a1a" stroke="#000" stroke-width="1.5"/>
+            <circle cx="220" cy="180" r="5" fill="#000"/>
+            <text x="220" y="200" text-anchor="middle" fill="#1a1a1a" font-size="10" font-weight="700">小孔（Φ3 盲孔）</text>
+
+            <!-- 另一侧的喷嘴/喉管伸出 -->
+            <rect x="380" y="170" width="200" height="20" fill="#d4a96a" stroke="#8b6914" stroke-width="1.5"/>
+            <polygon points="580,170 600,180 580,190" fill="#8b6914"/>
+            <text x="480" y="160" text-anchor="middle" fill="#aaa" font-size="10">▲ 喷嘴/喉管（侧面伸出）</text>
+
+            <!-- 标注 -->
+            <line x1="220" y1="180" x2="60" y2="60" stroke="#ff6644" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <text x="50" y="50" fill="#ff6644" font-size="12" font-weight="700">▲ 你问的这个孔</text>
+            <text x="50" y="68" fill="#ffaa44" font-size="11">热敏电阻孔（Φ3 盲孔）</text>
+
+            <!-- 解释标注 -->
+            <text x="60" y="320" fill="#66d9ef" font-size="11">从外面看：就一个黑黑的小圆孔</text>
+            <text x="60" y="338" fill="#66d9ef" font-size="11">直径约 3mm（玻璃珠大小）</text>
+            <text x="60" y="356" fill="#66d9ef" font-size="11">深度约 10-12mm（盲孔，不通）</text>
+            <text x="60" y="374" fill="#44dd88" font-size="11">✓ 2 根线都从这个孔出来</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="title">📍 这个小孔</div>
+          <div class="content">直径 3mm · 深度 10-12mm · 不通到底（盲孔）</div>
+        </div>
+        <div class="info-card blue">
+          <div class="title">📍 它的作用</div>
+          <div class="content">容纳<b>热敏电阻玻璃珠</b>，让珠体紧贴块体测温</div>
+        </div>
+        <div class="info-card green">
+          <div class="title">📍 2 根线</div>
+          <div class="content"><b>都从这一个孔进出</b>，孔小、线细（直径 0.3mm）能容纳</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: 剖面结构 -->
+    <div class="tab-pane" id="tab2">
+      <h2>② 内部剖面（从这个孔往里看）</h2>
+      <div class="svg-stage">
+        <svg viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg">
+          <!-- 加热块剖面 -->
+          <defs>
+            <pattern id="brass" patternUnits="userSpaceOnUse" width="8" height="8">
+              <rect width="8" height="8" fill="#d4a96a"/>
+              <line x1="0" y1="0" x2="8" y2="0" stroke="#8b6914" stroke-width="0.3"/>
+            </pattern>
+          </defs>
+          <rect x="200" y="60" width="300" height="280" rx="6" fill="url(#brass)" stroke="#8b6914" stroke-width="2"/>
+
+          <!-- 加热棒孔（横贯） -->
+          <rect x="220" y="180" width="260" height="20" rx="3" fill="#333"/>
+          <text x="350" y="172" text-anchor="middle" fill="#aaa" font-size="10">贯穿孔（Φ6.2）— 加热棒用</text>
+
+          <!-- 热敏孔（纵盲孔） -->
+          <rect x="298" y="80" width="14" height="120" rx="2" fill="#1a1a1a" stroke="#000" stroke-width="1.5"/>
+          <text x="305" y="74" text-anchor="middle" fill="#66d9ef" font-size="10" font-weight="600">热敏孔 Φ3 盲孔</text>
+          <text x="305" y="220" text-anchor="middle" fill="#aaa" font-size="9">深 12mm</text>
+
+          <!-- 玻璃珠（孔底） -->
+          <circle cx="305" cy="195" r="6" fill="#ff6688" stroke="#aa1133" stroke-width="1.5" class="pulse"/>
+          <text x="350" y="195" fill="#ff6688" font-size="11" font-weight="700">玻璃珠（孔底）</text>
+          <line x1="313" y1="195" x2="340" y2="195" stroke="#ff6688" stroke-dasharray="2,2"/>
+
+          <!-- 2 根线（并排从珠引出） -->
+          <line x1="305" y1="189" x2="295" y2="80" stroke="#222" stroke-width="2"/>
+          <line x1="305" y1="189" x2="315" y2="80" stroke="#222" stroke-width="2"/>
+          <text x="270" y="130" fill="#aaa" font-size="9">线 1</text>
+          <text x="325" y="130" fill="#aaa" font-size="9">线 2</text>
+
+          <!-- 黑色外皮（合并包住） -->
+          <rect x="290" y="40" width="30" height="45" fill="#1a1a1a" stroke="#000" stroke-width="1"/>
+          <text x="305" y="32" text-anchor="middle" fill="#aaa" font-size="10">黑色硅胶外皮</text>
+          <text x="305" y="20" text-anchor="middle" fill="#66d9ef" font-size="10" font-weight="600">2 根线合并</text>
+
+          <!-- 2P 插头 -->
+          <rect x="285" y="10" width="40" height="18" rx="2" fill="#f8f8f8" stroke="#888"/>
+          <text x="305" y="2" text-anchor="middle" fill="#aaa" font-size="9">2P 插头</text>
+
+          <!-- 喷嘴安装孔（底） -->
+          <rect x="345" y="320" width="20" height="20" fill="#5a4610"/>
+          <polygon points="340,340 370,340 365,360 345,360" fill="#3a2a05"/>
+          <text x="355" y="380" text-anchor="middle" fill="#aaa" font-size="10">喷嘴 M6</text>
+
+          <!-- 喉管连接（顶部） -->
+          <rect x="335" y="20" width="30" height="40" fill="#aa8844" stroke="#553300"/>
+
+          <!-- 标注 -->
+          <text x="100" y="80" fill="#ffaa44" font-size="13" font-weight="700">从孔口看进去：</text>
+          <text x="100" y="100" fill="#ccc" font-size="11">① 黑色硅胶外皮（2 根线包一起）</text>
+          <text x="100" y="118" fill="#ccc" font-size="11">② 2 根细铜线（直径 0.3mm）</text>
+          <text x="100" y="136" fill="#ccc" font-size="11">③ 玻璃珠（最里端）</text>
+          <text x="100" y="160" fill="#ff6644" font-size="12" font-weight="700">⚠ 玻璃珠必须贴最底部</text>
+          <text x="100" y="178" fill="#ffaa44" font-size="11">（距离喷嘴孔最近的位置）</text>
+        </svg>
+      </div>
+
+      <div class="tip">
+        <div class="tip-title">💡 关键：2 根线 = 同一根线的两端</div>
+        <p style="margin-top:6px">NTC 电阻珠有 2 个电极，每个电极接一根引线<br>
+        2 根线在珠内部是<b>分开的</b>，出来之后被<b>黑色硅胶外皮合并包住</b><br>
+        整根线外观上就像一根"双芯线"，实际是 2 根独立线</p>
+      </div>
+    </div>
+
+    <!-- Tab 3: 2 根线怎么放 -->
+    <div class="tab-pane" id="tab3">
+      <h2>③ 2 根线怎么放进这个孔</h2>
+      <p>这是个 <b>Φ3mm 盲孔</b>，要同时塞进 <b>1 颗玻璃珠 + 2 根线 + 导热硅脂</b>，听上去很挤？实际完全可以：</p>
+
+      <div class="svg-stage">
+        <svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg">
+          <!-- 装入过程 4 步 -->
+          <g>
+            <!-- 步骤 1 -->
+            <g transform="translate(30, 30)">
+              <text x="80" y="20" text-anchor="middle" fill="#ffaa44" font-size="13" font-weight="700">① 涂硅脂</text>
+              <rect x="20" y="40" width="120" height="180" rx="4" fill="url(#brass2)"/>
+              <rect x="76" y="60" width="14" height="100" rx="2" fill="#1a1a1a"/>
+              <ellipse cx="83" cy="80" rx="12" ry="5" fill="#ffeb3b" opacity="0.7"/>
+              <text x="83" y="50" text-anchor="middle" fill="#ffeb3b" font-size="10">硅脂</text>
+              <defs>
+                <pattern id="brass2" patternUnits="userSpaceOnUse" width="6" height="6">
+                  <rect width="6" height="6" fill="#d4a96a"/>
+                </pattern>
+              </defs>
+            </g>
+
+            <!-- 步骤 2 -->
+            <g transform="translate(200, 30)">
+              <text x="80" y="20" text-anchor="middle" fill="#ffaa44" font-size="13" font-weight="700">② 玻璃珠到孔底</text>
+              <rect x="20" y="40" width="120" height="180" rx="4" fill="url(#brass3)"/>
+              <defs>
+                <pattern id="brass3" patternUnits="userSpaceOnUse" width="6" height="6">
+                  <rect width="6" height="6" fill="#d4a96a"/>
+                </pattern>
+              </defs>
+              <rect x="76" y="60" width="14" height="100" rx="2" fill="#1a1a1a"/>
+              <circle cx="83" cy="155" r="6" fill="#ff6688" stroke="#aa1133" stroke-width="1.5" class="pulse"/>
+              <text x="83" y="170" text-anchor="middle" fill="#ff6688" font-size="9">珠</text>
+            </g>
+
+            <!-- 步骤 3 -->
+            <g transform="translate(370, 30)">
+              <text x="80" y="20" text-anchor="middle" fill="#ffaa44" font-size="13" font-weight="700">③ 2 根线并排出孔</text>
+              <rect x="20" y="40" width="120" height="180" rx="4" fill="url(#brass4)"/>
+              <defs>
+                <pattern id="brass4" patternUnits="userSpaceOnUse" width="6" height="6">
+                  <rect width="6" height="6" fill="#d4a96a"/>
+                </pattern>
+              </defs>
+              <rect x="76" y="60" width="14" height="100" rx="2" fill="#1a1a1a"/>
+              <circle cx="83" cy="155" r="6" fill="#ff6688" stroke="#aa1133" stroke-width="1.5"/>
+              <line x1="83" y1="149" x2="78" y2="60" stroke="#222" stroke-width="2"/>
+              <line x1="83" y1="149" x2="88" y2="60" stroke="#222" stroke-width="2"/>
+              <text x="60" y="105" fill="#aaa" font-size="9">线1</text>
+              <text x="98" y="105" fill="#aaa" font-size="9">线2</text>
+            </g>
+
+            <!-- 步骤 4 -->
+            <g transform="translate(540, 30)">
+              <text x="80" y="20" text-anchor="middle" fill="#ffaa44" font-size="13" font-weight="700">④ 黑皮包住</text>
+              <rect x="20" y="40" width="120" height="180" rx="4" fill="url(#brass5)"/>
+              <defs>
+                <pattern id="brass5" patternUnits="userSpaceOnUse" width="6" height="6">
+                  <rect width="6" height="6" fill="#d4a96a"/>
+                </pattern>
+              </defs>
+              <rect x="76" y="60" width="14" height="100" rx="2" fill="#1a1a1a"/>
+              <circle cx="83" cy="155" r="6" fill="#ff6688" stroke="#aa1133" stroke-width="1.5"/>
+              <rect x="73" y="20" width="20" height="45" fill="#1a1a1a" stroke="#000"/>
+              <line x1="83" y1="149" x2="78" y2="60" stroke="#222" stroke-width="2"/>
+              <line x1="83" y1="149" x2="88" y2="60" stroke="#222" stroke-width="2"/>
+              <text x="83" y="10" text-anchor="middle" fill="#aaa" font-size="9">外皮</text>
+            </g>
+          </g>
+
+          <!-- 尺寸标注 -->
+          <text x="350" y="280" text-anchor="middle" fill="#ffaa44" font-size="12">孔径 Φ3mm = 3mm</text>
+          <text x="350" y="298" text-anchor="middle" fill="#ccc" font-size="11">玻璃珠 Φ2.5mm（2 根线之间 0.5mm 缝隙 + 硅脂填满）</text>
+          <text x="350" y="316" text-anchor="middle" fill="#44dd88" font-size="11">✓ 实际能装下，工厂就是这么装的</text>
+        </svg>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-card green">
+          <div class="title">✓ 玻璃珠直径 2.5mm</div>
+          <div class="content">比孔径 3mm 小一点 → 留 0.25mm 缝隙给硅脂</div>
+        </div>
+        <div class="info-card green">
+          <div class="title">✓ 2 根线极细</div>
+          <div class="content">直径 0.3mm AWG30 耐热氟塑线，可弯曲折叠</div>
+        </div>
+        <div class="info-card green">
+          <div class="title">✓ 出线方向</div>
+          <div class="content">2 根线在珠体根部分开 0.5mm → 并排走出孔口 → 立刻被外皮合并</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 4: 错误装法 -->
+    <div class="tab-pane" id="tab4">
+      <h2>④ 装错会怎样（4 种错误）</h2>
+      <table style="width:100%;border-collapse:collapse;margin:12px 0;background:rgba(0,0,0,0.3);border-radius:8px;overflow:hidden;font-size:13px;">
+        <tr style="background:rgba(255,68,34,0.2)">
+          <th style="padding:10px;text-align:left;color:#ff6644">错误装法</th>
+          <th style="padding:10px;text-align:left;color:#ff6644">后果</th>
+        </tr>
+        <tr>
+          <td style="padding:10px;border-top:1px solid #333">玻璃珠没塞到底（卡在孔中段）</td>
+          <td style="padding:10px;border-top:1px solid #333;color:#ffaa44">测温偏低 10-20°C → 实际温度过高 → 塑料碳化</td>
+        </tr>
+        <tr>
+          <td style="padding:10px;border-top:1px solid #333">2 根线在孔里打结</td>
+          <td style="padding:10px;border-top:1px solid #333;color:#ff4422">线被孔口挤断 → 接触不良 → 测温不稳</td>
+        </tr>
+        <tr>
+          <td style="padding:10px;border-top:1px solid #333">没涂导热硅脂</td>
+          <td style="padding:10px;border-top:1px solid #333;color:#ffaa44">空气隔热 → 温度响应慢 5-10 秒 → PID 难调</td>
+        </tr>
+        <tr>
+          <td style="padding:10px;border-top:1px solid #333">线皮在孔口被挤破</td>
+          <td style="padding:10px;border-top:1px solid #333;color:#ff4422">裸铜接触黄铜块体 → 短路 → 主保险烧</td>
+        </tr>
+        <tr>
+          <td style="padding:10px;border-top:1px solid #333">玻璃珠装到加热棒孔里</td>
+          <td style="padding:10px;border-top:1px solid #333;color:#ff4422">测温位置错乱 → 温度显示异常 → 打印失败</td>
+        </tr>
+      </table>
+
+      <div class="alert">
+        <div class="alert-title">🚨 你问"两根线塞在一个位置？"——常见误解</div>
+        <div class="alert-body">
+          ❌ 错误理解：每根线单独占一个孔（一个孔一根）<br>
+          ✅ 正确理解：<b>两根线共用一个孔</b>，因为：<br>
+          - 孔径 3mm 比玻璃珠 2.5mm 大一点点<br>
+          - 两根线极细（0.3mm），并排走不占空间<br>
+          - 工厂出厂就这么装的<br><br>
+          <b>另一个孔（Φ6.2 贯穿孔）</b>是给<b>加热棒</b>用的，不给热敏
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 5: 装入步骤 -->
+    <div class="tab-pane" id="tab5">
+      <h2>⑤ 正确的装入步骤（5 步）</h2>
+
+      <div class="svg-stage">
+        <svg viewBox="0 0 700 360" xmlns="http://www.w3.org/2000/svg">
+          <!-- 5 步并排 -->
+          <g>
+            <g transform="translate(20, 0)">
+              <text x="60" y="20" text-anchor="middle" fill="#ffaa44" font-size="12" font-weight="700">① 准备</text>
+              <rect x="20" y="40" width="80" height="100" rx="4" fill="#d4a96a" stroke="#8b6914"/>
+              <rect x="56" y="50" width="14" height="60" rx="2" fill="#1a1a1a"/>
+              <text x="60" y="160" text-anchor="middle" fill="#aaa" font-size="10">孔朝上</text>
+            </g>
+            <g transform="translate(150, 0)">
+              <text x="60" y="20" text-anchor="middle" fill="#ffaa44" font-size="12" font-weight="700">② 涂硅脂</text>
+              <rect x="20" y="40" width="80" height="100" rx="4" fill="#d4a96a" stroke="#8b6914"/>
+              <rect x="56" y="50" width="14" height="60" rx="2" fill="#1a1a1a"/>
+              <ellipse cx="63" cy="60" rx="10" ry="4" fill="#ffeb3b" opacity="0.8"/>
+              <text x="60" y="160" text-anchor="middle" fill="#ffeb3b" font-size="10">薄薄一层</text>
+            </g>
+            <g transform="translate(280, 0)">
+              <text x="60" y="20" text-anchor="middle" fill="#ffaa44" font-size="12" font-weight="700">③ 珠入孔</text>
+              <rect x="20" y="40" width="80" height="100" rx="4" fill="#d4a96a" stroke="#8b6914"/>
+              <rect x="56" y="50" width="14" height="60" rx="2" fill="#1a1a1a"/>
+              <circle cx="63" cy="105" r="5" fill="#ff6688" stroke="#aa1133" stroke-width="1.5" class="pulse"/>
+              <text x="60" y="160" text-anchor="middle" fill="#ff6688" font-size="10">珠入底部</text>
+            </g>
+            <g transform="translate(410, 0)">
+              <text x="60" y="20" text-anchor="middle" fill="#ffaa44" font-size="12" font-weight="700">④ 2 根线</text>
+              <rect x="20" y="40" width="80" height="100" rx="4" fill="#d4a96a" stroke="#8b6914"/>
+              <rect x="56" y="50" width="14" height="60" rx="2" fill="#1a1a1a"/>
+              <circle cx="63" cy="105" r="5" fill="#ff6688" stroke="#aa1133" stroke-width="1.5"/>
+              <line x1="60" y1="100" x2="58" y2="50" stroke="#222" stroke-width="2"/>
+              <line x1="66" y1="100" x2="68" y2="50" stroke="#222" stroke-width="2"/>
+              <text x="60" y="160" text-anchor="middle" fill="#ccc" font-size="10">并排走</text>
+            </g>
+            <g transform="translate(540, 0)">
+              <text x="60" y="20" text-anchor="middle" fill="#ffaa44" font-size="12" font-weight="700">⑤ 压紧</text>
+              <rect x="20" y="40" width="80" height="100" rx="4" fill="#d4a96a" stroke="#8b6914"/>
+              <rect x="56" y="50" width="14" height="60" rx="2" fill="#1a1a1a"/>
+              <circle cx="63" cy="105" r="5" fill="#ff6688" stroke="#aa1133" stroke-width="1.5"/>
+              <line x1="60" y1="100" x2="58" y2="50" stroke="#222" stroke-width="2"/>
+              <line x1="66" y1="100" x2="68" y2="50" stroke="#222" stroke-width="2"/>
+              <rect x="52" y="35" width="22" height="10" fill="#888" stroke="#333"/>
+              <text x="63" y="32" text-anchor="middle" fill="#aaa" font-size="9">卡板</text>
+              <text x="60" y="160" text-anchor="middle" fill="#44dd88" font-size="10">完成 ✓</text>
+            </g>
+          </g>
+
+          <!-- 提示 -->
+          <text x="350" y="200" text-anchor="middle" fill="#66d9ef" font-size="13" font-weight="700">⚠ 重点：玻璃珠要"贴孔底"</text>
+          <text x="350" y="220" text-anchor="middle" fill="#ccc" font-size="11">推到孔最深处，距离喷嘴孔最近</text>
+          <text x="350" y="240" text-anchor="middle" fill="#ccc" font-size="11">用 1 根细铁丝或回形针伸进去轻轻推一下</text>
+
+          <text x="350" y="280" text-anchor="middle" fill="#44dd88" font-size="13" font-weight="700">装好后通电测试</text>
+          <text x="350" y="300" text-anchor="middle" fill="#ccc" font-size="11">发 M104 S200，看温度 30 秒内能否升到 200°C</text>
+          <text x="350" y="320" text-anchor="middle" fill="#ccc" font-size="11">如果温度显示异常，重新拆装检查</text>
+        </svg>
+      </div>
+
+      <h3>📋 检查清单（装好后对照）</h3>
+      <ul class="checklist">
+        <li>玻璃珠完全塞进孔底（用细铁丝能感到金属底）</li>
+        <li>2 根线从孔口并排整齐出来（不打结）</li>
+        <li>孔口有黑色外皮保护（不能裸铜）</li>
+        <li>外皮进入孔内的部分有 2-3mm（防止被孔口磨破）</li>
+        <li>轻拉外皮，玻璃珠不会被拉出（紧配合）</li>
+        <li>万用表测 2 根线 → 室温应该 ~100KΩ</li>
+      </ul>
+
+      <div class="tip">
+        <div class="tip-title">💡 实战技巧</div>
+        <p style="margin-top:6px">工厂装好的新热敏电阻，玻璃珠通常会涂一层<b>耐高温胶水（红/蓝色）</b><br>
+        它的作用：① 固定珠体 ② 填充空隙 ③ 标识已校准<br>
+        你重装时如果没胶水，可以用<b>高温硅胶</b>代替（淘宝 5 元/管）</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">🔍 1 个孔 = 玻璃珠 + 2 根线 + 硅脂 · Φ3 盲孔正好能装下</div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabId = btn.dataset.tab;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab' + tabId).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

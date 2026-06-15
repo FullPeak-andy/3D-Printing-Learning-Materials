@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>OrcaSlicer PETG 温度塔完整指南 · Andy哥</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"Microsoft YaHei",sans-serif;background:linear-gradient(135deg,#0a0e27 0%,#1a1a3e 50%,#0a0e27 100%);color:#e0e0e0;min-height:100vh;padding:20px}
+.container{max-width:1200px;margin:0 auto}
+.hero{background:linear-gradient(135deg,#ff6b6b 0%,#ffa726 50%,#ffeb3b 100%);border-radius:20px;padding:30px;margin-bottom:20px;position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.hero::before{content:"";position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 20% 50%,rgba(255,255,255,.2),transparent 50%),radial-gradient(circle at 80% 50%,rgba(255,235,59,.3),transparent 50%);pointer-events:none}
+.hero h1{font-size:30px;color:#fff;margin-bottom:8px;position:relative;text-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;gap:10px}
+.hero h1 .icon{width:48px;height:48px;background:rgba(255,255,255,.95);border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.hero .sub{color:rgba(255,255,255,.95);font-size:15px;position:relative}
+.hero .badges{margin-top:15px;display:flex;gap:8px;flex-wrap:wrap;position:relative}
+.badge{background:rgba(255,255,255,.2);backdrop-filter:blur(10px);padding:6px 12px;border-radius:20px;font-size:12px;color:#fff;border:1px solid rgba(255,255,255,.3)}
+
+.tabs{display:flex;gap:8px;margin-bottom:15px;background:rgba(255,255,255,.05);padding:8px;border-radius:15px;flex-wrap:wrap}
+.tab{padding:10px 18px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;transition:all .3s;background:rgba(255,255,255,.05);color:#aaa;border:1px solid transparent}
+.tab:hover{background:rgba(255,255,255,.1);color:#fff}
+.tab.active{background:linear-gradient(135deg,#ff6b6b,#ffa726);color:#fff;border-color:rgba(255,255,255,.3);box-shadow:0 4px 15px rgba(255,107,107,.4)}
+.tab .num{display:inline-block;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:10px;font-size:11px;margin-left:6px}
+.content{display:none;animation:fadeIn .4s}
+.content.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.intro-box{background:rgba(255,107,107,.1);border-left:4px solid #ff6b6b;padding:15px 20px;border-radius:8px;margin-bottom:20px;font-size:14px;line-height:1.7}
+.intro-box strong{color:#ff6b6b}
+.intro-box code{background:rgba(255,255,255,.1);padding:2px 6px;border-radius:4px;font-family:Consolas,monospace;color:#80deea}
+
+.section-title{font-size:20px;color:#fff;margin:25px 0 12px 0;display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:2px solid rgba(255,107,107,.3)}
+.section-title .icon{font-size:24px}
+
+.steps{display:grid;gap:15px;margin-bottom:20px}
+.step{background:linear-gradient(135deg,rgba(255,107,107,.15),rgba(255,167,38,.08));border:1px solid rgba(255,107,107,.3);border-radius:12px;padding:18px;display:flex;gap:15px;align-items:flex-start;transition:all .3s}
+.step:hover{transform:translateX(5px);border-color:rgba(255,107,107,.5)}
+.step-num{flex-shrink:0;width:48px;height:48px;background:linear-gradient(135deg,#ff6b6b,#ffa726);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;box-shadow:0 4px 12px rgba(255,107,107,.4)}
+.step-content h4{color:#fff;font-size:16px;margin-bottom:8px}
+.step-content p{font-size:13px;color:#b0b0b0;line-height:1.7;margin-bottom:6px}
+.step-content .hint{background:rgba(255,235,59,.1);border-left:3px solid #ffeb3b;padding:8px 12px;border-radius:6px;margin-top:8px;font-size:12px;color:#ffeb3b}
+
+.kbd{background:linear-gradient(180deg,#3a3a3a,#1a1a1a);color:#fff;padding:3px 8px;border-radius:5px;font-family:Consolas,monospace;font-size:12px;border:1px solid #555;box-shadow:0 2px 0 #000;display:inline-block;margin:0 2px}
+
+.code-block{background:#0d1117;border:1px solid rgba(255,107,107,.3);border-radius:10px;margin-bottom:15px;overflow:hidden}
+.code-head{background:linear-gradient(90deg,#ff6b6b,#ffa726);padding:8px 15px;font-size:12px;color:#fff;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.code-body{padding:15px;font-family:Consolas,monospace;font-size:12px;line-height:1.7;color:#c9d1d9;overflow-x:auto;white-space:pre}
+.code-body .key{color:#ff7b72}
+.code-body .val{color:#a5d6ff}
+.code-body .com{color:#8b949e}
+.code-body .str{color:#a5d6ff}
+.code-body .num{color:#79c0ff}
+
+.alert{background:linear-gradient(135deg,rgba(76,175,80,.15),rgba(0,188,212,.05));border:1px solid rgba(76,175,80,.3);border-radius:12px;padding:15px;margin-bottom:15px;font-size:13px;line-height:1.7}
+.alert strong{color:#81c784}
+.alert.warn{background:linear-gradient(135deg,rgba(255,152,0,.15),rgba(255,87,34,.05));border-color:rgba(255,152,0,.3)}
+.alert.warn strong{color:#ffb74d}
+
+.eval-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:20px}
+.eval-card{background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:15px;transition:all .3s}
+.eval-card:hover{transform:translateY(-3px);border-color:rgba(255,167,38,.5)}
+.eval-card h4{color:#ffeb3b;font-size:15px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.eval-card table{width:100%;font-size:12px}
+.eval-card td{padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.05)}
+.eval-card .hot{color:#ef5350;font-weight:600}
+.eval-card .cold{color:#42a5f5;font-weight:600}
+.eval-card .opt{color:#66bb6a;font-weight:700}
+
+.temp-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+.temp-table th{background:linear-gradient(135deg,#ff6b6b,#ffa726);color:#fff;padding:10px;text-align:center}
+.temp-table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.1);color:#e0e0e0;text-align:center}
+.temp-table tr:hover{background:rgba(255,107,107,.05)}
+.temp-table .ok{color:#66bb6a;font-weight:700}
+.temp-table .warn{color:#ffa726;font-weight:700}
+.temp-table .no{color:#ef5350;font-weight:700}
+
+.file-list{background:rgba(0,0,0,.2);border-radius:10px;padding:15px;margin-bottom:15px}
+.file-row{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.05)}
+.file-row:last-child{border-bottom:none}
+.file-info strong{color:#ffeb3b;display:block;margin-bottom:4px}
+.file-info span{color:#b0b0b0;font-size:12px}
+.file-btn{background:linear-gradient(135deg,#ff6b6b,#ffa726);color:#fff;padding:8px 16px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;transition:all .3s;white-space:nowrap}
+.file-btn:hover{transform:scale(1.05);box-shadow:0 4px 15px rgba(255,107,107,.4)}
+.file-btn.alt{background:linear-gradient(135deg,#42a5f5,#7e57c2)}
+
+.andy-tip{background:linear-gradient(135deg,rgba(156,39,176,.15),rgba(233,30,99,.08));border:1px solid rgba(156,39,176,.3);border-radius:12px;padding:18px;margin-top:15px}
+.andy-tip h3{color:#ce93d8;font-size:16px;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.andy-tip p{font-size:13px;color:#e0e0e0;line-height:1.7;margin-bottom:8px}
+.andy-tip strong{color:#ffeb3b}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- HERO -->
+<div class="hero">
+  <h1><span class="icon">🌡️</span>PETG 温度塔完整指南 · Andy哥</h1>
+  <div class="sub">机器：<strong>KINGROON KLP1</strong> · 喷嘴：<strong>0.4mm</strong> · 耗材：<strong>Generic PETG</strong> · 切片：<strong>OrcaSlicer 中文版</strong></div>
+  <div class="badges">
+    <span class="badge">⏱️ 30 秒生成 G-code</span>
+    <span class="badge">📐 9 段温度梯度</span>
+    <span class="badge">🎯 PETG 220-260°C</span>
+    <span class="badge">🖨️ KLP1 兼容</span>
+    <span class="badge">💡 LED 灯罩专用</span>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" data-tab="fastest">⚡ 30 秒最快 <span class="num">推荐</span></div>
+  <div class="tab" data-tab="params">🎯 PETG 最佳参数</div>
+  <div class="tab" data-tab="evaluate">🔍 怎么判断哪段好</div>
+  <div class="tab" data-tab="files">📦 备用开源文件</div>
+  <div class="tab" data-tab="led">💡 LED 灯罩特别调</div>
+</div>
+
+<!-- 1. 最快 -->
+<div class="content active" id="fastest">
+  <div class="intro-box">
+    <strong>🎉 重大发现</strong>：你已经在用 <strong>OrcaSlicer</strong>，根本不用下载任何文件！<br>
+    OrcaSlicer 自带<strong>"温度塔校准"功能</strong>，<strong>3 步 30 秒</strong>生成 G-code，直接打印。
+  </div>
+
+  <h2 class="section-title"><span class="icon">⚡</span>3 步生成温度塔 G-code</h2>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>点击"校准"菜单</h4>
+        <p>在你截图的 OrcaSlicer 顶栏，<strong>找到"校准"按钮</strong>（你截图最上面那个）。点击后会看到下拉菜单，包含：温度 / 流量 / 回抽 / 压力提前 / 频率 等校准项。</p>
+        <div class="hint">💡 看不到"校准"按钮？检查左下角是否选对了打印机（KINGROON KLP1）</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>选择"温度" → 设置范围</h4>
+        <p>点击 <strong>"温度"</strong> 校准项，弹出温度设置窗口：</p>
+        <p>• <strong>起始温度</strong>：填 <span class="kbd">260</span>°C（PETG 上限）<br>
+        • <strong>结束温度</strong>：填 <span class="kbd">220</span>°C（PETG 下限）<br>
+        • <strong>步长</strong>：<span class="kbd">5</span>°C（固定不可改）<br>
+        • <strong>起始层附加温度</strong>：<span class="kbd">+5</span>°C（首层粘得更牢）</p>
+        <p>会自动生成 <strong>9 段温度梯度</strong>：260 / 255 / 250 / 245 / 240 / 235 / 230 / 225 / 220</p>
+        <div class="hint">⚠️ 选错材料类型会重置温度范围！必须先在耗材栏选 <strong>Generic PETG</strong></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>点击"确定" → 切片 → 打印</h4>
+        <p>OrcaSlicer 会<strong>自动加载温度塔模型 + 自动配置 9 段温度</strong>。你只需要：</p>
+        <p>① 点 <span class="kbd">切片</span> → 等待 1 分钟<br>
+        ② 看<strong>预览</strong>里 9 段是否清晰，温度标识是否生成<br>
+        ③ 点 <span class="kbd">导出 G-code</span> 或直接发到 KLP1</p>
+        <div class="hint">💡 KLP1 是 Klipper，建议用 Mainsail/Fluidd 推送 G-code，比 SD 卡更稳</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert">
+    <strong>✅ 这样就完事了</strong>！不需要下载 STL、不需要装插件、不需要写 G-code。<br>
+    整个过程 <strong>3 步 30 秒</strong>，比我给你下载文件再切片还快。
+  </div>
+
+  <h2 class="section-title"><span class="icon">🖼️</span>你应该看到的预览效果</h2>
+
+  <div class="code-block">
+    <div class="code-head">温度塔 9 段温度分配（从下到上）<span class="lang">PETG 220-260°C</span></div>
+    <div class="code-body">层高 Z    温度    你应该看到的
+─────────────────────────────────
+0-10mm    260°C   ┐
+10-20mm   255°C   │  温度最高
+20-30mm   250°C   │  拉丝可能多
+30-40mm   245°C   │  表面光亮
+40-50mm   240°C   │ ← PETG 最佳区
+50-60mm   235°C   │  层间结合好
+60-70mm   230°C   │  表面偏哑光
+70-80mm   225°C   ┘  温度最低
+80-90mm   220°C   ┘  可能层间开裂</div>
+  </div>
+
+  <div class="andy-tip">
+    <h3>🎯 Andy 哥的 PETG 经验</h3>
+    <p>你用的 <strong>Generic PETG</strong> 没有官方推荐值，<strong>强烈建议做这次校准</strong>。每卷 PETG 的最佳温度都不同（颜色、品牌、批次都影响）。</p>
+    <p>经验值：<strong>240-245°C</strong> 是 PETG 通用最佳区间，<strong>多数情况 +5°C 给首层</strong>（床附着）。</p>
+  </div>
+</div>
+
+<!-- 2. 参数 -->
+<div class="content" id="params">
+  <div class="intro-box">
+    <strong>🎯 PETG 温度校准核心参数</strong>：跨度 40°C、步长 5°C 是 OrcaSlicer 默认推荐值，能覆盖 95% 的 PETG 场景。
+  </div>
+
+  <h2 class="section-title"><span class="icon">📊</span>材料温度参考表</h2>
+
+  <table class="temp-table">
+    <tr>
+      <th>材料</th>
+      <th>推荐范围</th>
+      <th>起始点</th>
+      <th>塔范围</th>
+      <th>Andy 哥建议</th>
+    </tr>
+    <tr>
+      <td><strong>PETG</strong> ⭐</td>
+      <td>230-250°C</td>
+      <td class="ok">240°C</td>
+      <td>220-260°C</td>
+      <td>你正在用 → 跨度 40°C</td>
+    </tr>
+    <tr>
+      <td>PLA</td>
+      <td>190-220°C</td>
+      <td class="ok">210°C</td>
+      <td>190-230°C</td>
+      <td>下次买 PLA 可测</td>
+    </tr>
+    <tr>
+      <td>PLA+</td>
+      <td>200-230°C</td>
+      <td class="ok">215°C</td>
+      <td>200-240°C</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>ABS</td>
+      <td>230-260°C</td>
+      <td class="ok">245°C</td>
+      <td>230-260°C</td>
+      <td>需要封闭腔体</td>
+    </tr>
+    <tr>
+      <td>TPU 95A</td>
+      <td>220-230°C</td>
+      <td class="ok">225°C</td>
+      <td>210-250°C</td>
+      <td>慢速打印</td>
+    </tr>
+  </table>
+
+  <h2 class="section-title"><span class="icon">⚙️</span>温度塔期间保持不变的参数</h2>
+
+  <div class="code-block">
+    <div class="code-head">保持这些设置不动，才能准确判断温度影响 <span class="lang">ORCASLICER</span></div>
+    <div class="code-body"><span class="key">层高</span>        : <span class="num">0.20</span> mm   <span class="com"># 通用</span>
+<span class="key">首层层高</span>    : <span class="num">0.20</span> mm   <span class="com"># 与标准层高一致</span>
+<span class="key">线宽</span>        : <span class="num">0.42</span> mm   <span class="com"># 0.4 喷嘴标准</span>
+<span class="key">壁数</span>        : <span class="num">2</span>         <span class="com"># 你截图里就是 2</span>
+<span class="key">顶/底层数</span>   : <span class="num">4</span>         <span class="com"># 标准</span>
+<span class="key">填充率</span>      : <span class="num">15</span>%       <span class="com"># 校准不需要高填充</span>
+<span class="key">回抽</span>        : <span class="num">0.8</span> mm    <span class="com"># KLP1 直驱，0.8-1.0 即可</span>
+<span class="key">回抽速度</span>    : <span class="num">30</span> mm/s
+<span class="key">打印速度</span>    : <span class="num">60</span> mm/s   <span class="com"># 中速对比清晰</span>
+<span class="key">风扇</span>        : <span class="num">50</span>%       <span class="com"># PETG 中等风冷</span>
+<span class="key">热床</span>        : <span class="num">70</span>°C       <span class="com"># PETG 通用</span>
+<span class="key">第一层热床</span>  : <span class="num">75</span>°C       <span class="com"># +5 增强附着</span></div>
+  </div>
+
+  <div class="alert warn">
+    <strong>⚠️ 重要</strong>：<strong>不要在打印温度塔的中途改这些参数</strong>。改任何一个都会让"温度是唯一变量"的原则失效，校准结果作废。
+  </div>
+
+  <h2 class="section-title"><span class="icon">🛏️</span>PETG 必开的"防翘边"设置</h2>
+
+  <div class="code-block">
+    <div class="code-head">Andy 哥特别提醒 · PETG 翘边是头号杀手 <span class="lang">ORCASLICER</span></div>
+    <div class="code-body"><span class="key">Brim</span> 裙边     : <span class="str">"鼠标耳朵"</span>  <span class="com"># 4 个角各贴一片，PETG 必开</span>
+<span class="key">Brim 宽度</span>  : <span class="num">5</span> mm
+<span class="key">热床类型</span>   : <span class="str">"PEI 纹理板"</span>   <span class="com"># KLP1 默认</span>
+<span class="key">热床温度</span>   : <span class="num">70</span>°C
+<span class="key">第一层速度</span> : <span class="num">25</span> mm/s   <span class="com"># 慢点压实</span>
+<span class="key">Z 偏移</span>     : <span class="num">-0.02</span> mm  <span class="com"># PETG 要稍微压扁一点</span>
+<span class="key">腔体风扇</span>   : <span class="str">关闭</span>       <span class="com"># KLP1 没有腔体风扇</span></div>
+  </div>
+</div>
+
+<!-- 3. 评估 -->
+<div class="content" id="evaluate">
+  <div class="intro-box">
+    <strong>🔍 评估方法</strong>：打印完约 1.5 小时后，<strong>不要拆下塔</strong>，先在原位观察 5 项指标。找到<strong>整体最优</strong>的那段（不是单项最牛）。
+  </div>
+
+  <h2 class="section-title"><span class="icon">📊</span>5 项评估指标</h2>
+
+  <div class="eval-grid">
+    <div class="eval-card">
+      <h4>🕸️ 1. 拉丝 Stringing</h4>
+      <table>
+        <tr><td><span class="cold">温度低</span></td><td>很少拉丝</td></tr>
+        <tr><td><span class="hot">温度高</span></td><td>拉丝很多</td></tr>
+        <tr><td><span class="opt">最佳</span></td><td>极少或无</td></tr>
+      </table>
+    </div>
+
+    <div class="eval-card">
+      <h4>🌉 2. 桥接 Bridging</h4>
+      <table>
+        <tr><td><span class="cold">温度低</span></td><td>桥接干净但脆</td></tr>
+        <tr><td><span class="hot">温度高</span></td><td>下垂/塌陷</td></tr>
+        <tr><td><span class="opt">最佳</span></td><td>平直牢固</td></tr>
+      </table>
+    </div>
+
+    <div class="eval-card">
+      <h4>📐 3. 悬垂 Overhang</h4>
+      <table>
+        <tr><td><span class="cold">温度低</span></td><td>清晰但弱</td></tr>
+        <tr><td><span class="hot">温度高</span></td><td>卷边/下垂</td></tr>
+        <tr><td><span class="opt">最佳</span></td><td>平滑无痕</td></tr>
+      </table>
+    </div>
+
+    <div class="eval-card">
+      <h4>💪 4. 层附着力</h4>
+      <table>
+        <tr><td><span class="cold">温度低</span></td><td>层间开裂</td></tr>
+        <tr><td><span class="hot">温度高</span></td><td>过强</td></tr>
+        <tr><td><span class="opt">最佳</span></td><td>折断在材料内</td></tr>
+      </table>
+    </div>
+
+    <div class="eval-card">
+      <h4>✨ 5. 表面质量</h4>
+      <table>
+        <tr><td><span class="cold">温度低</span></td><td>粗糙/哑光</td></tr>
+        <tr><td><span class="hot">温度高</span></td><td>光亮/起泡</td></tr>
+        <tr><td><span class="opt">最佳</span></td><td>均匀一致</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <h2 class="section-title"><span class="icon">🔨</span>破坏测试：折断法</h2>
+
+  <div class="code-block">
+    <div class="code-head">温度塔打印完 → 掰一掰 <span class="lang">破坏测试</span></div>
+    <div class="code-body"><span class="com"># 1. 把塔从底座拆下</span>
+<span class="com"># 2. 双手握住塔两端，用力弯</span>
+
+<span class="key">判断结果</span>:
+  <span class="cold">❌ 温度低</span>: 沿层间裂开（"啪"地一声一片片分开）
+  <span class="hot">❌ 温度高</span>: 弯不动/很硬（太脆）
+  <span class="opt">✅ 最佳</span>:  <span class="opt">从材料中间断裂，而不是层间</span>（齐刷刷一断）</div>
+  </div>
+
+  <h2 class="section-title"><span class="icon">📝</span>记录你的最优温度</h2>
+
+  <div class="code-block">
+    <div class="code-head">Andy 哥的 PETG 温度记录表（每次换卷都填）<span class="lang">复制即用</span></div>
+    <div class="code-body"><span class="com"># PETG 温度库（Andy 哥 FullPeak 内部用）</span>
+─────────────────────────────────────────────
+日期       品牌/颜色           最优温度   备注
+─────────────────────────────────────────────
+2026-06-10 Generic PETG 灰   <span class="num">__</span>°C     KLP1 + 0.4 喷嘴
+________   ____________       <span class="num">__</span>°C     ____________
+________   ____________       <span class="num">__</span>°C     ____________
+________   ____________       <span class="num">__</span>°C     ____________</div>
+  </div>
+
+  <div class="alert">
+    <strong>💡 进阶</strong>：找到最优温度后，在 OrcaSlicer 里<strong>右键耗材 → 编辑 → 喷嘴温度</strong>填入这个值，<strong>保存为该卷的专属配置</strong>，下次直接用。
+  </div>
+</div>
+
+<!-- 4. 备用文件 -->
+<div class="content" id="files">
+  <div class="intro-box">
+    <strong>📦 备用文件</strong>：以下开源温度塔是<strong>兜底方案</strong>——如果你不喜欢 OrcaSlicer 自带的塔，或要在其他切片软件（如 PrusaSlicer / Cura）里用，可以下载这些 STL。
+  </div>
+
+  <h2 class="section-title"><span class="icon">🏆</span>开源温度塔推荐</h2>
+
+  <div class="file-list">
+    <div class="file-row">
+      <div class="file-info">
+        <strong>🥇 Smart Compact Temperature Tower (gaaZolee)</strong>
+        <span>Printables · 6700+ 收藏 · 最流行的开源温度塔</span>
+      </div>
+      <a href="https://www.printables.com/model/209020-smart-compact-temperature-calibration-tower" target="_blank" class="file-btn">下载</a>
+    </div>
+
+    <div class="file-row">
+      <div class="file-info">
+        <strong>🥈 Temperature Tower by gandybrent</strong>
+        <span>Printables · 经典款，标签清晰</span>
+      </div>
+      <a href="https://www.printables.com/model/24649-temperature-tower-by-gandybrent" target="_blank" class="file-btn">下载</a>
+    </div>
+
+    <div class="file-row">
+      <div class="file-info">
+        <strong>🥉 All-in-One Temperature Tower (MakerLab)</strong>
+        <span>Printables · 含桥接/悬垂/回缩多功能</span>
+      </div>
+      <a href="https://www.printables.com/model/230135-all-in-one-temperature-tower" target="_blank" class="file-btn">下载</a>
+    </div>
+
+    <div class="file-row">
+      <div class="file-info">
+        <strong>📐 Smart Compact Temperature Tower (.3mf OrcaSlicer版)</strong>
+        <span>同上 gaaZolee 的 OrcaSlicer 工程文件（已配好温度）</span>
+      </div>
+      <a href="https://www.printables.com/model/209020/files" target="_blank" class="file-btn alt">.3mf</a>
+    </div>
+  </div>
+
+  <h2 class="section-title"><span class="icon">🔧</span>如果你用 PrusaSlicer / SuperSlicer</h2>
+
+  <div class="code-block">
+    <div class="code-head">PrusaSlicer 手动配置温度变化 <span class="lang">G-CODE</span></div>
+    <div class="code-body"><span class="com"># 在"打印机设置 → 自定义 G-code → 层变化 G-code"里填：</span>
+
+<span class="key">{if layer_z == 10}M104 S255<span class="key"> endif</span>     <span class="com"># 10mm 处降到 255°C</span>
+<span class="key">{if layer_z == 20}M104 S250<span class="key"> endif</span>     <span class="com"># 20mm 处降到 250°C</span>
+<span class="key">{if layer_z == 30}M104 S245<span class="key"> endif</span>
+<span class="key">{if layer_z == 40}M104 S240<span class="key"> endif</span>
+<span class="key">{if layer_z == 50}M104 S235<span class="key"> endif</span>
+<span class="key">{if layer_z == 60}M104 S230<span class="key"> endif</span>
+<span class="key">{if layer_z == 70}M104 S225<span class="key"> endif</span>
+<span class="key">{if layer_z == 80}M104 S220<span class="key"> endif</span></div>
+  </div>
+
+  <h2 class="section-title"><span class="icon">📥</span>在 OrcaSlicer 里用开源 STL</h2>
+
+  <div class="code-block">
+    <div class="code-head">如果你下载了 STL，导入 OrcaSlicer 后用这个方式配温度 <span class="lang">ORCASLICER</span></div>
+    <div class="code-body"><span class="com"># 1. 拖入 STL 到 OrcaSlicer</span>
+<span class="com"># 2. 切到"预览"标签</span>
+<span class="com"># 3. 拖动右侧"层滑块"到第一个温度变化点</span>
+<span class="com"># 4. 点击滑块旁的 "+" 按钮 → 选 "Change temperature"</span>
+<span class="com"># 5. 输入目标温度（如 255）</span>
+<span class="com"># 6. 重复 3-5 步骤 9 次</span>
+<span class="com"># 7. 切片</span></div>
+  </div>
+
+  <div class="alert">
+    <strong>✅ 但老实说</strong>：用 OrcaSlicer 自带的"校准 → 温度塔"比手动改 STL 温度快 <strong>5 倍以上</strong>。<br>
+    <strong>我强烈建议你先试 OrcaSlicer 自带功能，5 分钟搞定</strong>。
+  </div>
+</div>
+
+<!-- 5. LED 业务 -->
+<div class="content" id="led">
+  <div class="intro-box">
+    <strong>💡 Andy 哥 LED 业务特别提示</strong>：你做 LED 库存回收 + 闲鱼销售，<strong>PETG 是你的核心耗材</strong>（透光率 80%+ 远超 PLA）。温度校准准确 = <strong>灯罩透光一致性</strong> = 客户不退货的关键。
+  </div>
+
+  <h2 class="section-title"><span class="icon">💡</span>LED 灯罩用 PETG 的最佳温度</h2>
+
+  <div class="eval-grid">
+    <div class="eval-card">
+      <h4>🌟 透光优先（客户要"亮"）</h4>
+      <p style="font-size:13px;color:#b0b0b0;line-height:1.6">温度区间：<strong class="opt">250-255°C</strong></p>
+      <p style="font-size:12px;color:#888;line-height:1.5;margin-top:6px">高温度 → 层间结合更紧 → 透光更均匀（PETG 的"光学玻璃"效果）<br>但拉丝会多，需要配强力回抽</p>
+    </div>
+
+    <div class="eval-card">
+      <h4>💪 结构优先（客户要"结实"）</h4>
+      <p style="font-size:13px;color:#b0b0b0;line-height:1.6">温度区间：<strong class="opt">235-240°C</strong></p>
+      <p style="font-size:12px;color:#888;line-height:1.5;margin-top:6px">低温度 → 层间结合弱但层内强 → 抗冲击<br>适合做 LED 灯壳/外壳/底座</p>
+    </div>
+
+    <div class="eval-card">
+      <h4>🎨 表面优先（客户要"好看"）</h4>
+      <p style="font-size:13px;color:#b0b0b0;line-height:1.6">温度区间：<strong class="opt">240-245°C</strong></p>
+      <p style="font-size:12px;color:#888;line-height:1.5;margin-top:6px">中温度 → 表面光滑+层间足够强 → 展示样品<br>适合做 LED 商业展示样品/网红款</p>
+    </div>
+  </div>
+
+  <h2 class="section-title"><span class="icon">📦</span>3 类 LED 产品的 PETG 打印参数</h2>
+
+  <table class="temp-table">
+    <tr>
+      <th>产品类型</th>
+      <th>推荐温度</th>
+      <th>填充率</th>
+      <th>壁数</th>
+      <th>特殊设置</th>
+    </tr>
+    <tr>
+      <td>💡 LED 灯罩（透光）</td>
+      <td class="ok">250°C</td>
+      <td>10%</td>
+      <td>2</td>
+      <td>无顶底层 + 慢速</td>
+    </tr>
+    <tr>
+      <td>📦 LED 灯壳（结构）</td>
+      <td class="ok">235°C</td>
+      <td>25%</td>
+      <td>4</td>
+      <td>3D 交错 + Brim</td>
+    </tr>
+    <tr>
+      <td>🎨 LED 展示样品（外观）</td>
+      <td class="ok">243°C</td>
+      <td>15%</td>
+      <td>3</td>
+      <td>慢速 40mm/s + 50% 风</td>
+    </tr>
+  </table>
+
+  <h2 class="section-title"><span class="icon">📸</span>Andy 哥闲鱼卖 LED 配件的差异化卖点</h2>
+
+  <div class="andy-tip">
+    <h3>🌟 把"温度校准"做成销售亮点</h3>
+    <p>• <strong>详情页写</strong>："每批次都做过温度塔校准，最佳温度 ±2°C 范围内"（其他卖家都不会写）<br>
+    • <strong>附校准塔照片</strong>：把打印好的 9 段温度塔拍张照，证明你做事认真<br>
+    • <strong>附参数表</strong>：用本文档的"温度记录表"格式，发给客户看<br>
+    • <strong>视频展示</strong>：录个"1 分钟教你做温度校准"视频发小红书，<strong>专业感 + 流量</strong>双收</p>
+  </div>
+
+  <h2 class="section-title"><span class="icon">⚠️</span>PETG 库存回收要注意的</h2>
+
+  <div class="alert warn">
+    <strong>⚠️ 回收 PETG 必做的"双校准"</strong>：<br>
+    1. <strong>温度塔</strong>（本文档）→ 找最佳温度<br>
+    2. <strong>流量校准</strong>（OrcaSlicer 校准 → 流量）→ 找最佳流量比<br>
+    <br>
+    <strong>原因</strong>：回收 PETG 来源杂（可能是吸管/瓶坯/工业余料），直径偏差大 + 添加剂不一。<br>
+    建议每卷回收 PETG <strong>都做一次温度塔</strong>，2-3% 误差都不能接受（透光产品）。
+  </div>
+</div>
+
+<div style="text-align:center;padding:20px;color:#666;font-size:12px">
+  整理：LED 库存回收 & 闲鱼销售助理 · 2026-06-10 · 给 Andy 哥的 PETG 温度塔完全指南
+</div>
+
+</div>
+
+<script>
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+</script>
+</body>
+</html>

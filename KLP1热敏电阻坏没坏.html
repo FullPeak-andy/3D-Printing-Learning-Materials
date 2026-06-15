@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>玻璃珠不见了 = 坏了</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+    color: #e0e0e0; min-height: 100vh; padding: 20px;
+  }
+  .container { max-width: 1000px; margin: 0 auto; }
+  h1 { text-align: center; color: #ff6644; font-size: 28px; margin: 20px 0 8px; }
+  .subtitle { text-align: center; color: #aaa; margin-bottom: 24px; font-size: 14px; }
+
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; background: rgba(0,0,0,0.25); padding: 10px; border-radius: 12px 12px 0 0; }
+  .tab-btn {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    color: #ccc; padding: 10px 16px; border-radius: 8px; cursor: pointer;
+    font-size: 14px; transition: all 0.25s; flex: 1; min-width: 120px;
+  }
+  .tab-btn:hover { background: rgba(255,170,68,0.15); color: #ffaa44; }
+  .tab-btn.active {
+    background: linear-gradient(135deg, #ff7733, #ffaa44); color: #1a1a1a;
+    font-weight: 600; border-color: #ffaa44; box-shadow: 0 0 12px rgba(255,170,68,0.4);
+  }
+
+  .tab-content { background: rgba(0,0,0,0.35); border-radius: 0 0 12px 12px; padding: 30px; min-height: 500px; }
+  .tab-pane { display: none; animation: fadeIn 0.4s ease; }
+  .tab-pane.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  h2 { color: #ffaa44; margin-bottom: 16px; font-size: 20px; }
+  h3 { color: #66d9ef; margin: 16px 0 8px; font-size: 16px; }
+  p, li { line-height: 1.7; }
+  ul, ol { margin-left: 24px; margin-bottom: 12px; }
+
+  .svg-stage {
+    background: radial-gradient(circle at center, #1a2a3a, #0a1520);
+    border: 1px solid #334; border-radius: 10px;
+    padding: 20px; margin: 16px 0; text-align: center;
+  }
+
+  .info-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px; margin: 16px 0;
+  }
+  .info-card {
+    background: rgba(255,255,255,0.04); border-left: 3px solid #ffaa44;
+    padding: 12px 14px; border-radius: 6px;
+  }
+  .info-card.green { border-left-color: #44dd88; }
+  .info-card.red { border-left-color: #ff4422; }
+  .info-card.blue { border-left-color: #66d9ef; }
+  .info-card .title { color: #ffaa44; font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .info-card.green .title { color: #44dd88; }
+  .info-card.red .title { color: #ff6644; }
+  .info-card.blue .title { color: #66d9ef; }
+  .info-card .content { color: #ccc; font-size: 13px; line-height: 1.6; }
+
+  .alert {
+    background: linear-gradient(90deg, rgba(255,68,34,0.18), rgba(255,68,34,0.05));
+    border: 1px solid #ff4422; border-left: 4px solid #ff4422;
+    padding: 14px 18px; border-radius: 6px; margin: 12px 0;
+  }
+  .alert-title { color: #ff6644; font-weight: 600; margin-bottom: 6px; }
+  .alert-body { color: #fdd; font-size: 14px; line-height: 1.6; }
+
+  .tip {
+    background: linear-gradient(90deg, rgba(68,221,136,0.15), rgba(68,221,136,0.04));
+    border: 1px solid #44dd88; border-left: 4px solid #44dd88;
+    padding: 14px 18px; border-radius: 6px; margin: 12px 0;
+  }
+  .tip-title { color: #44dd88; font-weight: 600; margin-bottom: 6px; }
+
+  .checklist { list-style: none; }
+  .checklist li { padding: 6px 0 6px 28px; position: relative; }
+  .checklist li::before { content: "✓"; position: absolute; left: 0; top: 6px; color: #44dd88; font-weight: 700; }
+  .checklist li.bad::before { content: "✗"; color: #ff4422; }
+
+  .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; padding: 16px; }
+  .pulse { animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🔍 玻璃珠不见了 = 这根废了</h1>
+  <p class="subtitle">3 种可能 + 1 个判断 + 1 个建议</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="1">① 3 种可能</button>
+    <button class="tab-btn" data-tab="2">② 测一下确认</button>
+    <button class="tab-btn" data-tab="3">③ 新的长啥样</button>
+    <button class="tab-btn" data-tab="4">④ 换新 + 价格</button>
+  </div>
+
+  <div class="tab-content">
+
+    <!-- Tab 1 -->
+    <div class="tab-pane active" id="tab1">
+      <h2>① 玻璃珠不见了，3 种可能</h2>
+      <div class="svg-stage">
+        <svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg">
+          <!-- 三种情况 -->
+          <g>
+            <!-- 情况1: 珠体完好 -->
+            <g transform="translate(20, 0)">
+              <text x="100" y="25" text-anchor="middle" fill="#44dd88" font-size="13" font-weight="700">情况 A：珠体还在（健康）</text>
+              <circle cx="100" cy="100" r="10" fill="#ff6688" stroke="#aa1133" stroke-width="1.5"/>
+              <text x="100" y="105" text-anchor="middle" fill="#fff" font-size="8">NTC</text>
+              <line x1="100" y1="110" x2="100" y2="180" stroke="#222" stroke-width="2"/>
+              <line x1="100" y1="110" x2="100" y2="180" stroke="#666" stroke-width="2" transform="translate(3,0)"/>
+              <rect x="80" y="180" width="40" height="20" rx="2" fill="#f8f8f8" stroke="#888"/>
+              <text x="100" y="220" text-anchor="middle" fill="#44dd88" font-size="11">✓ 阻值 100KΩ</text>
+            </g>
+
+            <!-- 情况2: 珠体烧黑 -->
+            <g transform="translate(240, 0)">
+              <text x="100" y="25" text-anchor="middle" fill="#ffaa44" font-size="13" font-weight="700">情况 B：珠体烧黑（损坏）</text>
+              <circle cx="100" cy="100" r="10" fill="#1a0a00" stroke="#000" stroke-width="1.5"/>
+              <circle cx="100" cy="100" r="5" fill="#0a0500"/>
+              <line x1="100" y1="110" x2="100" y2="180" stroke="#222" stroke-width="2"/>
+              <rect x="80" y="180" width="40" height="20" rx="2" fill="#f8f8f8" stroke="#888"/>
+              <text x="100" y="220" text-anchor="middle" fill="#ffaa44" font-size="11">⚠ 阻值不稳/OL</text>
+            </g>
+
+            <!-- 情况3: 珠体脱落/破损 -->
+            <g transform="translate(460, 0)">
+              <text x="100" y="25" text-anchor="middle" fill="#ff4422" font-size="13" font-weight="700">情况 C：珠体掉了/破了（你的情况）</text>
+              <text x="100" y="100" text-anchor="middle" fill="#ff4422" font-size="22">❌</text>
+              <line x1="100" y1="110" x2="100" y2="180" stroke="#222" stroke-width="2"/>
+              <line x1="100" y1="110" x2="100" y2="180" stroke="#888" stroke-width="2" transform="translate(3,0)"/>
+              <rect x="80" y="180" width="40" height="20" rx="2" fill="#f8f8f8" stroke="#888"/>
+              <text x="100" y="125" text-anchor="middle" fill="#aaa" font-size="9">只剩铜线引出</text>
+              <text x="100" y="140" text-anchor="middle" fill="#aaa" font-size="9">裸露，无玻璃壳</text>
+              <text x="100" y="220" text-anchor="middle" fill="#ff4422" font-size="11">✗ 100% 报废</text>
+            </g>
+          </g>
+
+          <!-- 解释 -->
+          <g transform="translate(0, 250)">
+            <text x="50" y="20" fill="#ffaa44" font-size="13" font-weight="700">🔍 你的图特征</text>
+            <text x="50" y="42" fill="#ccc" font-size="11">✓ 末端有铜线（双股并排卷成小环）</text>
+            <text x="50" y="60" fill="#ccc" font-size="11">✗ 看不到粉/红色玻璃珠</text>
+            <text x="50" y="78" fill="#ccc" font-size="11">✗ 没有金属壳（金属壳型 NTC 也是常见）</text>
+            <text x="350" y="42" fill="#ff6644" font-size="12" font-weight="700">→ 对应情况 C，100% 报废</text>
+            <text x="350" y="60" fill="#ffaa44" font-size="11">可能原因：</text>
+            <text x="350" y="78" fill="#ccc" font-size="11">1. 玻璃壳碎裂（温度骤变）2. 脱落丢失 3. 之前拆机时弄丢</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="alert">
+        <div class="alert-title">⚠️ 即便能看到铜线，也不能用</div>
+        <div class="alert-body">
+          玻璃珠是 NTC 电阻的<b>封装</b>：<br>
+          - 保护内部 NTC 半导体不受氧化<br>
+          - 绝缘（防止铜引线和金属块体短路）<br>
+          - 导热（玻璃介质把热传给内部 NTC）<br>
+          没有玻璃珠 = 内部 NTC 暴露 = 一加热就氧化 = 失效
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2 -->
+    <div class="tab-pane" id="tab2">
+      <h2>② 万用表测一下，100% 确认</h2>
+      <p>虽然大概率坏了，但用万用表实测一下更稳妥（3 种结果对应 3 种判断）：</p>
+
+      <div class="svg-stage">
+        <svg viewBox="0 0 600 240" xmlns="http://www.w3.org/2000/svg">
+          <g transform="translate(30, 20)">
+            <rect x="0" y="0" width="200" height="200" rx="8" fill="#1a1a1a" stroke="#555" stroke-width="2"/>
+            <rect x="20" y="30" width="160" height="60" rx="4" fill="#2a3a1a" stroke="#333"/>
+            <text x="100" y="68" text-anchor="middle" id="t2-readout" fill="#a6e22e" font-family="monospace" font-size="26" font-weight="700">测 试</text>
+            <text x="100" y="82" text-anchor="middle" fill="#88aa66" font-size="9">RANGE: 200K</text>
+            <circle cx="100" cy="140" r="30" fill="#444" stroke="#333"/>
+            <line x1="100" y1="140" x2="80" y2="120" stroke="#ffaa44" stroke-width="3"/>
+            <text x="100" y="190" text-anchor="middle" fill="#888" font-size="10">200KΩ 档</text>
+          </g>
+
+          <line x1="180" y1="180" x2="380" y2="120" stroke="#ff2222" stroke-width="3"/>
+          <line x1="180" y1="240" x2="380" y2="160" stroke="#222" stroke-width="3"/>
+          <circle cx="380" cy="120" r="5" fill="#ff2222"/>
+          <circle cx="380" cy="160" r="5" fill="#222"/>
+
+          <g transform="translate(420, 100)">
+            <text x="0" y="0" fill="#aaa" font-size="10">2P 插头</text>
+            <rect x="-20" y="10" width="50" height="20" rx="2" fill="#f8f8f8" stroke="#888"/>
+            <text x="5" y="50" text-anchor="middle" fill="#aaa" font-size="9">红/黑表笔</text>
+            <text x="5" y="65" text-anchor="middle" fill="#aaa" font-size="9">接 2 根线</text>
+          </g>
+        </svg>
+      </div>
+
+      <h3>📋 3 种结果对应 3 种结论</h3>
+      <table style="width:100%;border-collapse:collapse;margin:12px 0;background:rgba(0,0,0,0.3);border-radius:8px;overflow:hidden;font-size:13px;">
+        <tr style="background:rgba(255,170,68,0.2)">
+          <th style="padding:10px;text-align:left;color:#ffaa44">万用表读数</th>
+          <th style="padding:10px;text-align:left;color:#ffaa44">判断</th>
+          <th style="padding:10px;text-align:left;color:#ffaa44">结论</th>
+        </tr>
+        <tr>
+          <td style="padding:10px;border-top:1px solid #333;color:#44dd88">~100 KΩ（室温）</td>
+          <td style="padding:10px;border-top:1px solid #333;color:#44dd88">NTC 还活着</td>
+          <td style="padding:10px;border-top:1px solid #333;color:#ff6644">✗ <b>但</b>无玻璃壳，不能用</td>
+        </tr>
+        <tr>
+          <td style="padding:10px;border-top:1px solid #333;color:#ffaa44">0Ω 或 OL（∞）</td>
+          <td style="padding:10px;border-top:1px solid #333;color:#ff4422">彻底烧毁</td>
+          <td style="padding:10px;border-top:1px solid #333;color:#ff4422">✗ 100% 报废</td>
+        </tr>
+        <tr>
+          <td style="padding:10px;border-top:1px solid #333;color:#ffaa44">几十 K 到几 M 不稳</td>
+          <td style="padding:10px;border-top:1px solid #333;color:#ffaa44">接触不良</td>
+          <td style="padding:10px;border-top:1px solid #333;color:#ff4422">✗ 即将失效</td>
+        </tr>
+      </table>
+
+      <div class="tip">
+        <div class="tip-title">💡 我的判断</div>
+        <p style="margin-top:6px">大概率你会读到 <b>OL（无穷大）</b>，因为玻璃壳碎的同时，内部 NTC 半导体也断了<br>
+        即使读到 100KΩ，<b>也建议直接换新</b>，没玻璃壳 = 用几次就氧化失效</p>
+      </div>
+    </div>
+
+    <!-- Tab 3 -->
+    <div class="tab-pane" id="tab3">
+      <h2>③ 新的热敏电阻长啥样</h2>
+      <div class="svg-stage">
+        <svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg">
+          <!-- 玻璃壳型 NTC -->
+          <g transform="translate(30, 30)">
+            <text x="100" y="20" text-anchor="middle" fill="#ffaa44" font-size="13" font-weight="700">类型 1：玻璃壳珠（最常见）</text>
+            <circle cx="100" cy="100" r="12" fill="#ff6688" stroke="#aa1133" stroke-width="1.5"/>
+            <circle cx="100" cy="100" r="5" fill="#ffaacc" opacity="0.6"/>
+            <text x="100" y="105" text-anchor="middle" fill="#fff" font-size="7">NTC</text>
+            <line x1="100" y1="112" x2="100" y2="180" stroke="#222" stroke-width="2"/>
+            <line x1="100" y1="112" x2="100" y2="180" stroke="#666" stroke-width="2" transform="translate(3,0)"/>
+            <rect x="80" y="180" width="40" height="20" rx="2" fill="#f8f8f8" stroke="#888"/>
+            <text x="100" y="225" text-anchor="middle" fill="#44dd88" font-size="11">✓ KLP1 默认用这个</text>
+            <text x="100" y="240" text-anchor="middle" fill="#aaa" font-size="10">直径 2.5mm，粉色/红色</text>
+          </g>
+
+          <!-- 金属壳型 NTC -->
+          <g transform="translate(230, 30)">
+            <text x="100" y="20" text-anchor="middle" fill="#ffaa44" font-size="13" font-weight="700">类型 2：金属壳珠（高端）</text>
+            <rect x="90" y="90" width="20" height="22" rx="2" fill="#c0c0c0" stroke="#555"/>
+            <circle cx="100" cy="95" r="2" fill="#666"/>
+            <line x1="100" y1="112" x2="100" y2="180" stroke="#222" stroke-width="2"/>
+            <line x1="100" y1="112" x2="100" y2="180" stroke="#666" stroke-width="2" transform="translate(3,0)"/>
+            <rect x="80" y="180" width="40" height="20" rx="2" fill="#f8f8f8" stroke="#888"/>
+            <text x="100" y="225" text-anchor="middle" fill="#aaa" font-size="11">金属封装，更耐高温</text>
+            <text x="100" y="240" text-anchor="middle" fill="#aaa" font-size="10">适用 300°C+ 长期</text>
+          </g>
+
+          <!-- 通用型对比 -->
+          <g transform="translate(430, 30)">
+            <text x="100" y="20" text-anchor="middle" fill="#ffaa44" font-size="13" font-weight="700">类型 3：环氧树脂珠（便宜）</text>
+            <ellipse cx="100" cy="100" rx="10" ry="14" fill="#ffeb3b" stroke="#aa9900" stroke-width="1.5"/>
+            <ellipse cx="100" cy="100" rx="4" ry="6" fill="#fff8b0"/>
+            <line x1="100" y1="114" x2="100" y2="180" stroke="#222" stroke-width="2"/>
+            <line x1="100" y1="114" x2="100" y2="180" stroke="#666" stroke-width="2" transform="translate(3,0)"/>
+            <rect x="80" y="180" width="40" height="20" rx="2" fill="#f8f8f8" stroke="#888"/>
+            <text x="100" y="225" text-anchor="middle" fill="#ffaa44" font-size="11">⚠ 耐温差（≤250°C）</text>
+            <text x="100" y="240" text-anchor="middle" fill="#aaa" font-size="10">便宜但容易老化</text>
+          </g>
+
+          <!-- 选购建议 -->
+          <g transform="translate(0, 280)">
+            <text x="50" y="0" fill="#44dd88" font-size="13" font-weight="700">✅ 推荐：买类型 1（玻璃壳），和 KLP1 工厂配的一致</text>
+            <text x="50" y="20" fill="#aaa" font-size="11">规格：NTC 100K B3950 · 玻璃珠直径 2.5mm · 1 米硅胶线 · 2P XH2.54 插头</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-card green">
+          <div class="title">✓ 类型 1（玻璃壳）</div>
+          <div class="content">最常见，淘宝 ¥5-10/根，KLP1 出厂就是这个</div>
+        </div>
+        <div class="info-card">
+          <div class="title">✓ 类型 2（金属壳）</div>
+          <div class="content">高端，¥15-30/根，硅碳热端/全金属热端用</div>
+        </div>
+        <div class="info-card blue">
+          <div class="title">✓ 长度</div>
+          <div class="content">线长 1 米（KLP1 从打印头到主板约 80cm，1 米刚好）</div>
+        </div>
+        <div class="info-card blue">
+          <div class="title">✓ 插头</div>
+          <div class="content">2P XH2.54 母头（KLP1 主板上是公头）</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 4 -->
+    <div class="tab-pane" id="tab4">
+      <h2>④ 换新方案 + 价格</h2>
+
+      <div class="tip">
+        <div class="tip-title">🎯 你的情况（玻璃珠丢失）</div>
+        <p style="margin-top:6px">这根热敏电阻 = <b>100% 报废，必须换</b><br>
+        反正都要拆了，建议 <b>三件套一起换</b>（热敏 + 加热棒 + 喷嘴）<br>
+        加热块如螺纹没坏可以复用</p>
+      </div>
+
+      <h3>🛒 采购清单</h3>
+      <table style="width:100%;border-collapse:collapse;margin:12px 0;background:rgba(0,0,0,0.3);border-radius:8px;overflow:hidden;font-size:13px;">
+        <tr style="background:rgba(68,221,136,0.2)">
+          <th style="padding:10px;text-align:left;color:#44dd88">商品</th>
+          <th style="padding:10px;text-align:left;color:#44dd88">规格</th>
+          <th style="padding:10px;text-align:left;color:#44dd88">数量</th>
+          <th style="padding:10px;text-align:left;color:#44dd88">价格</th>
+        </tr>
+        <tr>
+          <td style="padding:10px;border-top:1px solid #333">热敏电阻</td>
+          <td style="padding:10px;border-top:1px solid #333">NTC 100K B3950 玻璃壳</td>
+          <td style="padding:10px;border-top:1px solid #333">2 根（备用 1）</td>
+          <td style="padding:10px;border-top:1px solid #333;color:#44dd88"><b>¥10-20</b></td>
+        </tr>
+        <tr>
+          <td style="padding:10px;border-top:1px solid #333">加热棒</td>
+          <td style="padding:10px;border-top:1px solid #333">24V 50W 6×20mm</td>
+          <td style="padding:10px;border-top:1px solid #333">2 根（备用 1）</td>
+          <td style="padding:10px;border-top:1px solid #333;color:#44dd88"><b>¥15-25</b></td>
+        </tr>
+        <tr>
+          <td style="padding:10px;border-top:1px solid #333">喷嘴 0.4mm</td>
+          <td style="padding:10px;border-top:1px solid #333">E3D V6 / MK8 黄铜</td>
+          <td style="padding:10px;border-top:1px solid #333">3 个（0.4+0.6+0.8 各 1）</td>
+          <td style="padding:10px;border-top:1px solid #333;color:#44dd88"><b>¥15-25</b></td>
+        </tr>
+        <tr style="background:rgba(68,221,136,0.1)">
+          <td colspan="3" style="padding:10px;border-top:1px solid #333"><b>合计</b></td>
+          <td style="padding:10px;border-top:1px solid #333;color:#44dd88"><b style="font-size:18px">¥40-70</b></td>
+        </tr>
+      </table>
+
+      <h3>🔍 淘宝/拼多多搜什么</h3>
+      <div class="code-block">热敏电阻：<span style="color:#ffaa44">"3D 打印机 NTC 100K 热敏电阻 玻璃珠 1米线 2P插头"</span>
+
+加热棒：<span style="color:#ffaa44">"3D 打印机 加热棒 24V 50W 6mm×20mm"</span>
+
+喷嘴：<span style="color:#ffaa44">"E3D V6 喷嘴 0.4mm 黄铜"</span>
+
+<span class="comment" style="color:#888">// 提示：搜"套装"更省运费，但品质参差</span>
+<span class="comment" style="color:#888">// 搜"分件"品质更可控，但要 3 单运费</span></div>
+
+      <h3>⚠️ 别买错</h3>
+      <ul class="checklist">
+        <li class="bad">买"12V 加热棒"（KLP1 是 24V，12V 会功率减半、升温慢）</li>
+        <li class="bad">买"PT1000 铂电阻"（1000Ω 型号，Klipper 配置要改）</li>
+        <li class="bad">买"10K NTC"（不是 100K，Klipper 配置不一样）</li>
+        <li class="bad">买"带金属壳的 50K 测温"（规格不符）</li>
+        <li>买"NTC 100K B3950" + "24V 50W 6×20mm" + "E3D V6 0.4"</li>
+      </ul>
+
+      <div class="alert">
+        <div class="alert-title">📦 下单前最后确认</div>
+        <div class="alert-body">
+          ✓ 拍<b>清晰照片</b>给淘宝客服，问"我是 KLP1 24V 系统，能用吗？"<br>
+          ✓ 优先选"七天无理由退换"的店<br>
+          ✓ 到货后<b>万用表复测</b>再装机（防买到次品）<br>
+          ✓ 装好后跑 <code>PID_CALIBRATE HEATER=extruder TARGET=200</code> 重做 PID
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">🔍 没玻璃珠 = 100% 报废 · 直接换新 · 总价 ¥40-70</div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabId = btn.dataset.tab;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab' + tabId).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

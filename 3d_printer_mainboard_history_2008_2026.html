@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>3D 打印机下位机 2008-2026 技术发展史</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #e2e8f0; min-height: 100vh; }
+.container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+header { text-align: center; padding: 30px 0 20px; }
+h1 { font-size: 2.2em; background: linear-gradient(90deg, #06b6d4, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+.subtitle { color: #94a3b8; font-size: 1em; }
+
+/* 时间轴 */
+.timeline-wrap { position: relative; margin: 30px 0; padding: 30px 20px; background: rgba(15,23,42,0.6); border-radius: 12px; border: 1px solid #334155; }
+.timeline-track { position: relative; height: 60px; margin: 20px 30px; }
+.timeline-bar { position: absolute; top: 50%; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #f59e0b 0%, #06b6d4 33%, #8b5cf6 66%, #ec4899 100%); transform: translateY(-50%); border-radius: 2px; }
+.timeline-marker { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 14px; height: 14px; border-radius: 50%; background: #1e293b; border: 2px solid; cursor: pointer; transition: all 0.2s; z-index: 2; }
+.timeline-marker:hover { transform: translate(-50%, -50%) scale(1.5); box-shadow: 0 0 20px currentColor; }
+.timeline-marker.active { transform: translate(-50%, -50%) scale(1.6); box-shadow: 0 0 25px currentColor; }
+.timeline-year { position: absolute; top: 20px; transform: translateX(-50%); font-size: 0.75em; color: #94a3b8; font-weight: 600; }
+.timeline-label { position: absolute; top: -8px; transform: translateX(-50%); font-size: 0.7em; padding: 2px 8px; background: rgba(0,0,0,0.5); border-radius: 4px; white-space: nowrap; color: #e2e8f0; }
+.era-m1 { color: #f59e0b; border-color: #f59e0b; }
+.era-m2 { color: #06b6d4; border-color: #06b6d4; }
+.era-m3 { color: #8b5cf6; border-color: #8b5cf6; }
+.era-m4 { color: #ec4899; border-color: #ec4899; }
+.era-m5 { color: #10b981; border-color: #10b981; }
+.era-m6 { color: #f43f5e; border-color: #f43f5e; }
+
+/* Tab 切换 */
+.tabs { display: flex; gap: 6px; margin: 20px 0 0; flex-wrap: wrap; background: rgba(15,23,42,0.4); padding: 8px; border-radius: 12px; border: 1px solid #334155; }
+.tab { padding: 10px 16px; background: transparent; border: 1px solid transparent; border-radius: 8px; cursor: pointer; color: #94a3b8; font-size: 0.85em; font-weight: 500; transition: all 0.2s; flex: 1; min-width: 130px; text-align: center; }
+.tab:hover { color: #e2e8f0; background: rgba(255,255,255,0.05); }
+.tab.active { background: rgba(6,182,212,0.15); border-color: #06b6d4; color: #06b6d4; }
+
+/* 内容卡片 */
+.content { margin-top: 24px; }
+.era-content { display: none; }
+.era-content.active { display: block; animation: fadeIn 0.4s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.era-header { display: flex; align-items: center; gap: 16px; padding: 20px 24px; background: linear-gradient(90deg, rgba(6,182,212,0.1), transparent); border-left: 4px solid #06b6d4; border-radius: 8px; margin-bottom: 20px; }
+.era-icon { font-size: 2.5em; }
+.era-title-block h2 { font-size: 1.5em; color: #06b6d4; }
+.era-title-block .era-period { color: #94a3b8; font-size: 0.9em; margin-top: 4px; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+@media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+.card { background: rgba(30,41,59,0.6); border: 1px solid #334155; border-radius: 10px; padding: 18px; }
+.card-title { font-size: 1.05em; font-weight: 600; color: #06b6d4; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
+.improvement { padding: 12px 14px; margin: 8px 0; background: rgba(6,182,212,0.05); border-left: 3px solid #06b6d4; border-radius: 4px; }
+.improvement .imp-title { font-weight: 600; color: #67e8f9; margin-bottom: 4px; font-size: 0.95em; }
+.improvement .imp-desc { color: #cbd5e1; font-size: 0.85em; line-height: 1.5; }
+.improvement.major { background: rgba(139,92,246,0.1); border-left-color: #8b5cf6; }
+.improvement.major .imp-title { color: #c4b5fd; }
+.improvement.turning { background: rgba(245,158,11,0.1); border-left-color: #f59e0b; }
+.improvement.turning .imp-title { color: #fcd34d; }
+
+.board-card { padding: 12px; background: rgba(15,23,42,0.8); border: 1px solid #334155; border-radius: 8px; transition: all 0.2s; }
+.board-card:hover { border-color: #06b6d4; transform: translateY(-2px); }
+.board-name { color: #67e8f9; font-weight: 600; font-size: 0.95em; margin-bottom: 4px; }
+.board-spec { color: #94a3b8; font-size: 0.78em; line-height: 1.5; }
+.board-spec span { color: #cbd5e1; }
+.board-tag { display: inline-block; padding: 2px 6px; background: rgba(139,92,246,0.2); color: #c4b5fd; border-radius: 4px; font-size: 0.7em; margin-right: 4px; margin-top: 4px; }
+.board-tag.andy { background: rgba(245,158,11,0.2); color: #fcd34d; }
+
+table.spec-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.85em; }
+table.spec-table th { background: rgba(6,182,212,0.1); color: #06b6d4; padding: 8px 10px; text-align: left; border-bottom: 1px solid #334155; }
+table.spec-table td { padding: 6px 10px; border-bottom: 1px solid #1e293b; color: #cbd5e1; }
+table.spec-table tr:hover { background: rgba(255,255,255,0.03); }
+table.spec-table .andy-row { background: rgba(245,158,11,0.08); }
+table.spec-table .andy-row td { color: #fcd34d; }
+
+.andy-section { margin-top: 24px; padding: 20px 24px; background: linear-gradient(90deg, rgba(245,158,11,0.1), rgba(245,158,11,0.02)); border: 1px solid rgba(245,158,11,0.3); border-radius: 10px; }
+.andy-title { color: #fcd34d; font-size: 1.1em; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.andy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 768px) { .andy-grid { grid-template-columns: 1fr; } }
+.andy-card { padding: 10px 12px; background: rgba(15,23,42,0.5); border-left: 3px solid #f59e0b; border-radius: 4px; }
+.andy-card .andy-device { color: #fcd34d; font-weight: 600; font-size: 0.9em; }
+.andy-card .andy-board { color: #cbd5e1; font-size: 0.8em; margin-top: 2px; }
+.andy-card .andy-era { color: #94a3b8; font-size: 0.75em; margin-top: 4px; }
+
+.summary-section { margin-top: 30px; padding: 24px; background: rgba(15,23,42,0.8); border: 1px solid #334155; border-radius: 12px; }
+.summary-title { color: #06b6d4; font-size: 1.2em; font-weight: 600; margin-bottom: 16px; }
+.scenario-card { padding: 14px 16px; margin: 10px 0; background: rgba(30,41,59,0.6); border-radius: 8px; border-left: 4px solid; }
+.scenario-card.s1 { border-color: #10b981; }
+.scenario-card.s2 { border-color: #f59e0b; }
+.scenario-card.s3 { border-color: #8b5cf6; }
+.scenario-name { font-weight: 600; margin-bottom: 6px; }
+.scenario-name.s1 { color: #6ee7b7; }
+.scenario-name.s2 { color: #fcd34d; }
+.scenario-name.s3 { color: #c4b5fd; }
+.scenario-board { color: #cbd5e1; font-size: 0.9em; line-height: 1.6; }
+
+.legacy { padding: 8px 12px; margin: 6px 0; background: rgba(239,68,68,0.08); border-left: 3px solid #ef4444; border-radius: 4px; color: #fca5a5; font-size: 0.85em; }
+
+.fact { padding: 4px 0; color: #94a3b8; font-size: 0.82em; }
+.fact strong { color: #67e8f9; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🖥️ 3D 打印机下位机 2008 → 2026 技术发展史</h1>
+    <p class="subtitle">从 Arduino Mega + RAMPS 1.4 到 K1 Max 集成 SoC · 18 年 6 大阶段关键改进</p>
+  </header>
+
+  <!-- 时间轴 -->
+  <div class="timeline-wrap">
+    <div class="timeline-track" id="timeline">
+      <div class="timeline-bar"></div>
+      <!-- 标记点（年份位置由 JS 定位）-->
+    </div>
+  </div>
+
+  <!-- Tab 切换 -->
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-era="m1">① 8-bit AVR 时代<br><small>2008-2014</small></button>
+    <button class="tab" data-era="m2">② 32-bit LPC 萌芽<br><small>2015-2017</small></button>
+    <button class="tab" data-era="m3">③ STM32 普及 + Klipper 革命<br><small>2018-2020</small></button>
+    <button class="tab" data-era="m4">④ TMC 静音 + F4 高性能<br><small>2021-2022</small></button>
+    <button class="tab" data-era="m5">⑤ H7 旗舰时代<br><small>2023-2024</small></button>
+    <button class="tab" data-era="m6">⑥ 集成 SoC + AI 时代<br><small>2025-2026</small></button>
+  </div>
+
+  <!-- 阶段 1：8-bit AVR 时代 -->
+  <div class="content">
+    <div class="era-content active" data-era="m1">
+      <div class="era-header">
+        <div class="era-icon">🟡</div>
+        <div class="era-title-block">
+          <h2>8-bit AVR 时代（2008-2014）</h2>
+          <div class="era-period">Arduino Mega 2560 主导 + Marlin 固件奠基 · RepRap 哲学大众化</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">📋 阶段概述</div>
+          <div class="fact"><strong>CPU</strong>：AVR ATmega2560（8-bit，16 MHz，256KB Flash + 8KB SRAM）</div>
+          <div class="fact"><strong>代表架构</strong>：Arduino Mega 2560 + RAMPS 1.4 shield + Pololu A4988 模块化驱动</div>
+          <div class="fact"><strong>固件</strong>：Marlin 1.0（2011-08-12 GitHub 发布）→ Marlin 1.1.x</div>
+          <div class="fact"><strong>核心创新</strong>：模块化（Shield 堆叠）+ Pololu 步进驱动（焊/拆皆可）+ 12V 电源体系</div>
+          <div class="fact"><strong>商业引爆点</strong>：Prusa i3（2012）成为全球 DIY 3D 打印"参考设计"</div>
+          <div class="legacy">⚠️ 局限：8KB RAM 装不下高级功能（断料续打/线性推进需外挂）；16MHz CPU 在 80steps/mm × 50mm/s 时已接近极限；不支持 128/256 细分（TMC 必需）</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🔌 代表主板型号（6 款）</div>
+          <div class="board-card">
+            <div class="board-name">Arduino Mega 2560 + RAMPS 1.4</div>
+            <div class="board-spec"><span>ATmega2560 16MHz / 256KB Flash</span><br><span>开源 Shield / Pololu 5 槽 / 12V 11A 热床</span></div>
+            <span class="board-tag">2011-08-04</span><span class="board-tag">最经典</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">Sanguinololu 1.3a</div>
+            <div class="board-spec"><span>ATmega1284P 20MHz / 128KB</span><br><span>一体板 / 4 步进槽 / 早期 Reprap 主力</span></div>
+            <span class="board-tag">2010</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">Melzi 2.0</div>
+            <div class="board-spec"><span>ATmega1284P 16MHz</span><br><span>集成板 / Creality / Makerbot 早期用</span></div>
+            <span class="board-tag">2012</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">MKS Gen V1.4</div>
+            <div class="board-spec"><span>ATmega2560 / RAMPS 兼容</span><br><span>创客基地 / 中国开源第一代代表</span></div>
+            <span class="board-tag">2013</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">GT2560</div>
+            <div class="board-spec"><span>ATmega2560 / 集成板</span><br><span>Geeetech 整机专用</span></div>
+            <span class="board-tag">2014</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">Printrboard V3</div>
+            <div class="board-spec"><span>ATmega2560 / Micro USB</span><br><span>Printrbot 商业化</span></div>
+            <span class="board-tag">2012</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔑 5 项关键历史改进</div>
+        <div class="improvement major">
+          <div class="imp-title">① RepRap 开源哲学建立（2005-2007）</div>
+          <div class="imp-desc">Adrian Bowyer 在英国巴斯大学发起 RepRap 项目（replicating rapid prototyper）→ 第一台 Darwin（2007）能"自复制" 50% 的塑料部件 → 树立"开源 + 可自复制 + 持续迭代"的社区文化</div>
+        </div>
+        <div class="improvement turning">
+          <div class="imp-title">② Marlin 固件发布（2011-08-12）</div>
+          <div class="imp-desc">从 Sprinter/grbl 衍生，Scott Lahteine 主导，专为 RepRap 设计。GPLv3 协议；支持 G-code 150+ 命令；PID 控温；Marlin 后成为 8 位 AVR 时代的"事实上标准"，到 2026 年仍是出货量最大的固件</div>
+        </div>
+        <div class="improvement">
+          <div class="imp-title">③ RAMPS 1.4 Shield 标准化（2011-08-04）</div>
+          <div class="imp-desc">RepRap Arduino Mega Pololu Shield，Arduino Mega 上插一块即得完整 3D 打印机控制。Pololu A4988 步进驱动模块化（焊/插随意）→ 大幅降低 DIY 门槛</div>
+        </div>
+        <div class="improvement">
+          <div class="imp-title">④ Pololu A4988 / DRV8825 步进驱动</div>
+          <div class="imp-desc">Allegro A4988（16 细分 / 2A）和 TI DRV8825（32 细分 / 2.5A）成为标配，A4988 的插拔模块化（5 个槽）让 8 位 AVR 板可以支持 5 轴，但发热大、噪音大，机械声像"打嗝"</div>
+        </div>
+        <div class="improvement">
+          <div class="imp-title">⑤ Prusa i3 商业化引爆（2012-2014）</div>
+          <div class="imp-desc">Prusa Research 将 RepRap 设计标准化为 i3（cartesian + 床式 Y），Joseph Prusa 开源所有固件和 BOM → 出现 Anet、Creality、Anycubic、Tronxy 等"Prusa 克隆"厂商，3D 打印进入消费市场</div>
+        </div>
+      </div>
+
+      <div class="andy-section">
+        <div class="andy-title">📌 Andy 设备在此阶段</div>
+        <div class="andy-grid">
+          <div class="andy-card">
+            <div class="andy-device">暂无</div>
+            <div class="andy-board">KLP1 主板是 32 位 STM32F407</div>
+            <div class="andy-era">属于阶段 3（2018-2020）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 阶段 2：32-bit LPC 萌芽 -->
+    <div class="era-content" data-era="m2">
+      <div class="era-header">
+        <div class="era-icon">🔵</div>
+        <div class="era-title-block">
+          <h2>32-bit LPC 萌芽时代（2015-2017）</h2>
+          <div class="era-period">Cortex-M3 100MHz 普及 + Klipper 横空出世 · 架构根本性变革</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">📋 阶段概述</div>
+          <div class="fact"><strong>CPU</strong>：NXP LPC1768（32-bit ARM Cortex-M3，100 MHz，512KB Flash + 64KB SRAM）</div>
+          <div class="fact"><strong>代表架构</strong>：MCU 一体板（Re-Arm、MKS SGEN_L）</div>
+          <div class="fact"><strong>固件</strong>：Marlin 1.1.x（32-bit 支持加入）+ Klipper 2016 横空出世 + Smoothieware</div>
+          <div class="fact"><strong>核心创新</strong>：MCU + SBC 双芯架构（Klipper 革命）+ TMC2100 静音驱动雏形</div>
+          <div class="fact"><strong>转折点</strong>：Kevin O'Connor 2016 发布 Klipper → 树莓派做路径规划 + MCU 做实时硬件，3D 打印正式进入"双处理器"时代</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🔌 代表主板型号（4 款）</div>
+          <div class="board-card">
+            <div class="board-name">Smoothieboard V1.0</div>
+            <div class="board-spec"><span>LPC1769 120MHz / 512KB Flash</span><br><span>Smoothieware 官方 / 5 步进槽 / 第一款 32 位 3D 打印专用板</span></div>
+            <span class="board-tag">2013</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">Re-Arm (LPC1768)</div>
+            <div class="board-spec"><span>LPC1768 100MHz / RAMPS 1.4 兼容</span><br><span>替换 Arduino Mega 的"换芯"方案</span></div>
+            <span class="board-tag">2016</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">MKS SGEN_L V1.0</div>
+            <div class="board-spec"><span>LPC1768 100MHz / 集成板</span><br><span>创客基地 / Marlin 2.0 参考板</span></div>
+            <span class="board-tag">2017</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">Archim 1.1</div>
+            <div class="board-spec"><span>SAM3X8E (Due) 84MHz</span><br><span>32 位早期试水 / 兼容性差</span></div>
+            <span class="board-tag">2015</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔑 5 项关键历史改进</div>
+        <div class="improvement turning">
+          <div class="imp-title">① Klipper 革命：MCU + SBC 双芯架构（2016）</div>
+          <div class="imp-desc">Kevin O'Connor 发布 Klipper 固件 → 上位机（树莓派/任何 Linux SBC）做路径规划 + 下位机（MCU）做实时硬件响应。这是 3D 打印架构的根本性变革，让 175K steps/s 的高细分驱动成为可能（8-bit AVR 跑 50 steps/mm × 50mm/s 已极限）</div>
+        </div>
+        <div class="improvement major">
+          <div class="imp-title">② 32 位 ARM Cortex-M3 100MHz 首次普及</div>
+          <div class="imp-desc">LPC1768 替代 AVR：512KB Flash（2 倍 AVR） + 64KB SRAM（8 倍 AVR） → 装得下"断料检测 / 断电续打 / 喷嘴泊车 / 高级暂停 / S 曲线加速 / Linear Advance"等高级功能</div>
+        </div>
+        <div class="improvement">
+          <div class="imp-title">③ TMC 驱动首次出现（TMC2100）</div>
+          <div class="imp-desc">Trinamic 推出 TMC2100（首代 StealthChop 静音）→ 256 细分 + 静音运行，结束了 A4988/DRV8825 的"打嗝时代"。但当时价格高（一片 ¥80+），未普及</div>
+        </div>
+        <div class="improvement">
+          <div class="imp-title">④ Marlin 编译环境迁移：Arduino IDE → PlatformIO</div>
+          <div class="imp-desc">Marlin 2.0 起不再支持 Arduino IDE（1.1.x 仍支持），需要 PlatformIO 或 VSCode + PlatformIO 插件。门槛提高，但 32-bit 多文件管理能力大幅提升</div>
+        </div>
+        <div class="improvement">
+          <div class="imp-title">⑤ Creality 崛起（2015-2017）</div>
+          <div class="imp-desc">深圳拓想（Creality）成立于 2014 年，2015 年推出 CR-10，2016 年 Ender 1/2 试水，2018 年 Ender 3 一炮而红（¥999 全套）→ 3D 打印进入"消费级"时代</div>
+        </div>
+      </div>
+
+      <div class="andy-section">
+        <div class="andy-title">📌 Andy 设备在此阶段</div>
+        <div class="andy-grid">
+          <div class="andy-card">
+            <div class="andy-device">暂无</div>
+            <div class="andy-board">KLP1 主板是 STM32F407（阶段 3）</div>
+            <div class="andy-era">属于阶段 3（2018-2020）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 阶段 3：STM32 普及 + Klipper 革命 -->
+    <div class="era-content" data-era="m3">
+      <div class="era-header">
+        <div class="era-icon">🟣</div>
+        <div class="era-title-block">
+          <h2>STM32 普及 + Klipper 革命时代（2018-2020）</h2>
+          <div class="era-period">F4 168MHz 主流 + Voron 设计引爆 Klipper + BTT 拓竹崛起</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">📋 阶段概述</div>
+          <div class="fact"><strong>CPU</strong>：STM32F407VET6（32-bit ARM Cortex-M4，168 MHz，512KB Flash + 192KB SRAM）</div>
+          <div class="fact"><strong>代表架构</strong>：BTT SKR V1.4 主流 + 板载 TMC2208/2209 UART 模式</div>
+          <div class="fact"><strong>固件</strong>：Klipper 0.x 成熟 + Marlin 2.0 正式支持 32-bit</div>
+          <div class="fact"><strong>核心创新</strong>：Klipper + Voron + 树莓派上位机 → 3D 打印进入"高端 DIY"时代</div>
+          <div class="fact"><strong>市场转折</strong>：Voron 2.4（2020）→ 4Z 万向节架构 + 必装 Klipper → 拓竹（BTT）2018 深圳成立，吃下 Voron 主板市场</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🔌 代表主板型号（5 款）</div>
+          <div class="board-card">
+            <div class="board-name andy">BTT SKR V1.4 Turbo</div>
+            <div class="board-spec"><span>STM32F407VET6 168MHz / 512KB Flash</span><br><span>5 步进槽（X/Y/Z/E0/E1）/ TMC2209 UART</span></div>
+            <span class="board-tag andy">KLP1 用</span><span class="board-tag">Voron 主流</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">BTT SKR Mini E3 V2.0</div>
+            <div class="board-spec"><span>STM32F103RCT6 72MHz / 256KB</span><br><span>3 步进槽 / Creality Ender 3 替换板</span></div>
+            <span class="board-tag">¥80</span><span class="board-tag">Ender 3 首选</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">MKS Robin Nano V2</div>
+            <div class="board-spec"><span>STM32F407VGT6 168MHz / 1MB Flash</span><br><span>3 步进槽 / 创客基地</span></div>
+            <span class="board-tag">¥120</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">Fysetc F6 V1.3</div>
+            <div class="board-spec"><span>STM32F446VET6 180MHz / 512KB</span><br><span>3 步进槽 / Voron 早期用</span></div>
+            <span class="board-tag">2019</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">BTT Octopus V1.0 (F407)</div>
+            <div class="board-spec"><span>STM32F407VGT6 168MHz</span><br><span><strong>8 步进槽</strong>（Voron 2.4 4Z 完美匹配）</span></div>
+            <span class="board-tag">2020</span><span class="board-tag">4Z 旗舰</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔑 5 项关键历史改进</div>
+        <div class="improvement major">
+          <div class="imp-title">① STM32F407 Cortex-M4 168MHz 主流化</div>
+          <div class="imp-desc">意法半导体 STM32F4 系列：168MHz 单精度浮点 / DSP 指令 / 512KB Flash + 192KB SRAM → 性能是 LPC1768 的 1.7 倍，价格相当（¥30-50/片）→ 几乎一夜替代 LPC1768 成为开源 3D 打印主板首选</div>
+        </div>
+        <div class="improvement turning">
+          <div class="imp-title">② TMC2208/2209 板载 + UART 模式</div>
+          <div class="imp-desc">TMC2208（2017）/ TMC2209（2019）板载（替代 Pololu 模块）→ 256 细分 + StealthChop 静音 + UART 通信。StealthChop 让 3D 打印噪音从 50dB 降到 30dB，Voron 静音的硬件基础</div>
+        </div>
+        <div class="improvement">
+          <div class="imp-title">③ Klipper 上位机成熟（树莓派 + Klipper）</div>
+          <div class="imp-desc">Klipper 0.x → Klipper 2020 期间，MCU 通过 USB 连树莓派，配置由树莓派上的 printer.cfg 决定 → 无需重编译，浏览器（OctoPrint/Mainsail/Fluidd）直接编辑 → 软件迭代速度比 Marlin 快 10 倍</div>
+        </div>
+        <div class="improvement major">
+          <div class="imp-title">④ Voron Design 团队成立 + V2.4 发布（2020）</div>
+          <div class="imp-desc">Voron-2 GitHub 4.4k ⭐（2026 仍是开源 3D 打印 Top 1）→ 4 独立 Z 电机 + 万向节（gantry joints） + 闭环皮带 → "无妥协"理念重新定义 3D 打印质量天花板。Voron 2.4 必装 Klipper，反向推动 Klipper 成为主流</div>
+        </div>
+        <div class="improvement">
+          <div class="imp-title">⑤ BTT（拓竹）2018 深圳成立</div>
+          <div class="imp-desc">深圳必趣科技（BTT）2018 成立，专注 3D 打印主板 → SKR V1.3（2019）→ SKR V1.4（2020）→ 一举吃下 Voron 主板市场。同期 MKS（创客基地）、Fysetc（飞思策）三足鼎立</div>
+        </div>
+      </div>
+
+      <div class="andy-section">
+        <div class="andy-title">📌 Andy 设备在此阶段</div>
+        <div class="andy-grid">
+          <div class="andy-card">
+            <div class="andy-device">KLP1（KINGROON KLP1 V2.2）</div>
+            <div class="andy-board">BTT SKR Mini E3 V2.0 + Klipper</div>
+            <div class="andy-era">4×TMC2209 / CoreXY / 220×220</div>
+          </div>
+          <div class="andy-card">
+            <div class="andy-device">中柏 N100 迷你主机</div>
+            <div class="andy-board">Ubuntu 22.04 + Docker</div>
+            <div class="andy-era">Klipper 上位机候选</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 阶段 4：TMC 静音 + F4 高性能 -->
+    <div class="era-content" data-era="m4">
+      <div class="era-header">
+        <div class="era-icon">🔴</div>
+        <div class="era-title-block">
+          <h2>TMC 静音 + F4 高性能时代（2021-2022）</h2>
+          <div class="era-period">F427 180MHz + 8 步进槽 + CAN 总线 + Input Shaper 加速度计革命</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">📋 阶段概述</div>
+          <div class="fact"><strong>CPU</strong>：STM32F427VIT6（32-bit ARM Cortex-M4，180 MHz，1MB Flash + 256KB SRAM）</div>
+          <div class="fact"><strong>代表架构</strong>：8 步进槽（Voron 2.4 4Z 完美匹配）+ 板载 ESP32 WiFi</div>
+          <div class="fact"><strong>固件</strong>：Klipper 0.10+ + Input Shaper + ADXL345 加速度计</div>
+          <div class="fact"><strong>核心创新</strong>：8 步进槽 = Voron 2.4 / Trident 4Z 必备 + CAN-FD 工具头板（去皮线）</div>
+          <div class="fact"><strong>加速度革命</strong>：Input Shaper 2021 加入 Klipper，ADXL345 测量共振频率 → 打印速度 200mm/s 不丢步，2022 年 500mm/s 起步</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🔌 代表主板型号（5 款）</div>
+          <div class="board-card">
+            <div class="board-name">BTT Octopus Pro F427 V1.0</div>
+            <div class="board-spec"><span>STM32F427VIT6 180MHz / 1MB Flash</span><br><span><strong>8 步进槽</strong> / 6 风扇 / 3 热头</span></div>
+            <span class="board-tag">Voron 2.4</span><span class="board-tag">¥300</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">BTT Manta M5P</div>
+            <div class="board-spec"><span>STM32F407VGT6 168MHz / 1MB</span><br><span>5 步进槽 / Voron Trident 首选</span></div>
+            <span class="board-tag">¥220</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">BTT Manta M8P V1.0/V1.1</div>
+            <div class="board-spec"><span>STM32H723VET6 550MHz / LQFP-100</span><br><span>8 步进槽 / 82 I/O</span></div>
+            <span class="board-tag">¥380</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">Fysetc Spider V2.1</div>
+            <div class="board-spec"><span>STM32F446VET6 180MHz / 512KB</span><br><span>8 步进槽 / Voron 经典款</span></div>
+            <span class="board-tag">¥250</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">Fysetc EBB SB-CAN V1.0</div>
+            <div class="board-spec"><span>STM32G0B1CBT6 64MHz / 工具头板</span><br><span>CAN-FD 总线 / 4 线接 8 线效果</span></div>
+            <span class="board-tag">¥62</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔑 5 项关键历史改进</div>
+        <div class="improvement major">
+          <div class="imp-title">① 8 步进槽成为 Voron 标配</div>
+          <div class="imp-desc">Voron 2.4 4Z（4 个 Z 电机）+ X/Y + 挤出机 + 备选第 6/7 槽 → 主板需要 8 步进槽。BTT Octopus / Fysetc Spider 引领，4 步进槽板（如 SKR V1.4）被淘汰出 Voron 主板选项</div>
+        </div>
+        <div class="improvement turning">
+          <div class="imp-title">② Input Shaper 加速度革命（Klipper 2021）</div>
+          <div class="imp-desc">Klipper 引入 Input Shaper + ADXL345 加速度计 → 测量 X/Y 共振频率 → 主动消除打印头共振 → 打印速度从 80mm/s 提升到 200-500mm/s，质量不降。这是 Klipper 第一次在"功能层"超越 Marlin</div>
+        </div>
+        <div class="improvement major">
+          <div class="imp-title">③ CAN-FD 工具头板革命</div>
+          <div class="imp-desc">BTT EBB / Fysetc EBB SB-CAN V1.0（2021）→ 工具头板通过 4 线（CAN-H/CAN-L/GND/+24V）连接主板，工具头端的 8+ 根线（加热棒/热敏/风扇/挤出/探针/灯）全部本地处理 → "去皮线"成 Voron 标配</div>
+        </div>
+        <div class="improvement">
+          <div class="imp-title">④ TMC2209 全面替代 TMC2208</div>
+          <div class="imp-desc">TMC2209 比 TMC2208 多 0.5A 电流（2.0A vs 1.5A RMS） + StallGuard 失步检测 → Klipper 可识别打印头碰撞 + 自动 PA 调整。2208 在大流量挤出时发热严重，逐步淘汰</div>
+        </div>
+        <div class="improvement">
+          <div class="imp-title">⑤ Marlin 2.0.x 稳定 + 32-bit 全面接管</div>
+          <div class="imp-desc">2021 年 Marlin 2.0.9 稳定版发布，2.1.x 开发版 2022 推出，32-bit ARM Cortex-M4 成为 Marlin 主力支持。AVR 8-bit 仍维护（限于低功能），商业市场全面转向 32-bit</div>
+        </div>
+      </div>
+
+      <div class="andy-section">
+        <div class="andy-title">📌 Andy 设备在此阶段</div>
+        <div class="andy-grid">
+          <div class="andy-card">
+            <div class="andy-device">Voron 2.4 R2 调研中</div>
+            <div class="andy-board">候选：Manta M8P V2.0 H723 / Octopus Pro F427</div>
+            <div class="andy-era">4Z + 350mm 二手整机 ¥885</div>
+          </div>
+          <div class="andy-card">
+            <div class="andy-device">中柏 N100（HA + Klipper 上位机）</div>
+            <div class="andy-board">Ubuntu 22.04 + Docker</div>
+            <div class="andy-era">1TB 挂载 / HA:8124 / Jellyfin:8096</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 阶段 5：H7 旗舰时代 -->
+    <div class="era-content" data-era="m5">
+      <div class="era-header">
+        <div class="era-icon">🟢</div>
+        <div class="era-title-block">
+          <h2>H7 旗舰时代（2023-2024）</h2>
+          <div class="era-period">STM32H723 550MHz Cortex-M7 普及 + Voron Trident 主推 + 高流量热端爆发</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">📋 阶段概述</div>
+          <div class="fact"><strong>CPU</strong>：STM32H723ZET6（32-bit ARM Cortex-M7，550 MHz + DSP，1MB Flash + 564KB SRAM）</div>
+          <div class="fact"><strong>代表架构</strong>：LQFP-144 封装 114 I/O + TMC2240 60V/3A 板载 + 高速 USB</div>
+          <div class="fact"><strong>固件</strong>：Klipper 0.11.x 稳定 + 主推 Voron Trident（3Z 简化版）</div>
+          <div class="fact"><strong>核心创新</strong>：性能 3 倍 F427 + Input Shaper 调谐自动化 + Eddy 涡流近端探针</div>
+          <div class="fact"><strong>市场转折</strong>：Voron Trident（2023-06 发布） → 3Z 床自调平 → 装配比 2.4 简单 30-50% → 逐步成为 Voron 新手首选</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🔌 代表主板型号（4 款）</div>
+          <div class="board-card">
+            <div class="board-name andy">BTT Manta M8P V2.0</div>
+            <div class="board-spec"><span>STM32H723ZET6 550MHz / 1MB Flash / 564KB SRAM</span><br><span>LQFP-144 / 8 步进槽 / 114 I/O</span></div>
+            <span class="board-tag andy">Andy 闲鱼</span><span class="board-tag">¥300</span><span class="board-tag">Voron 首选</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">BTT Octopus Pro H723 V1.0/V1.3</div>
+            <div class="board-spec"><span>STM32H723ZET6 550MHz / 1MB</span><br><span>8 步进槽 / 3 SBC 接口 / 调试口丰富</span></div>
+            <span class="board-tag">¥450</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">Fysetc Spider V2.2</div>
+            <div class="board-spec"><span>STM32H723VET6 550MHz / LQFP-100</span><br><span>8 步进槽 / 82 I/O / 升级 Spider V2.1</span></div>
+            <span class="board-tag">¥350</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">BTT EBB SB-CAN V1.2</div>
+            <div class="board-spec"><span>STM32G0B1CBT6 64MHz / 工具头板</span><br><span>CAN-FD / USB-C / ADXL 集成</span></div>
+            <span class="board-tag">¥75</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔑 5 项关键历史改进</div>
+        <div class="improvement major">
+          <div class="imp-title">① STM32H723 Cortex-M7 550MHz 全面接管</div>
+          <div class="imp-desc">550MHz 主频 + 单精度 FPU + DSP 指令 → 比 F427 快 3 倍，步进率 500K+ steps/s。1MB Flash + 564KB SRAM → 装得下更复杂的"AI 输入整形 / 视觉反馈 / 高级加热算法"。Voron 2.4 R2 / Trident 装机首选</div>
+        </div>
+        <div class="improvement">
+          <div class="imp-title">② TMC2240 板载（60V / 3A）</div>
+          <div class="imp-desc">TMC2240 是 TMC2209 的高压版（60V 而非 36V），3A RMS 电流 → 适合大流量（30+ mm³/s）打印头（Rapido / Mosquito Magnum / Revo）。2209 仍在低端主流，2240 是高端选项</div>
+        </div>
+        <div class="improvement turning">
+          <div class="imp-title">③ Voron Trident 主推（2023-06）</div>
+          <div class="imp-desc">Voron 团队 2023-06 发布 Trident（3Z 床自调平版 2.4）→ 减少 1 个 Z 电机 + 4 个万向节 + 4 个限位开关 → 装配简单 30-50%，但性能（4Z 独立调平）略输 2.4。GitHub 991 ⭐（2026）成为 Voron 新主流</div>
+        </div>
+        <div class="improvement">
+          <div class="imp-title">④ Eddy 涡流 / Beacon 近端探针普及</div>
+          <div class="imp-desc">Voron 2.4 首选 Beacon 模块（¥150-250） → 非接触式涡流近端探针 + 集成 MCU（STM32G0），单次 0.5 秒测全网格 + 温度补偿。Klipper 0.10+ 原生支持。Eddy（¥40-80）是 BTT 简化版，KLP1 升级首选</div>
+        </div>
+        <div class="improvement">
+          <div class="imp-title">⑤ 高流量热端革命（Rapido / Revo）</div>
+          <div class="imp-desc">Rapido（PhatMAX）/ Mosquito Magnum / Revo（E3D 6 更换喷嘴） 等高流量热端 2023 普及 → 配合 H7 主板的高速步进 + Input Shaper → 打印速度突破 500mm/s，挤出流量突破 30 mm³/s，ABS/PC 等高强度材料可打印</div>
+        </div>
+      </div>
+
+      <div class="andy-section">
+        <div class="andy-title">📌 Andy 设备在此阶段</div>
+        <div class="andy-grid">
+          <div class="andy-card">
+            <div class="andy-device">闲鱼 Manta M8P V2.0 套装</div>
+            <div class="andy-board">STM32H723ZET6 550MHz + H723 主控</div>
+            <div class="andy-era">¥300 入手（商丘"染染电竞"）</div>
+          </div>
+          <div class="andy-card">
+            <div class="andy-device">Fysetc EBB SB-CAN V1.0</div>
+            <div class="andy-board">STM32G0B1CBT6 64MHz</div>
+            <div class="andy-era">¥62 入手 / 工具头板</div>
+          </div>
+          <div class="andy-card">
+            <div class="andy-device">Voron 2.4 R2 4Z 整机</div>
+            <div class="andy-board">候选 H7 主板 + 4×TMC2209 + Eddy</div>
+            <div class="andy-era">二手 ¥885（当前 4Z 主力调研）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 阶段 6：集成 SoC + AI 时代 -->
+    <div class="era-content" data-era="m6">
+      <div class="era-header">
+        <div class="era-icon">🟠</div>
+        <div class="era-title-block">
+          <h2>集成 SoC + AI 时代（2025-2026）</h2>
+          <div class="era-period">Ingenic X2000E + GD32 三件套 + AI LiDAR + 1080P 视觉 · 闭源化趋势</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">📋 阶段概述</div>
+          <div class="fact"><strong>CPU</strong>：Ingenic X2000E SoC（双核 XBurst2 1.2 GHz + 实时核 XBurst0 240 MHz） + 3 块 GD32 MCU（主控 + 喷嘴 + 热床）</div>
+          <div class="fact"><strong>代表架构</strong>：主板集成 SoC + 多 MCU 协同 + AI 视觉 + 触屏 + 闭源</div>
+          <div class="fact"><strong>固件</strong>：Klipper 仍开源可选 + CreOS / X1Plus 闭源专有系统</div>
+          <div class="fact"><strong>核心创新</strong>：SoC 直接做 Klipper 上位机（无需 SBC）+ AI LiDAR 流量校准 + 1080P 视觉检测</div>
+          <div class="fact"><strong>市场转折</strong>：拓想 K1 系列 2023-03 发布（¥3,999 起）→ 一体压铸铝合金 + CNC 工艺 → 3D 打印机进入"消费级 + 智能化"时代</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🔌 代表主板型号（4 款）</div>
+          <div class="board-card">
+            <div class="board-name andy">创想 K1 Max 主板</div>
+            <div class="board-spec"><span>Ingenic X2000E（双核 1.2GHz + 实时核 240MHz）</span><br><span>+ GD32F303RET6 主控 + GD32F303CBT6 喷嘴 + GD32E230F8P6 热床</span></div>
+            <span class="board-tag andy">Andy 自有</span><span class="board-tag">¥1588</span><span class="board-tag">闭源</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">创想 K1 / K1C / K1 SE 主板</div>
+            <div class="board-spec"><span>同 K1 Max 三件套</span><br><span>核心 SoC + 三块 MCU 完全相同</span></div>
+            <span class="board-tag">K1 SE ¥2499</span><span class="board-tag">差异在固件签名</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">MKS SKIPR V1.0</div>
+            <div class="board-spec"><span>STM32F407VET6 168MHz + 内置 RK3328 SoC + 1GB DDR3</span><br><span>Klipper + Linux 一体 / Voron 可选</span></div>
+            <span class="board-tag">¥450</span>
+          </div>
+          <div class="board-card" style="margin-top:8px">
+            <div class="board-name">拓竹 X1 / P1 / A1 主板</div>
+            <div class="board-spec"><span>自研 + 5 寸触摸屏</span><br><span>Bambu Studio 闭源 / 不能刷 Klipper</span></div>
+            <span class="board-tag">¥6999+</span><span class="board-tag">不可刷 Klipper</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔑 6 项关键历史改进</div>
+        <div class="improvement turning">
+          <div class="imp-title">① 主板集成 SoC：Klipper 上位机内置</div>
+          <div class="imp-desc">Ingenic X2000E（双核 XBurst2 1.2 GHz + 实时核 XBurst0 240 MHz + 256MB LPDDR2 + 8GB eMMC）直接集成到 3D 打印机主板上 → 无需外接树莓派 / 中柏 N100 → 上位机 + 下位机一体化。这是 Klipper 架构的"反向集成"</div>
+        </div>
+        <div class="improvement major">
+          <div class="imp-title">② 多 MCU 协同架构（主控 + 喷嘴 + 热床）</div>
+          <div class="imp-desc">创想 K1 系列：GD32F303RET6（主控 Cortex-M4 120MHz）+ GD32F303CBT6（喷嘴 Cortex-M4 120MHz）+ GD32E230F8P6（热床 Cortex-M23 72MHz）三块 MCU + SoC 协调 → 实时性最高的分区控制（喷嘴 1kHz PID + 热床 1kHz PID + 主控 G-code 执行完全独立）</div>
+        </div>
+        <div class="improvement">
+          <div class="imp-title">③ AI LiDAR 流量校准（K1 Max）</div>
+          <div class="imp-desc">K1 Max 内置 LiDAR + AI 算法 → 自动测量 12 个点的高度差 → 计算最佳流量值（0.025 mm³/mm）→ 替代手工流量塔。OrcaSlicer 标号 0.025 = mm³/mm（不是百分比），默认 1.0 流量比</div>
+        </div>
+        <div class="improvement major">
+          <div class="imp-title">④ 1080P AI 视觉（拓想 K1 Max / 拓竹 X1）</div>
+          <div class="imp-desc">K1 Max 内置 1080P 摄像头 + AI 模型 → 断料检测 / 翘边检测 / 异物检测 / 打印质量监控 / 失败自动暂停 → 24 小时无人值守打印成为现实。这是 3D 打印机的"智能化分水岭"</div>
+        </div>
+        <div class="improvement">
+          <div class="imp-title">⑤ 5 寸触摸屏 + CreOS 闭源系统</div>
+          <div class="imp-desc">拓想 K1 系列 4.3 寸 / 拓竹 X1 5 寸 触摸屏 + 闭源 CreOS / Bambu OS → 局域网推送打印 / 云端切片 / 手机 APP → 普通用户 10 分钟上手。但代价：K1 Max / 拓竹 X1 不可刷通用 Klipper</div>
+        </div>
+        <div class="improvement">
+          <div class="imp-title">⑥ 闭源化趋势 + 第三方改装社区</div>
+          <div class="imp-desc">拓想 K1 系列、拓竹 X1 / P1 / A1 全部闭源 → 出现社区移植 Klipper 项目（如 K1Plus / X1Plus）但仅部分功能可用。**Andy 偏好**：K1 Max 实测因闭源无法改断料检测参数，只能在屏幕或物理层面解决（如 WD-40 喷微动开关）</div>
+        </div>
+      </div>
+
+      <div class="andy-section">
+        <div class="andy-title">📌 Andy 设备在此阶段</div>
+        <div class="andy-grid">
+          <div class="andy-card">
+            <div class="andy-device">K1 Max（¥1588，2026-06-13 入手）</div>
+            <div class="andy-board">Ingenic X2000E + 三块 GD32</div>
+            <div class="andy-era">当前调试：Z 偏移 / 流量 / TR0116</div>
+          </div>
+          <div class="andy-card">
+            <div class="andy-device">K1 Max 断料器（机械式 + LM393）</div>
+            <div class="andy-board">微动 SW1 + LM393 + HT7333 LDO</div>
+            <div class="andy-era">修复优先级：WD-40 → 换 SS-5GL</div>
+          </div>
+          <div class="andy-card">
+            <div class="andy-device">中柏 N100（HomeAssistant 主控）</div>
+            <div class="andy-board">Klipper 上位机备份 + HA:8124</div>
+            <div class="andy-era">3D 打印远程监控候选</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 选型建议 -->
+  <div class="summary-section">
+    <div class="summary-title">🎯 2026 选型建议（按 3 个典型场景）</div>
+
+    <div class="scenario-card s1">
+      <div class="scenario-name s1">① 入门小白 / 教学机（预算 ≤¥200）</div>
+      <div class="scenario-board">
+        <strong>首选：BTT SKR Mini E3 V3.0（STM32G0B1 64MHz / ¥80-100）</strong><br>
+        备选：MKS Gen L V2.1（AVR 2560 / ¥50-80，二手 ¥30）<br>
+        适用：Ender 3 替换、孩子学习、12V 小型机
+      </div>
+    </div>
+
+    <div class="scenario-card s2">
+      <div class="scenario-name s2">② 高性能 Voron / DIY 进阶（预算 ¥300-500）</div>
+      <div class="scenario-board">
+        <strong>首选：BTT Manta M8P V2.0（STM32H723 550MHz / 闲鱼 ¥300）</strong><br>
+        备选：BTT Octopus Pro H723 V1.3（¥400-500）<br>
+        备选：Fysetc Spider V2.2 H723（闲鱼 ¥250-350）<br>
+        适用：Voron 2.4 / Trident 4Z 或 3Z 装机、8 步进槽
+      </div>
+    </div>
+
+    <div class="scenario-card s3">
+      <div class="scenario-name s3">③ 旗舰消费级 / 24h 无人值守（预算 ¥1500-7000）</div>
+      <div class="scenario-board">
+        <strong>首选：创想 K1 Max（¥1588-3500）</strong> ← Andy 自有，调试中<br>
+        备选：拓想 K1C（¥3499）/ 拓竹 P1S（¥4500+）<br>
+        备选：Sovol SV08（¥3500-4500，可刷 Klipper）<br>
+        适用：商用工坊、ABS / PC 高温打印、AI 视觉监控
+      </div>
+    </div>
+
+    <div class="legacy">
+      ⚠️ <strong>2026 闭源化趋势警告</strong>：创想 K1 Max / 拓竹 X1 / P1 / A1 全部闭源，不可刷通用 Klipper → 不能自定义 G-code macro / 不能装 Beacon / 不能加 Eddy。要"开放 + 改装"必须选 Voron + Manta M8P + Klipper 路线
+    </div>
+  </div>
+</div>
+
+<script>
+// 阶段数据
+const eras = [
+  { id: 'm1', year: 2011, label: '8-bit AVR', color: '#f59e0b', icon: '🟡' },
+  { id: 'm2', year: 2016, label: 'LPC 32-bit', color: '#06b6d4', icon: '🔵' },
+  { id: 'm3', year: 2019, label: 'STM32F4 普及', color: '#8b5cf6', icon: '🟣' },
+  { id: 'm4', year: 2021, label: 'F427 高性能', color: '#ec4899', icon: '🔴' },
+  { id: 'm5', year: 2023, label: 'H7 旗舰', color: '#10b981', icon: '🟢' },
+  { id: 'm6', year: 2025, label: '集成 SoC + AI', color: '#f43f5e', icon: '🟠' },
+];
+
+// 渲染时间轴
+const timeline = document.getElementById('timeline');
+const startYear = 2008;
+const endYear = 2026;
+const totalRange = endYear - startYear;
+
+eras.forEach(era => {
+  const position = ((era.year - startYear) / totalRange) * 100;
+
+  // 年份标签
+  const yearLabel = document.createElement('div');
+  yearLabel.className = 'timeline-year';
+  yearLabel.style.left = position + '%';
+  yearLabel.textContent = era.year;
+  timeline.appendChild(yearLabel);
+
+  // 阶段标签
+  const label = document.createElement('div');
+  label.className = 'timeline-label';
+  label.style.left = position + '%';
+  label.style.color = era.color;
+  label.textContent = era.icon + ' ' + era.label;
+  timeline.appendChild(label);
+
+  // 标记点
+  const marker = document.createElement('div');
+  marker.className = `timeline-marker era-${era.id}`;
+  marker.style.left = position + '%';
+  marker.dataset.era = era.id;
+  marker.title = `${era.year} - ${era.label}`;
+  marker.addEventListener('click', () => activateTab(era.id));
+  timeline.appendChild(marker);
+});
+
+// 添加年份刻度
+for (let y = startYear; y <= endYear; y += 2) {
+  const tick = document.createElement('div');
+  tick.style.cssText = `position:absolute; top:calc(50% + 8px); left:${((y-startYear)/totalRange)*100}%; transform:translateX(-50%); font-size:0.65em; color:#64748b;`;
+  tick.textContent = y;
+  timeline.appendChild(tick);
+}
+
+// Tab 切换
+const tabs = document.querySelectorAll('.tab');
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => activateTab(tab.dataset.era));
+});
+
+function activateTab(eraId) {
+  // Tab 高亮
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll(`.tab[data-era="${eraId}"]`).forEach(t => t.classList.add('active'));
+
+  // 内容显示
+  document.querySelectorAll('.era-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll(`.era-content[data-era="${eraId}"]`).forEach(c => c.classList.add('active'));
+
+  // 标记点高亮
+  document.querySelectorAll('.timeline-marker').forEach(m => m.classList.remove('active'));
+  document.querySelectorAll(`.timeline-marker[data-era="${eraId}"]`).forEach(m => m.classList.add('active'));
+}
+
+// 键盘左右切换
+document.addEventListener('keydown', (e) => {
+  const currentTab = document.querySelector('.tab.active');
+  if (!currentTab) return;
+  const currentIdx = Array.from(tabs).indexOf(currentTab);
+  if (e.key === 'ArrowLeft' && currentIdx > 0) {
+    activateTab(tabs[currentIdx - 1].dataset.era);
+  } else if (e.key === 'ArrowRight' && currentIdx < tabs.length - 1) {
+    activateTab(tabs[currentIdx + 1].dataset.era);
+  }
+});
+</script>
+</body>
+</html>

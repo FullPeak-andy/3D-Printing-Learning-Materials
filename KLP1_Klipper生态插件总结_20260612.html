@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KLP1 Klipper 生态插件总结</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0a0e14;color:#e0e0e0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif;min-height:100vh;padding:20px}
+  .container{max-width:1400px;margin:0 auto}
+  .header{text-align:center;padding:24px 20px 28px;border-bottom:1px solid #1f2937;margin-bottom:24px}
+  .header h1{font-size:30px;background:linear-gradient(135deg,#00d9a3 0%,#00d4ff 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;font-weight:700}
+  .header .sub{color:#8b9bb4;font-size:13px}
+  .tab-nav{display:flex;gap:4px;border-bottom:1px solid #1f2937;margin-bottom:24px;overflow-x:auto}
+  .tab-btn{padding:11px 18px;background:transparent;border:none;color:#8b9bb4;cursor:pointer;font-size:13px;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;font-family:inherit}
+  .tab-btn:hover{color:#e0e0e0}
+  .tab-btn.active{color:#00d9a3;border-bottom-color:#00d9a3}
+  .tab-pane{display:none}
+  .tab-pane.active{display:block;animation:fadeIn .35s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .arch{background:#131820;border:1px solid #1f2937;border-radius:12px;padding:24px;margin-bottom:20px}
+  .arch-title{font-size:14px;color:#8b9bb4;margin-bottom:14px;text-align:center}
+  .arch-svg{width:100%;max-width:1000px;margin:0 auto;display:block}
+  .arch-pulse{animation:archPulse 2.4s ease-in-out infinite}
+  @keyframes archPulse{0%,100%{opacity:.7}50%{opacity:1}}
+  .arch-arrow{stroke:#00d9a3;stroke-width:1.5;fill:none;stroke-dasharray:6 4;animation:dashMove 1.2s linear infinite}
+  @keyframes dashMove{to{stroke-dashoffset:-20}}
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+  .card{background:#131820;border:1px solid #1f2937;border-radius:10px;padding:18px;transition:all .3s;position:relative;overflow:hidden}
+  .card:hover{transform:translateY(-3px);border-color:#00d9a3;box-shadow:0 6px 20px rgba(0,217,163,.08)}
+  .card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:linear-gradient(180deg,#00d9a3 0%,transparent 100%);opacity:.5}
+  .card-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .card-icon{width:34px;height:34px;background:linear-gradient(135deg,#00d9a3 0%,#00d4ff 100%);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#0a0e14;font-weight:700;flex-shrink:0}
+  .card-title{font-size:16px;font-weight:600;color:#e0e0e0}
+  .badge{display:inline-block;padding:3px 9px;border-radius:11px;font-size:10px;font-weight:600;margin-bottom:10px;letter-spacing:.3px}
+  .badge-installed{background:rgba(0,217,163,.15);color:#00d9a3;border:1px solid rgba(0,217,163,.4)}
+  .badge-upgrade{background:rgba(255,165,0,.15);color:#ffa500;border:1px solid rgba(255,165,0,.4);animation:pulse 2s ease-in-out infinite}
+  .badge-missing{background:rgba(139,155,180,.12);color:#8b9bb4;border:1px solid rgba(139,155,180,.3)}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+  .card-desc{font-size:12.5px;line-height:1.65;color:#b0b8c8;margin-bottom:10px}
+  .card-meta{display:flex;gap:14px;font-size:11px;color:#8b9bb4;border-top:1px solid #1f2937;padding-top:9px}
+  .meta-item{display:flex;flex-direction:column;gap:2px}
+  .meta-label{color:#6b7280;font-size:10px}
+  .meta-value{color:#e0e0e0;font-weight:600;font-size:12px}
+  .section-title{font-size:16px;margin:24px 0 14px;color:#e0e0e0;display:flex;align-items:center;gap:8px}
+  .section-title::before{content:'';width:3px;height:16px;background:linear-gradient(180deg,#00d9a3 0%,#00d4ff 100%);border-radius:2px}
+  .gcode-preview{background:#0a0e14;border:1px solid #1f2937;border-radius:8px;padding:18px;margin-top:14px;min-height:220px;position:relative;overflow:hidden}
+  .gcode-info{position:absolute;top:10px;left:12px;font-size:10px;color:#8b9bb4;font-family:monospace}
+  .gcode-coord{position:absolute;bottom:10px;right:12px;font-size:10px;color:#00d9a3;font-family:monospace}
+  .gcode-layer1{stroke:#00d9a3;stroke-width:1.2;fill:none;stroke-dasharray:600;stroke-dashoffset:600;animation:drawPath 3.5s ease-in-out infinite}
+  .gcode-layer2{stroke:#00d4ff;stroke-width:1;fill:none;stroke-dasharray:500;stroke-dashoffset:500;animation:drawPath 3.5s ease-in-out infinite .4s;opacity:.7}
+  .gcode-layer3{stroke:#ffa500;stroke-width:.8;fill:none;stroke-dasharray:400;stroke-dashoffset:400;animation:drawPath 3.5s ease-in-out infinite .8s;opacity:.5}
+  @keyframes drawPath{0%{stroke-dashoffset:600;opacity:.3}50%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:.4}}
+  .camera-frame{background:linear-gradient(135deg,#1a2030 0%,#0f1520 100%);border:2px solid #1f2937;border-radius:8px;padding:10px;margin-top:14px;position:relative}
+  .camera-view{background:#000;border-radius:4px;aspect-ratio:16/9;position:relative;overflow:hidden}
+  .camera-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,217,163,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(0,217,163,.08) 1px,transparent 1px);background-size:32px 32px}
+  .camera-dot{position:absolute;top:10px;right:10px;width:7px;height:7px;background:#ff3b30;border-radius:50%;animation:blink 1.5s ease-in-out infinite;box-shadow:0 0 8px rgba(255,59,48,.6)}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+  .camera-label{position:absolute;top:8px;left:10px;font-size:9px;color:#00d9a3;font-family:monospace;letter-spacing:.5px}
+  .camera-nozzle{position:absolute;top:55%;left:50%;transform:translate(-50%,-50%);width:20px;height:20px;background:radial-gradient(circle,#00d9a3 0%,#008c6a 100%);border-radius:50%;box-shadow:0 0 16px rgba(0,217,163,.7);animation:nozzleFloat 2.5s ease-in-out infinite}
+  @keyframes nozzleFloat{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-50%,-58%)}}
+  .status-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+  .status-card{background:#131820;border:1px solid #1f2937;border-radius:8px;padding:14px;text-align:center;transition:all .2s}
+  .status-card:hover{border-color:#00d9a3;transform:translateY(-2px)}
+  .status-icon{font-size:20px;margin-bottom:4px}
+  .status-name{font-size:11px;color:#8b9bb4;margin-bottom:4px}
+  .status-val{font-size:12px;font-weight:600}
+  .status-ok{color:#00d9a3}
+  .status-warn{color:#ffa500}
+  .status-miss{color:#8b9bb4}
+  .summary{background:linear-gradient(135deg,rgba(0,217,163,.08) 0%,rgba(0,212,255,.08) 100%);border:1px solid rgba(0,217,163,.3);border-radius:10px;padding:18px;margin-top:18px}
+  .summary-title{font-size:14px;font-weight:600;color:#00d9a3;margin-bottom:8px}
+  .summary-text{font-size:12.5px;line-height:1.7;color:#b0b8c8}
+  .install-hint{background:rgba(0,217,163,.06);border-left:3px solid #00d9a3;padding:10px 12px;margin-top:10px;border-radius:4px;font-size:11.5px;color:#b0b8c8;line-height:1.6}
+  .install-hint b{color:#00d9a3}
+  .footer{text-align:center;padding:20px;margin-top:30px;border-top:1px solid #1f2937;color:#6b7280;font-size:11px}
+  .note-warn{background:rgba(255,165,0,.08);border-left:3px solid #ffa500;padding:10px 12px;margin-top:10px;border-radius:4px;font-size:11.5px;color:#b0b8c8;line-height:1.6}
+  .note-warn b{color:#ffa500}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>KLP1 Klipper 生态插件总结</h1>
+    <div class="sub">从 KIAUH Update Menu 提取 · 13 个组件/插件 · 7 个分类 · 2026-06-12</div>
+  </div>
+
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="arch">架构全景</button>
+    <button class="tab-btn" data-tab="core">核心 5 件套</button>
+    <button class="tab-btn" data-tab="visual">可视化</button>
+    <button class="tab-btn" data-tab="remote">远程通知</button>
+    <button class="tab-btn" data-tab="mobile">手机 App</button>
+    <button class="tab-btn" data-tab="camera">摄像头</button>
+    <button class="tab-btn" data-tab="status">KLP1 状态</button>
+  </nav>
+
+  <main>
+
+    <!-- TAB 1: 架构全景 -->
+    <section class="tab-pane active" id="arch">
+      <div class="arch">
+        <div class="arch-title">Klipper 生态数据流架构（KLP1 视角）</div>
+        <svg class="arch-svg" viewBox="0 0 1000 360" xmlns="http://www.w3.org/2000/svg">
+          <!-- Layer labels -->
+          <text x="20" y="30" fill="#8b9bb4" font-size="11" font-family="monospace">UI 层</text>
+          <text x="20" y="120" fill="#8b9bb4" font-size="11" font-family="monospace">API 层</text>
+          <text x="20" y="210" fill="#8b9bb4" font-size="11" font-family="monospace">固件层</text>
+          <text x="20" y="320" fill="#8b9bb4" font-size="11" font-family="monospace">硬件层</text>
+
+          <!-- UI Layer -->
+          <rect x="120" y="10" width="180" height="50" rx="8" fill="#131820" stroke="#00d9a3" stroke-width="1.5"/>
+          <text x="210" y="32" text-anchor="middle" fill="#00d9a3" font-size="12" font-weight="600">Mainsail</text>
+          <text x="210" y="50" text-anchor="middle" fill="#8b9bb4" font-size="10">v2.11.2 (KLP1 主流)</text>
+
+          <rect x="320" y="10" width="120" height="50" rx="8" fill="#131820" stroke="#00d4ff" stroke-width="1.5"/>
+          <text x="380" y="32" text-anchor="middle" fill="#00d4ff" font-size="12" font-weight="600">Fluidd</text>
+          <text x="380" y="50" text-anchor="middle" fill="#8b9bb4" font-size="10">v1.30.0</text>
+
+          <rect x="460" y="10" width="200" height="50" rx="8" fill="#131820" stroke="#00d4ff" stroke-width="1.5"/>
+          <text x="560" y="32" text-anchor="middle" fill="#00d4ff" font-size="12" font-weight="600">KlipperScreen</text>
+          <text x="560" y="50" text-anchor="middle" fill="#8b9bb4" font-size="10">v0.4.0-73 (触屏)</text>
+
+          <!-- API Layer -->
+          <rect x="200" y="100" width="320" height="55" rx="8" fill="#131820" stroke="#00d9a3" stroke-width="1.5" class="arch-pulse"/>
+          <text x="360" y="125" text-anchor="middle" fill="#00d9a3" font-size="13" font-weight="700">Moonraker</text>
+          <text x="360" y="143" text-anchor="middle" fill="#8b9bb4" font-size="10">v0.8.0-354 · JSON-RPC API · WebSocket · 文件/历史/更新</text>
+
+          <!-- Plugin Layer -->
+          <rect x="560" y="100" width="200" height="55" rx="8" fill="#131820" stroke="#ffa500" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <text x="660" y="125" text-anchor="middle" fill="#ffa500" font-size="12" font-weight="600">Moonraker 插件</text>
+          <text x="660" y="143" text-anchor="middle" fill="#8b9bb4" font-size="10">Crowsnest / Obico / Telegram</text>
+
+          <rect x="800" y="100" width="170" height="55" rx="8" fill="#131820" stroke="#8b9bb4" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <text x="885" y="125" text-anchor="middle" fill="#8b9bb4" font-size="12" font-weight="600">外部服务</text>
+          <text x="885" y="143" text-anchor="middle" fill="#8b9bb4" font-size="10">Telegram / Obico 云</text>
+
+          <!-- Firmware Layer -->
+          <rect x="120" y="190" width="280" height="55" rx="8" fill="#131820" stroke="#00d9a3" stroke-width="1.5" class="arch-pulse"/>
+          <text x="260" y="215" text-anchor="middle" fill="#00d9a3" font-size="13" font-weight="700">Klipper (host)</text>
+          <text x="260" y="233" text-anchor="middle" fill="#ffa500" font-size="10">v0.11.0-312 · ⚠️ 可升 0.12.0</text>
+
+          <rect x="420" y="190" width="240" height="55" rx="8" fill="#131820" stroke="#00d4ff" stroke-width="1.5"/>
+          <text x="540" y="215" text-anchor="middle" fill="#00d4ff" font-size="12" font-weight="600">Klipper 模块</text>
+          <text x="540" y="233" text-anchor="middle" fill="#8b9bb4" font-size="10">input_shaper / PA / bed_mesh</text>
+
+          <!-- Hardware Layer -->
+          <rect x="200" y="290" width="320" height="50" rx="8" fill="#131820" stroke="#00d9a3" stroke-width="1.5"/>
+          <text x="360" y="312" text-anchor="middle" fill="#00d9a3" font-size="13" font-weight="700">MCU 固件</text>
+          <text x="360" y="328" text-anchor="middle" fill="#8b9bb4" font-size="10">MKS THR 主板 (KLP1 一体板)</text>
+
+          <!-- Arrows -->
+          <line x1="210" y1="60" x2="280" y2="100" class="arch-arrow"/>
+          <line x1="380" y1="60" x2="380" y2="100" class="arch-arrow"/>
+          <line x1="560" y1="60" x2="450" y2="100" class="arch-arrow"/>
+
+          <line x1="520" y1="130" x2="560" y2="125" class="arch-arrow"/>
+          <line x1="760" y1="125" x2="800" y2="125" class="arch-arrow"/>
+
+          <line x1="360" y1="155" x2="280" y2="190" class="arch-arrow"/>
+          <line x1="540" y1="245" x2="540" y2="290" class="arch-arrow"/>
+
+          <!-- Bi-directional label -->
+          <text x="990" y="180" text-anchor="end" fill="#6b7280" font-size="9" font-family="monospace">HTTP / WebSocket / Unix Socket</text>
+        </svg>
+      </div>
+
+      <div class="summary">
+        <div class="summary-title">架构关键点</div>
+        <div class="summary-text">
+          • <b>Klipper 拆 host + MCU</b>：算法在 host（树莓派/Linux），MCU 只管"按时钟发脉冲"<br>
+          • <b>Moonraker 是中枢</b>：所有 Web UI / 插件 / 外部服务都通过它和 Klipper 通信<br>
+          • <b>插件分两类</b>：Moonraker 插件（用 API 通信）vs Klipper 模块（在 host Python 里运行）<br>
+          • <b>UI 三选一</b>：Mainsail（深色+功能多）/ Fluidd（轻量）/ KlipperScreen（触屏）<br>
+          • <b>改配置不重编</b>：.cfg 文件改完重启服务即可，不用刷固件
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: 核心 5 件套 -->
+    <section class="tab-pane" id="core">
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon">K</div>
+            <div class="card-title">Klipper</div>
+          </div>
+          <div class="badge badge-upgrade">⚠️ 可升级</div>
+          <div class="card-desc">3D 打印固件核心。把轨迹规划从 MCU 移到 host（Linux SBC），MCU 只负责"按时间表发步进脉冲"。结果是 200+ mm/s 仍能跑得稳。</div>
+          <div class="card-meta">
+            <div class="meta-item"><span class="meta-label">当前</span><span class="meta-value">v0.11.0-312</span></div>
+            <div class="meta-item"><span class="meta-label">最新</span><span class="meta-value">v0.12.0-180</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon">M</div>
+            <div class="card-title">Moonraker</div>
+          </div>
+          <div class="badge badge-installed">✅ 已装最新</div>
+          <div class="card-desc">API 网关 / 中间层。Web UI 和插件都通过它（JSON-RPC over WebSocket）跟 Klipper 通信。还管文件管理、历史记录、OTA 更新。</div>
+          <div class="card-meta">
+            <div class="meta-item"><span class="meta-label">当前</span><span class="meta-value">v0.8.0-354</span></div>
+            <div class="meta-item"><span class="meta-label">最新</span><span class="meta-value">v0.8.0-354 ✓</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon">N</div>
+            <div class="card-title">Mainsail</div>
+          </div>
+          <div class="badge badge-installed">✅ 已装最新</div>
+          <div class="card-desc">最主流的 Web UI。深色主题、拖拽仪表盘、内置延时摄影、宏命令商店、移动端 PWA 优化。KLP1 默认推荐。</div>
+          <div class="card-meta">
+            <div class="meta-item"><span class="meta-label">当前</span><span class="meta-value">v2.11.2</span></div>
+            <div class="meta-item"><span class="meta-label">最新</span><span class="meta-value">v2.11.2 ✓</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon">F</div>
+            <div class="card-title">Fluidd</div>
+          </div>
+          <div class="badge badge-installed">✅ 已装最新</div>
+          <div class="card-desc">Mainsail 的"轻量版"。界面更简洁、加载更快、配置热重载（改 .cfg 不重启）。低配树莓派友好，但高级功能比 Mainsail 少。</div>
+          <div class="card-meta">
+            <div class="meta-item"><span class="meta-label">当前</span><span class="meta-value">v1.30.0</span></div>
+            <div class="meta-item"><span class="meta-label">最新</span><span class="meta-value">v1.30.0 ✓</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon">S</div>
+            <div class="card-title">KlipperScreen</div>
+          </div>
+          <div class="badge badge-installed">✅ 已装最新</div>
+          <div class="card-desc">触屏 UI。接 LCD 屏（KLP1 mini12864 / 5" 大屏），实现"不开电脑就能操作打印机"。显示温度、控制移动、启动打印。</div>
+          <div class="card-meta">
+            <div class="meta-item"><span class="meta-label">当前</span><span class="meta-value">v0.4.0-73</span></div>
+            <div class="meta-item"><span class="meta-label">最新</span><span class="meta-value">v0.4.0-73 ✓</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note-warn">
+        <b>⚠️ Klipper 0.11.0 → 0.12.0 升级建议：</b>0.12.0 引入 <b>Axis Twist Compensation</b>（X/Y 轴扭曲补偿），KLP1 这种 CoreXY 长 X 轴容易扭曲。但升级需刷 MKS 主板 MCU 固件（不是 SSH 升 Klipper 就完事）。<b>先别升</b>，首层问题搞定再考虑。
+      </div>
+    </section>
+
+    <!-- TAB 3: 可视化 -->
+    <section class="tab-pane" id="visual">
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon">P</div>
+            <div class="card-title">PrettyGCode</div>
+          </div>
+          <div class="badge badge-missing">❌ 未安装</div>
+          <div class="card-desc">GCode 3D 路径预览器。在 Mainsail/Fluidd 界面里直接看切片路径的 3D 动画 —— 喷嘴走过的每条线、填充、墙都能高亮显示。打印前就能发现路径问题。</div>
+
+          <div class="gcode-preview">
+            <div class="gcode-info">PRETTY GCODE · 3D PATH PREVIEW</div>
+            <div class="gcode-coord">X: 110.2  Y: 108.7  Z: 0.20  E: 1.45</div>
+            <svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+              <!-- Layer 1 - walls -->
+              <path class="gcode-layer1" d="M 30 30 L 30 150 L 200 150 L 200 30 Z M 40 40 L 190 40 L 190 140 L 40 140 Z"/>
+              <!-- Layer 2 - infill -->
+              <path class="gcode-layer2" d="M 50 50 L 180 50 M 50 60 L 180 60 M 50 70 L 180 70 M 50 80 L 180 80 M 50 90 L 180 90 M 50 100 L 180 100 M 50 110 L 180 110 M 50 120 L 180 120 M 50 130 L 180 130"/>
+              <!-- Layer 3 - top surface -->
+              <path class="gcode-layer3" d="M 50 50 L 60 50 L 60 60 L 70 60 L 70 50 L 80 50 L 80 60 L 90 60 L 90 50 L 100 50 L 100 60 L 110 60 L 110 50 L 120 50 L 120 60 L 130 60 L 130 50 L 140 50 L 140 60 L 150 60 L 150 50 L 160 50 L 160 60 L 170 60 L 170 50 L 180 50"/>
+            </svg>
+          </div>
+
+          <div class="install-hint">
+            <b>装它能干嘛：</b>在 Mainsail 顶部工具栏直接看 GCode 3D 预览，不开 Cura 也能看路径。<b>调试神器</b>—— 看到底哪条线走过、跳过了什么。<br>
+            <b>安装：</b>SSH 跑 KIAUH → 选 4) [PrettyGCode] 一键装。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: 远程通知 -->
+    <section class="tab-pane" id="remote">
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon">T</div>
+            <div class="card-title">Telegram Bot</div>
+          </div>
+          <div class="badge badge-missing">❌ 未安装</div>
+          <div class="card-desc">把 Klipper 接到 Telegram。打印开始/完成/失败发消息到你的 TG，也能发指令（如 /status, /pause）。免费、不需公网 IP。</div>
+          <div class="install-hint">
+            <b>你可能不需要：</b>KLP1 在家里网络，TG 通知用得到，但不如 Obico 强大。先用其他方式。
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon">O</div>
+            <div class="card-title">Obico for Klipper</div>
+          </div>
+          <div class="badge badge-missing">❌ 未安装</div>
+          <div class="card-desc">云端 AI 监控。摄像头 + AI 检测"打歪了/塌了/翘边"等故障，自动暂停打印 + 发通知。比 TG 强大 —— 主动发现问题。</div>
+          <div class="install-hint">
+            <b>免费额度：</b>每月 10 小时，超出付费（$4-8/月）。家用偶尔打够用。<br>
+            <b>关键功能：</b>AI 故障检测 / 远程看摄像头 / 远程发送 GCode。
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon">E</div>
+            <div class="card-title">OctoEverywhere</div>
+          </div>
+          <div class="badge badge-missing">❌ 未安装</div>
+          <div class="card-desc">免费远程访问。免公网 IP、免端口映射，从任何地方浏览器打开 klp1.octoeverywhere.com 就能控制打印机。AI 检测免费。</div>
+          <div class="install-hint">
+            <b>对你价值：</b>比 Obico 远程访问更稳定，AI 检测免费。<b>最推荐先装这个</b>，你晚上工作 / 上班都能看 KLP1。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: 手机 App -->
+    <section class="tab-pane" id="mobile">
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon">M</div>
+            <div class="card-title">Mobileraker</div>
+          </div>
+          <div class="badge badge-missing">❌ 未安装</div>
+          <div class="card-desc">Klipper 官方手机 App（开源 / 跨平台）。iOS + Android 都有。简洁直接 —— 看温度、查打印进度、暂停/恢复、发送 GCode。<b>必须装 Moonraker 0.8+</b>，你 KLP1 满足。</div>
+          <div class="install-hint">
+            <b>优点：</b>开源、免费、无广告、轻量。<br>
+            <b>缺点：</b>功能相对少，UI 朴素。
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon">A</div>
+            <div class="card-title">OctoApp</div>
+          </div>
+          <div class="badge badge-missing">❌ 未安装</div>
+          <div class="card-desc">第三方手机 App（iOS 优化更好）。功能比 Mobileraker 多：内置 GCode 查看器、电源控制插件支持、OctoEverywhere/Obico 集成。<b>免费试用 + 内购解锁</b>（USD 12.99）。</div>
+          <div class="install-hint">
+            <b>优点：</b>功能多、UI 漂亮、iOS 用户体验最好。<br>
+            <b>缺点：</b>不是开源、需付费解锁全部功能。
+          </div>
+        </div>
+      </div>
+
+      <div class="summary">
+        <div class="summary-title">怎么选？</div>
+        <div class="summary-text">
+          • 想要<b>开源免费</b>：装 <b>Mobileraker</b>（跨平台）<br>
+          • 想要<b>iOS 体验最好</b>且<b>不差钱</b>：装 <b>OctoApp</b><br>
+          • 想要<b>远程访问</b>不挑设备：装 <b>OctoEverywhere</b>（浏览器访问，无需装 App）
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 6: 摄像头 -->
+    <section class="tab-pane" id="camera">
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-icon">C</div>
+            <div class="card-title">Crowsnest</div>
+          </div>
+          <div class="badge badge-installed">✅ 已装最新</div>
+          <div class="card-desc">USB 摄像头管理。自动检测摄像头、推 MJPG 流到 Mainsail/Fluidd/OctoEverywhere。支持 Pi Camera v2/v3、UVC USB 摄像头、IP 摄像头。<b>你前面用的 KLP1 内置摄像头实时画面就是它推的</b>。</div>
+
+          <div class="camera-frame">
+            <div class="camera-view">
+              <div class="camera-grid"></div>
+              <div class="camera-dot"></div>
+              <div class="camera-label">CROWSNEST · KLP1 · LIVE</div>
+              <div class="camera-nozzle"></div>
+            </div>
+          </div>
+
+          <div class="card-meta" style="margin-top:14px">
+            <div class="meta-item"><span class="meta-label">当前</span><span class="meta-value">v4.1.0-1</span></div>
+            <div class="meta-item"><span class="meta-label">最新</span><span class="meta-value">v4.1.0-1 ✓</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 7: KLP1 状态 -->
+    <section class="tab-pane" id="status">
+      <div class="section-title">KLP1 实际安装状态（13 项）</div>
+      <div class="status-grid">
+        <div class="status-card">
+          <div class="status-icon">🟢</div>
+          <div class="status-name">Klipper</div>
+          <div class="status-val status-warn">0.11.0 ⚠️</div>
+        </div>
+        <div class="status-card">
+          <div class="status-icon">🟢</div>
+          <div class="status-name">Moonraker</div>
+          <div class="status-val status-ok">0.8.0 ✓</div>
+        </div>
+        <div class="status-card">
+          <div class="status-icon">🟢</div>
+          <div class="status-name">Mainsail</div>
+          <div class="status-val status-ok">2.11.2 ✓</div>
+        </div>
+        <div class="status-card">
+          <div class="status-icon">🟢</div>
+          <div class="status-name">Fluidd</div>
+          <div class="status-val status-ok">1.30.0 ✓</div>
+        </div>
+        <div class="status-card">
+          <div class="status-icon">🟢</div>
+          <div class="status-name">KlipperScreen</div>
+          <div class="status-val status-ok">0.4.0-73 ✓</div>
+        </div>
+        <div class="status-card">
+          <div class="status-icon">🟢</div>
+          <div class="status-name">Crowsnest</div>
+          <div class="status-val status-ok">4.1.0 ✓</div>
+        </div>
+        <div class="status-card">
+          <div class="status-icon">⚫</div>
+          <div class="status-name">PrettyGCode</div>
+          <div class="status-val status-miss">未装</div>
+        </div>
+        <div class="status-card">
+          <div class="status-icon">⚫</div>
+          <div class="status-name">Telegram Bot</div>
+          <div class="status-val status-miss">未装</div>
+        </div>
+        <div class="status-card">
+          <div class="status-icon">⚫</div>
+          <div class="status-name">Obico</div>
+          <div class="status-val status-miss">未装</div>
+        </div>
+        <div class="status-card">
+          <div class="status-icon">⚫</div>
+          <div class="status-name">OctoEverywhere</div>
+          <div class="status-val status-miss">未装</div>
+        </div>
+        <div class="status-card">
+          <div class="status-icon">⚫</div>
+          <div class="status-name">Mobileraker</div>
+          <div class="status-val status-miss">未装</div>
+        </div>
+        <div class="status-card">
+          <div class="status-icon">⚫</div>
+          <div class="status-name">OctoApp</div>
+          <div class="status-val status-miss">未装</div>
+        </div>
+      </div>
+
+      <div class="summary">
+        <div class="summary-title">📊 KLP1 总结</div>
+        <div class="summary-text">
+          <b>核心 5 件套</b> 全部装好，4 个最新版（Mainsail / Fluidd / KlipperScreen / Moonraker），1 个可升级（Klipper 0.11 → 0.12）。<br>
+          <b>Crowsnest 摄像头</b>最新版（前面用的就是它）。<br>
+          <b>6 个远程/通知/手机 App 插件</b> 都没装 —— <b>OctoEverywhere</b> 性价比最高（免费 + AI 检测 + 远程访问）。<br><br>
+          <b>Andy 哥下一步建议</b>：<br>
+          1️⃣ <b>先</b>把首层问题搞定（PID 持久化 + z_offset 重测 + mesh 重测）<br>
+          2️⃣ <b>再</b>装 OctoEverywhere（远程看 KLP1 状态）<br>
+          3️⃣ <b>最后</b>考虑 Klipper 0.12 升级（需刷 MCU 固件，谨慎）
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="footer">
+    数据来源：KIAUH Update Menu 截图 · Andy 哥 KLP1 (MKS THR / Klipper 0.11.0-312)
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.tab;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(target).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

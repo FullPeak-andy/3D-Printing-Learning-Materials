@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Fusion 360 vs SolidWorks · 2026 终极对比</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(135deg,#0a0a1f,#1f1f3f);color:#e0e0e0;min-height:100vh;padding:20px}
+.wrap{max-width:1200px;margin:0 auto}
+h1{font-size:30px;text-align:center;margin:20px 0;background:linear-gradient(90deg,#0696d7,#ff6b35);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
+.subtitle{text-align:center;color:#999;font-size:14px;margin-bottom:24px}
+.tabs{display:flex;gap:6px;background:rgba(0,0,0,.3);border-radius:14px;padding:6px;margin-bottom:20px;flex-wrap:wrap}
+.tab{flex:1;min-width:110px;padding:10px 6px;text-align:center;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;transition:all .3s;color:#aaa;background:transparent;border:none;font-family:inherit}
+.tab.active{background:linear-gradient(135deg,#0696d7,#ff6b35);color:#fff;box-shadow:0 4px 16px rgba(6,150,215,.4)}
+.tab:hover:not(.active){background:rgba(255,255,255,.08);color:#fff}
+.panel{display:none;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:24px;backdrop-filter:blur(10px);animation:fadeIn .4s}
+.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.section{margin-bottom:24px}
+.section h2{font-size:20px;color:#0696d7;margin-bottom:12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(6,150,215,.2);padding-bottom:8px}
+.section h2::before{content:"▎";color:#ff6b35;font-size:24px}
+.cat-intro{background:rgba(6,150,215,.08);border-left:3px solid #0696d7;padding:12px 14px;border-radius:0 8px 8px 0;margin-bottom:14px;font-size:13px;color:#ccc;line-height:1.6}
+.score-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+.score-table th{background:rgba(6,150,215,.15);color:#0696d7;padding:10px;text-align:center;border-bottom:2px solid rgba(6,150,215,.3)}
+.score-table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.05);color:#ccc;text-align:center}
+.score-table td:first-child{text-align:left;font-weight:600;color:#4ecdc4}
+.score-table tr:hover td{background:rgba(255,255,255,.03)}
+.bar{display:inline-block;height:8px;border-radius:4px;vertical-align:middle;margin-left:6px}
+.bar-fusion{background:linear-gradient(90deg,#0696d7,#4ecdc4)}
+.bar-sw{background:linear-gradient(90deg,#ff6b35,#ffd54f)}
+.score-num{font-weight:700;font-size:14px;display:inline-block;min-width:30px}
+.score-num.fusion{color:#4ecdc4}
+.score-num.sw{color:#ffd54f}
+.verdict{background:rgba(78,205,196,.08);border:1px solid rgba(78,205,196,.3);border-radius:12px;padding:14px 18px;margin:12px 0;font-size:14px;color:#ccc;line-height:1.7}
+.verdict.warn{background:rgba(255,107,107,.08);border-color:rgba(255,107,107,.3)}
+.verdict.gold{background:rgba(255,213,79,.08);border-color:rgba(255,213,79,.3)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin:14px 0}
+.compare-card{background:rgba(0,0,0,.3);border-radius:10px;padding:16px;border-top:3px solid #0696d7}
+.compare-card.sw-card{border-top-color:#ff6b35}
+.compare-card h4{color:#0696d7;font-size:15px;margin-bottom:8px}
+.compare-card.sw-card h4{color:#ff6b35}
+.compare-card .price{font-size:18px;font-weight:900;margin:6px 0}
+.compare-card .price.fusion{color:#4ecdc4}
+.compare-card .price.sw{color:#ffd54f}
+.compare-card ul{list-style:none;font-size:12px;color:#bbb;line-height:1.8;margin-top:8px}
+.compare-card li::before{content:"✓ ";color:#4ecdc4;font-weight:bold}
+.compare-card li.bad::before{content:"✗ ";color:#ff6b6b}
+.compare-card.sw-card li::before{color:#ff6b35}
+.compare-card.sw-card li.bad::before{color:#ff6b6b}
+.cta-box{background:linear-gradient(135deg,rgba(6,150,215,.15),rgba(255,107,53,.15));border:2px solid rgba(78,205,196,.4);border-radius:16px;padding:20px;margin-top:20px;text-align:center}
+.cta-box h3{color:#4ecdc4;margin-bottom:10px;font-size:18px}
+.btn{display:inline-block;padding:10px 24px;background:linear-gradient(135deg,#ff6b35,#ee5a24);color:#fff;border-radius:24px;text-decoration:none;font-weight:600;margin:4px;font-size:14px;transition:transform .2s;cursor:pointer;border:none}
+.btn:hover{transform:scale(1.05)}
+.btn.alt{background:linear-gradient(135deg,#0696d7,#0488b9)}
+.spec-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+.spec-table th{background:rgba(6,150,215,.2);color:#0696d7;padding:10px;text-align:left;border-bottom:2px solid rgba(6,150,215,.3)}
+.spec-table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.05);color:#ccc}
+.spec-table tr:hover td{background:rgba(255,255,255,.03)}
+.tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;margin:2px;background:rgba(78,205,196,.15);color:#4ecdc4;border:1px solid rgba(78,205,196,.3)}
+.tag.sw{background:rgba(255,107,53,.15);color:#ff6b35;border-color:rgba(255,107,53,.3)}
+.tag.gold{background:rgba(255,213,79,.15);color:#ffd54f;border-color:rgba(255,213,79,.3)}
+.tag.fire{background:rgba(255,107,107,.15);color:#ff8888;border-color:rgba(255,107,107,.3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>⚔️ Fusion 360 vs SolidWorks</h1>
+<p class="subtitle">2026 终极对比 · 价格 / 功能 / 适合人群 · Andy 哥决策指南</p>
+
+<div class="tabs">
+<div class="tab active" onclick="showPanel(0)">📊 总览</div>
+<div class="tab" onclick="showPanel(1)">💰 价格/许可</div>
+<div class="tab" onclick="showPanel(2)">🛠️ 核心功能</div>
+<div class="tab" onclick="showPanel(3)">⚙️ 高级功能</div>
+<div class="tab" onclick="showPanel(4)">🎯 适合谁</div>
+</div>
+
+<!-- Tab 0 总览 -->
+<div class="panel active" id="p0">
+<div class="section">
+<h2>📋 30 秒速览</h2>
+<div class="card-grid">
+<div class="compare-card">
+<h4>🔵 Autodesk Fusion 360</h4>
+<div class="price fusion">免费 / ¥200+/月</div>
+<p style="font-size:13px;color:#aaa">云端 CAD/CAM/CAE 一体化</p>
+<ul>
+<li>个人版<b>完全免费</b>（非商业）</li>
+<li>商业版 ¥200+/月</li>
+<li>Mac/Win/Linux 全平台</li>
+<li>云端模型 + 历史版本</li>
+<li>集成 CAM（2-5 轴加工）</li>
+<li>集成仿真 FEA/热分析</li>
+<li>集成渲染 + 动画</li>
+<li>团队协作（多用户同时编辑）</li>
+<li class="bad">大装配体性能较弱（&gt;1000 件卡）</li>
+<li class="bad">云端强依赖，断网受限</li>
+</ul>
+</div>
+<div class="compare-card sw-card">
+<h4>🟠 SolidWorks</h4>
+<div class="price sw">¥15000+/年</div>
+<p style="font-size:13px;color:#aaa">机械 CAD 行业标准</p>
+<ul>
+<li>学生/教师<b>免费</b>（通过学校）</li>
+<li>个人版 $99/年（3D 体验版）</li>
+<li>专业版 $3995+ 一次性 + 年维护</li>
+<li>只支持 Windows（Mac 已停）</li>
+<li>本地为主，云端可选</li>
+<li>独立 CAM（SolidWorks CAM）</li>
+<li>独立 Simulation Premium/FEA</li>
+<li>独立 PhotoView 360 渲染</li>
+<li>焊件/钣金/管道/电气专业模块</li>
+<li class="bad">商业用途贵（年维护费 ¥3000+）</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2>📊 核心维度评分（10 分制）</h2>
+<table class="score-table">
+<tr><th>维度</th><th>Fusion 360</th><th>SolidWorks</th><th>赢家</th></tr>
+<tr>
+<td>易用性 / 学习曲线</td>
+<td><span class="score-num fusion">9</span><span class="bar bar-fusion" style="width:90px"></span></td>
+<td><span class="score-num sw">7</span><span class="bar bar-sw" style="width:70px"></span></td>
+<td>Fusion</td>
+</tr>
+<tr>
+<td>参数化建模</td>
+<td><span class="score-num fusion">8</span><span class="bar bar-fusion" style="width:80px"></span></td>
+<td><span class="score-num sw">10</span><span class="bar bar-sw" style="width:100px"></span></td>
+<td>SolidWorks</td>
+</tr>
+<tr>
+<td>大装配体性能（&gt;1000 件）</td>
+<td><span class="score-num fusion">5</span><span class="bar bar-fusion" style="width:50px"></span></td>
+<td><span class="score-num sw">9</span><span class="bar bar-sw" style="width:90px"></span></td>
+<td>SolidWorks</td>
+</tr>
+<tr>
+<td>钣金 / 焊件 / 管道</td>
+<td><span class="score-num fusion">5</span><span class="bar bar-fusion" style="width:50px"></span></td>
+<td><span class="score-num sw">10</span><span class="bar bar-sw" style="width:100px"></span></td>
+<td>SolidWorks</td>
+</tr>
+<tr>
+<td>CAM 加工</td>
+<td><span class="score-num fusion">10</span><span class="bar bar-fusion" style="width:100px"></span></td>
+<td><span class="score-num sw">7</span><span class="bar bar-sw" style="width:70px"></span></td>
+<td>Fusion</td>
+</tr>
+<tr>
+<td>仿真 / FEA</td>
+<td><span class="score-num fusion">8</span><span class="bar bar-fusion" style="width:80px"></span></td>
+<td><span class="score-num sw">9</span><span class="bar bar-sw" style="width:90px"></span></td>
+<td>SolidWorks</td>
+</tr>
+<tr>
+<td>渲染 / 出图</td>
+<td><span class="score-num fusion">8</span><span class="bar bar-fusion" style="width:80px"></span></td>
+<td><span class="score-num sw">9</span><span class="bar bar-sw" style="width:90px"></span></td>
+<td>SolidWorks</td>
+</tr>
+<tr>
+<td>云端协作 / 移动</td>
+<td><span class="score-num fusion">10</span><span class="bar bar-fusion" style="width:100px"></span></td>
+<td><span class="score-num sw">6</span><span class="bar bar-sw" style="width:60px"></span></td>
+<td>Fusion</td>
+</tr>
+<tr>
+<td>价格友好度</td>
+<td><span class="score-num fusion">10</span><span class="bar bar-fusion" style="width:100px"></span></td>
+<td><span class="score-num sw">4</span><span class="bar bar-sw" style="width:40px"></span></td>
+<td>Fusion</td>
+</tr>
+<tr>
+<td>插件 / 第三方</td>
+<td><span class="score-num fusion">7</span><span class="bar bar-fusion" style="width:70px"></span></td>
+<td><span class="score-num sw">10</span><span class="bar bar-sw" style="width:100px"></span></td>
+<td>SolidWorks</td>
+</tr>
+<tr>
+<td>行业认可度（求职）</td>
+<td><span class="score-num fusion">6</span><span class="bar bar-fusion" style="width:60px"></span></td>
+<td><span class="score-num sw">10</span><span class="bar bar-sw" style="width:100px"></span></td>
+<td>SolidWorks</td>
+</tr>
+</table>
+</div>
+
+<div class="section">
+<h2>🏆 一句话总结</h2>
+<div class="verdict gold">
+<b>SolidWorks 是行业标准；Fusion 360 是趋势所向。</b><br>
+如果你是<b>机械工程师/求职/出工程图</b> → SolidWorks<br>
+如果你是<b>独立开发者/创业/小批量/3D 打印</b> → Fusion 360
+</div>
+</div>
+</div>
+
+<!-- Tab 1 价格 -->
+<div class="panel" id="p1">
+<div class="section">
+<h2>💰 价格 & 许可（2026 最新）</h2>
+<div class="cat-intro">SolidWorks 的价格是"劝退级"，Fusion 360 走"免费 + 订阅"路线。</div>
+
+<table class="spec-table">
+<tr><th>版本</th><th>Fusion 360</th><th>SolidWorks</th></tr>
+<tr><td><b>个人/学生</b></td>
+<td><span class="tag">免费</span> Fusion 360 Personal（年收入 < $1000 商业用途禁）<br>学生/教师：3 年免费教育版</td>
+<td><span class="tag sw">免费</span> 学生版（需学校授权）<br>个人版 $99/年（3D 体验 + SolidWorks xDesign 基础版）</td>
+</tr>
+<tr><td><b>入门订阅</b></td>
+<td><span class="tag">¥0</span> Fusion 360 Personal Use（仅学习/业余）<br><span class="tag">$545/年</span> Fusion Standard（约 ¥3900/年）</td>
+<td><span class="tag sw">$1295/年</span> SolidWorks Standard（约 ¥9300/年，含维护）</td>
+</tr>
+<tr><td><b>专业版</b></td>
+<td><span class="tag">$2330/年</span> Fusion Professional（含仿真 + 高级 CAM）<br><span class="tag">$4370/年</span> Fusion Ultimate（含制造 + 生成式设计）</td>
+<td><span class="tag sw">$3995 一次性 + $1295/年 维护</span> Standard<br>$5795+ Professional + 维护<br>Premium $8495+ 含 Simulation</td>
+</tr>
+<tr><td><b>5 年总成本</b></td>
+<td><b>约 ¥2-22 万</b>（看版本）</td>
+<td><b>约 ¥6.5-15 万</b>（含维护费）</td>
+</tr>
+<tr><td><b>关键差异</b></td>
+<td>云端订阅 + 永久绑定 Autodesk 账户<br>商业版<b>有营收上限</b>（Personal $100k/年）</td>
+<td>永久买断 + 年维护费（约 20%）<br>维护停 = 没法用新版</td>
+</tr>
+</table>
+</div>
+
+<div class="section">
+<h2>🎁 Andy 哥免费获得 SolidWorks 的方式</h2>
+<div class="verdict">
+1. <b>学生 / 教师</b>：通过学校邮箱申请 SolidWorks 学生版，3 年免费，全功能<br>
+2. <b>创业公司</b>：SolidWorks for Entrepreneurs（前 1 年免费，需融资 &lt; $1M）<br>
+3. <b>3D 体验试用</b>：SolidWorks xDesign 浏览器版免费，但功能残缺<br>
+4. <b>学术研究</b>：教授/研究生通过学校申请研究许可<br><br>
+<span style="color:#ff6b35">⚠️ 你 USER.md 写明"技能：SolidWorks"，如果你现在已经会，说明你可能已有某种许可。</span>
+</div>
+</div>
+</div>
+
+<!-- Tab 2 核心功能 -->
+<div class="panel" id="p2">
+<div class="section">
+<h2>🛠️ 核心建模功能对比</h2>
+
+<table class="spec-table">
+<tr><th>功能</th><th>Fusion 360</th><th>SolidWorks</th></tr>
+<tr><td><b>草图工具</b></td>
+<td>✓ 全功能 + 自动约束<br>✓ 草图诊断（红黄绿显示）</td>
+<td>✓ 行业标杆<br>✓ 自动/几何/尺寸约束完整</td>
+</tr>
+<tr><td><b>拉伸 / 旋转 / 扫描</b></td>
+<td>✓ 全部支持<br>✓ "拉伸"对话框集中</td>
+<td>✓ 全部支持<br>✓ FeatureManager 设计树逻辑</td>
+</tr>
+<tr><td><b>布尔运算</b></td>
+<td>✓ 组合/切除/相交/分割</td>
+<td>✓ 组合/切除/相交<br>✓ "分割"更灵活</td>
+</tr>
+<tr><td><b>圆角 / 倒角</b></td>
+<td>✓ 边圆角/面圆角/变半径</td>
+<td>✓ 同上 + 圆角专家（更细）</td>
+</tr>
+<tr><td><b>放样 / 边界</b></td>
+<td>✓ Loft + Boundary</td>
+<td>✓ Loft + Boundary<br>✓ 引导线控制更细</td>
+</tr>
+<tr><td><b>镜像 / 阵列</b></td>
+<td>✓ 矩形/圆形/曲线阵列</td>
+<td>✓ 同上 + 填充阵列/表驱动</td>
+</tr>
+<tr><td><b>方程式 / 全局变量</b></td>
+<td>✓ "参数" + 链接 CSV</td>
+<td>✓ 方程式 + 全局变量 + 设计表</td>
+</tr>
+<tr><td><b>历史/时间线</b></td>
+<td>✓ 时间线 + 滑块（秒级回溯）</td>
+<td>✓ FeatureManager（树状结构）</td>
+</tr>
+<tr><td><b>直接建模</b></td>
+<td>✓ 推/拉面 + 移动面（很丝滑）</td>
+<td>△ 需在零件模式下选"直接编辑"</td>
+</tr>
+<tr><td><b>曲面建模</b></td>
+<td>✓ 完整曲面工具</td>
+<td>✓ 行业标杆（更精细控制）</td>
+</tr>
+<tr><td><b>钣金</b></td>
+<td>✓ 基础钣金（折弯/展开）</td>
+<td>✓ <b>行业标杆</b>（自定义折弯表/工具）</td>
+</tr>
+<tr><td><b>焊件</b></td>
+<td>△ 基础轮廓切割</td>
+<td>✓ <b>专业模块</b>（结构件库/切割清单）</td>
+</tr>
+<tr><td><b>管道 / 电气</b></td>
+<td>✗ 无</td>
+<td>✓ <b>Routing 专业模块</b>（管道/线缆/电气）</td>
+</tr>
+<tr><td><b>装配体</b></td>
+<td>✓ 1000 件以下流畅<br>△ &gt;1000 件会卡</td>
+<td>✓ <b>5000+ 件流畅</b>（专业级）</td>
+</tr>
+<tr><td><b>运动仿真</b></td>
+<td>✓ 内置（关节/弹簧/电机）</td>
+<td>✓ Motion 分析（更专业）</td>
+</tr>
+</table>
+</div>
+
+<div class="section">
+<h2>🎬 直接建模对比（Fusion 强项）</h2>
+<div class="verdict">
+<b>Fusion 360 的"推/拉面" + 倒角/圆角直接编辑是杀手锏</b>——从第三方 STEP 文件改尺寸/改细节超方便。<br>
+SolidWorks 改 STEP 复杂得多（要先"识别特征"再改）。<br><br>
+<span style="color:#4ecdc4">Andy 哥你改 KLP1 / 大鱼 SPA 之类的二手打印机，F</span><span style="color:#4ecdc4">usion 直接改 STL/STEP 会省 50% 时间。</span>
+</div>
+</div>
+</div>
+
+<!-- Tab 3 高级功能 -->
+<div class="panel" id="p3">
+<div class="section">
+<h2>⚙️ 高级功能对比</h2>
+
+<table class="spec-table">
+<tr><th>功能</th><th>Fusion 360</th><th>SolidWorks</th></tr>
+<tr><td><b>CAM（数控加工）</b></td>
+<td>⭐ <b>核心杀手锏</b><br>2-5 轴铣削、车削、切割、3D 打印<br>刀路仿真 + 后处理<br>与 CAD 无缝集成</td>
+<td>SolidWorks CAM（独立模块）<br>2.5-5 轴加工<br>刀路库 + 后处理<br>额外费用</td>
+</tr>
+<tr><td><b>FEA 仿真</b></td>
+<td>✓ 内置（静力学/模态/热/屈曲）<br>云端求解（Autodesk 算力）<br>免费版有限制</td>
+<td>✓ Simulation Standard/Premium/Professional<br>本地求解（算力看电脑）<br>多模块费用累加</td>
+</tr>
+<tr><td><b>渲染</b></td>
+<td>✓ 内置云渲染（出图快）<br>Arnold 渲染器</td>
+<td>△ PhotoView 360（需单独购买）<br>Visualize 专业渲染</td>
+</tr>
+<tr><td><b>动画</b></td>
+<td>✓ 基础动画 + 运动算例<br>云渲染动画</td>
+<td>✓ 动画 + 运动算例<br>Visualize 高级</td>
+</tr>
+<tr><td><b>3D 打印准备</b></td>
+<td>✓ <b>直接切片到打印机</b>（拓竹/Prusa/MakerBot）<br>✓ STL/OBJ/3MF 导出<br>✓ 支撑自动生成</td>
+<td>✓ STL/3MF 导出<br>△ 无直接切片（需外部软件）</td>
+</tr>
+<tr><td><b>2D 工程图</b></td>
+<td>✓ 基础工程图（够用）<br>GD&T 标注<br>✓ 1:1 打印出图</td>
+<td>✓ <b>行业标杆</b><br>完整 GD&T / 装配图 / 材料明细表<br>自定义标题栏</td>
+</tr>
+<tr><td><b>PDM（文件管理）</b></td>
+<td>✓ 云端版本控制（自带）<br>✓ 协作 + 权限管理</td>
+<td>SolidWorks PDM Standard/Professional（额外）<br>本地服务器</td>
+</tr>
+<tr><td><b>云端协作</b></td>
+<td>⭐ <b>杀手锏</b><br>多用户同时编辑<br>云端模型库 + 共享</td>
+<td>△ 3D Experience 平台（订阅）<br>本地为主</td>
+</tr>
+<tr><td><b>移动端</b></td>
+<td>✓ iOS/Android App（查看+评论）</td>
+<td>△ 3D Experience Mobile</td>
+</tr>
+<tr><td><b>API / 二次开发</b></td>
+<td>✓ Python API + C++<br>Fusion 360 Add-In</td>
+<td>✓ SolidWorks API（C# / VBA）<br>宏录制</td>
+</tr>
+</table>
+</div>
+
+<div class="section">
+<h2>🌐 平台支持</h2>
+<table class="spec-table">
+<tr><th>平台</th><th>Fusion 360</th><th>SolidWorks</th></tr>
+<tr><td>Windows 10/11</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr><td>macOS</td>
+<td>✓ 完整支持</td>
+<td>✗ <b>已停</b>（2017 后不再发布 Mac 版）</td>
+</tr>
+<tr><td>Linux</td>
+<td>✓ 浏览器版可用</td>
+<td>✗</td>
+</tr>
+<tr><td>Web 浏览器</td>
+<td>✓ Fusion Web（轻量）</td>
+<td>△ 3D Experience（订阅）</td>
+</tr>
+<tr><td>移动端</td>
+<td>✓ iOS + Android</td>
+<td>✗ 无原生 App</td>
+</tr>
+</table>
+</div>
+</div>
+
+<!-- Tab 4 适合谁 -->
+<div class="panel" id="p4">
+<div class="section">
+<h2>🎯 适合谁？（按职业/场景）</h2>
+
+<div class="card-grid">
+<div class="compare-card">
+<h4>🛠️ 机械工程师（企业/工厂）</h4>
+<p style="font-size:13px;color:#4ecdc4;font-weight:600">→ SolidWorks</p>
+<ul>
+<li>公司用 SolidWorks 比例 80%+</li>
+<li>图纸通用性 + GD&T 完整</li>
+<li>钣金/焊件/管道标准流程</li>
+<li class="bad">SolidWorks 简历加分多</li>
+</ul>
+</div>
+<div class="compare-card sw-card">
+<h4>🚀 创业者 / 独立开发者</h4>
+<p style="font-size:13px;color:#ff6b35;font-weight:600">→ Fusion 360</p>
+<ul>
+<li>CAD + CAM + 渲染 + 3D 打印一站</li>
+<li>价格友好（年收入低可免费）</li>
+<li>云端协作 + 移动办公</li>
+<li>硬件原型 → 3D 打印无缝</li>
+</ul>
+</div>
+
+<div class="compare-card">
+<h4>🖨️ 3D 打印玩家（你 Andy 哥）</h4>
+<p style="font-size:13px;color:#4ecdc4;font-weight:600">→ Fusion 360 + SolidWorks 双修</p>
+<ul>
+<li>Fusion 做日常设计 + 直接切片打印</li>
+<li>SolidWorks 做正式工程图 + 客户对接</li>
+<li>改第三方 STEP 用 Fusion（直接建模）</li>
+</ul>
+</div>
+<div class="compare-card sw-card">
+<h4>🎓 学生 / 教学</h4>
+<p style="font-size:13px;color:#ff6b35;font-weight:600">→ SolidWorks 学生版</p>
+<ul>
+<li>学校授权下完全免费</li>
+<li>行业认可度最高</li>
+<li>SolidWorks 认证（CSWA/CSPO）求职有用</li>
+</ul>
+</div>
+
+<div class="compare-card">
+<h4>🏭 制造业 / 钣金工厂</h4>
+<p style="font-size:13px;color:#4ecdc4;font-weight:600">→ SolidWorks + 钣金模块</p>
+<ul>
+<li>钣金展开图/折弯表必备</li>
+<li>焊件轮廓库</li>
+<li>PDM 文件管理</li>
+</ul>
+</div>
+<div class="compare-card sw-card">
+<h4>💻 数控 / CNC 加工</h4>
+<p style="font-size:13px;color:#ff6b35;font-weight:600">→ Fusion 360</p>
+<ul>
+<li>CAM 功能完整且免费</li>
+<li>刀路仿真 + 后处理</li>
+<li>2-5 轴都支持</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2>💡 给 Andy 哥的具体建议</h2>
+
+<div class="verdict">
+<b>你的现状：</b>已有 SolidWorks 技能 + 从事 LED 业务 + 玩 3D 打印 + 准备打印农场<br><br>
+<b>我的建议：</b><br><br>
+<span class="tag">方案 A</span>（保守）：<b>继续 SolidWorks 主力 + 装个 Fusion 360 个人免费版当副业</b><br>
+• 改第三方 STEP（KLP1/大鱼 SPA 升级件）用 Fusion 直接建模<br>
+• 出工程图/客户图纸用 SolidWorks<br>
+• 偶尔做 CNC 加工就开 Fusion CAM<br><br>
+<span class="tag gold">方案 B</span>（推荐）：<b>SolidWorks + Fusion 360 各司其职</b><br>
+• SolidWorks：机械设计、装配体、工程图（找工作/正式项目用）<br>
+• Fusion 360：3D 打印原型、直接建模改 STL/STEP、3D 打印切片<br>
+• 你做 LED 业务要出工程图给客户的话 SolidWorks 必备<br><br>
+<span class="tag fire">方案 C</span>（转型）：<b>全切 Fusion 360</b>，前提是你不需要靠 SolidWorks 简历吃饭<br>
+• 3D 打印圈 Fusion 越来越主流<br>
+• 价格友好 + 云端协作适合小团队<br>
+• 但制造业求职会被卡 SolidWorks
+</div>
+
+<div class="cta-box">
+<h3>🎬 实战建议</h3>
+<p style="margin:8px 0;font-size:14px;color:#ccc">
+下一步：<b>打开 Fusion 360 免费版 → 改一个你最近打印的 ST</b>L（比如 Voron 工具头卡扣）<br>
+5 分钟体感"直接建模"和"切片到打印机"的威力，再决定要不要继续用 SolidWorks。
+</p>
+<p style="margin:8px 0;font-size:12px;color:#999">
+📌 注意：Fusion 360 2025 起对 STL 修改功能做了升级，"Mesh → BRep" 一键转换比以前好用
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+function showPanel(n){
+document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===n));
+document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('active',i===n));
+}
+</script>
+</body>
+</html>

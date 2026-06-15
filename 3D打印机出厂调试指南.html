@@ -1,0 +1,1964 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D打印机出厂调试完整指南 | KINGROON KLP1 参考</title>
+    <style>
+        :root {
+            --bg-dark: #0a0e14;
+            --bg-card: #121820;
+            --bg-card-hover: #1a2230;
+            --border: #2a3545;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent-green: #3fb950;
+            --accent-green-dim: #238636;
+            --accent-blue: #58a6ff;
+            --accent-blue-dim: #1f6feb;
+            --accent-yellow: #d29922;
+            --accent-red: #f85149;
+            --accent-purple: #a371f7;
+            --code-bg: #0d1117;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 14, 20, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 0 20px;
+        }
+
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+        }
+
+        .nav-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--accent-green);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-title svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        .nav-link {
+            padding: 6px 12px;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13px;
+            white-space: nowrap;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+
+        .nav-link.active {
+            color: var(--accent-green);
+            border-color: var(--accent-green-dim);
+            background: rgba(63, 185, 80, 0.1);
+        }
+
+        /* Main Content */
+        .main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 80px 20px 40px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(180deg, rgba(63, 185, 80, 0.1) 0%, transparent 100%);
+            border-radius: 16px;
+            margin-bottom: 40px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .hero-badge span {
+            color: var(--accent-blue);
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 60px;
+            scroll-margin-top: 80px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .section-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .section-icon.mechanical { background: rgba(63, 185, 80, 0.2); color: var(--accent-green); }
+        .section-icon.electrical { background: rgba(88, 166, 255, 0.2); color: var(--accent-blue); }
+        .section-icon.software { background: rgba(163, 113, 247, 0.2); color: var(--accent-purple); }
+        .section-icon.calibration { background: rgba(210, 153, 34, 0.2); color: var(--accent-yellow); }
+        .section-icon.testing { background: rgba(248, 81, 73, 0.2); color: var(--accent-red); }
+        .section-icon.packaging { background: rgba(110, 118, 129, 0.2); color: var(--text-secondary); }
+
+        .section h2 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .section-number {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: var(--accent-green-dim);
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: var(--accent-green);
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        /* Tables */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 20px 0;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            background: var(--bg-card);
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--accent-green);
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(63, 185, 80, 0.05);
+        }
+
+        .table-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 20px 0 12px;
+            padding-left: 4px;
+            border-left: 3px solid var(--accent-green);
+            padding-left: 12px;
+        }
+
+        /* Code */
+        code {
+            font-family: 'Fira Code', 'Consolas', monospace;
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: var(--accent-blue);
+        }
+
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: var(--text-primary);
+        }
+
+        .code-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Checklist */
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .checklist li:hover {
+            border-color: var(--accent-green-dim);
+        }
+
+        .checklist li.checked {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+
+        .checklist li.checked::before {
+            content: '✓';
+            color: var(--accent-green);
+        }
+
+        .checklist li::before {
+            content: '○';
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .checklist li.checked::before {
+            content: '✓';
+        }
+
+        .check-box {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+            transition: all 0.2s;
+        }
+
+        .checklist li.checked .check-box {
+            background: var(--accent-green);
+            border-color: var(--accent-green);
+        }
+
+        .check-box::after {
+            content: '';
+            width: 10px;
+            height: 6px;
+            border-left: 2px solid white;
+            border-bottom: 2px solid white;
+            transform: rotate(-45deg) scale(0);
+            transition: transform 0.2s;
+        }
+
+        .checklist li.checked .check-box::after {
+            transform: rotate(-45deg) scale(1);
+        }
+
+        /* Flowchart */
+        .flowchart {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .flowchart-container {
+            overflow-x: auto;
+        }
+
+        .flowchart svg {
+            min-width: 800px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            color: var(--accent-green);
+            border-bottom-color: var(--accent-green);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Accordion */
+        .accordion {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+
+        .accordion-header {
+            padding: 16px 20px;
+            background: var(--bg-card);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s;
+        }
+
+        .accordion-header:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .accordion-header h4 {
+            font-size: 15px;
+            color: var(--text-primary);
+        }
+
+        .accordion-icon {
+            color: var(--text-muted);
+            transition: transform 0.3s;
+        }
+
+        .accordion.open .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .accordion.open .accordion-content {
+            max-height: 2000px;
+        }
+
+        .accordion-body {
+            padding: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-green { background: rgba(63, 185, 80, 0.2); color: var(--accent-green); }
+        .badge-blue { background: rgba(88, 166, 255, 0.2); color: var(--accent-blue); }
+        .badge-yellow { background: rgba(210, 153, 34, 0.2); color: var(--accent-yellow); }
+        .badge-red { background: rgba(248, 81, 73, 0.2); color: var(--accent-red); }
+        .badge-purple { background: rgba(163, 113, 247, 0.2); color: var(--accent-purple); }
+
+        /* Alert */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin: 16px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .alert-info {
+            background: rgba(88, 166, 255, 0.1);
+            border: 1px solid rgba(88, 166, 255, 0.3);
+        }
+
+        .alert-warning {
+            background: rgba(210, 153, 34, 0.1);
+            border: 1px solid rgba(210, 153, 34, 0.3);
+        }
+
+        .alert-success {
+            background: rgba(63, 185, 80, 0.1);
+            border: 1px solid rgba(63, 185, 80, 0.3);
+        }
+
+        .alert-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .alert-content {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent-green);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Progress */
+        .progress-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+        }
+
+        .progress-bar-container {
+            background: var(--bg-dark);
+            border-radius: 8px;
+            height: 24px;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-green-dim), var(--accent-green));
+            border-radius: 8px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Highlight */
+        .highlight {
+            background: rgba(63, 185, 80, 0.1);
+            border: 1px solid var(--accent-green-dim);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+
+        .highlight h4 {
+            color: var(--accent-green);
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        /* Command blocks */
+        .command-block {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin: 8px 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
+        }
+
+        .command-prefix {
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        .command-text {
+            color: var(--text-primary);
+        }
+
+        .command-copy {
+            margin-left: auto;
+            padding: 4px 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-muted);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .command-copy:hover {
+            color: var(--accent-green);
+            border-color: var(--accent-green);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 13px;
+            border-top: 1px solid var(--border);
+            margin-top: 60px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .section h2 {
+                font-size: 22px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            .nav, .checklist li {
+                display: none;
+            }
+
+            body {
+                background: white;
+                color: black;
+            }
+
+            .card, .accordion {
+                border: 1px solid #ccc;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-content">
+            <div class="nav-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                3D打印机出厂调试指南
+            </div>
+            <div class="nav-links">
+                <a href="#overview" class="nav-link active">总览</a>
+                <a href="#mechanical" class="nav-link">机械装配</a>
+                <a href="#electrical" class="nav-link">电气配置</a>
+                <a href="#software" class="nav-link">软件配置</a>
+                <a href="#calibration" class="nav-link">校准</a>
+                <a href="#testing" class="nav-link">测试打印</a>
+                <a href="#packaging" class="nav-link">包装出厂</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Hero -->
+        <div class="hero">
+            <h1>3D打印机出厂调试完整指南</h1>
+            <p>从专业生产厂家的角度，全面覆盖机械装配、电气配置、软件校准、测试打印等核心环节。以 KINGROON KLP1 V2.2 (Klipper + CoreXY) 为参考机型，兼容 Voron、Creality K1、Bambu Lab X1 等主流品牌。</p>
+            <div class="hero-badge">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 6v6l4 2"/>
+                </svg>
+                预计调试时间：<span>4-6 小时</span> | 涵盖 <span>80+</span> 项检查点
+            </div>
+        </div>
+
+        <!-- Overview Section -->
+        <section id="overview" class="section">
+            <div class="section-header">
+                <div class="section-icon" style="background: rgba(255,255,255,0.1); color: var(--text-primary);">📋</div>
+                <div>
+                    <h2>调试流程总览</h2>
+                    <div class="section-number">完整流程分为 6 大阶段</div>
+                </div>
+            </div>
+
+            <!-- Flowchart -->
+            <div class="flowchart">
+                <div class="code-label">调试流程图</div>
+                <div class="flowchart-container">
+                    <svg viewBox="0 0 1000 400" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Definitions -->
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#3fb950"/>
+                            </marker>
+                            <filter id="glow">
+                                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        
+                        <!-- Phase 1: Mechanical -->
+                        <g filter="url(#glow)">
+                            <rect x="20" y="30" width="140" height="60" rx="8" fill="#1a2230" stroke="#3fb950" stroke-width="2"/>
+                            <text x="90" y="55" text-anchor="middle" fill="#3fb950" font-size="12" font-weight="600">1. 机械装配</text>
+                            <text x="90" y="75" text-anchor="middle" fill="#8b949e" font-size="10">机架·皮带·导轨</text>
+                        </g>
+                        
+                        <!-- Arrow 1 -->
+                        <line x1="160" y1="60" x2="190" y2="60" stroke="#3fb950" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        
+                        <!-- Phase 2: Electrical -->
+                        <g filter="url(#glow)">
+                            <rect x="200" y="30" width="140" height="60" rx="8" fill="#1a2230" stroke="#58a6ff" stroke-width="2"/>
+                            <text x="270" y="55" text-anchor="middle" fill="#58a6ff" font-size="12" font-weight="600">2. 电气配置</text>
+                            <text x="270" y="75" text-anchor="middle" fill="#8b949e" font-size="10">主板·固件·接线</text>
+                        </g>
+                        
+                        <!-- Arrow 2 -->
+                        <line x1="340" y1="60" x2="370" y2="60" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        
+                        <!-- Phase 3: Software -->
+                        <g filter="url(#glow)">
+                            <rect x="380" y="30" width="140" height="60" rx="8" fill="#1a2230" stroke="#a371f7" stroke-width="2"/>
+                            <text x="450" y="55" text-anchor="middle" fill="#a371f7" font-size="12" font-weight="600">3. 软件配置</text>
+                            <text x="450" y="75" text-anchor="middle" fill="#8b949e" font-size="10">printer.cfg</text>
+                        </g>
+                        
+                        <!-- Arrow 3 -->
+                        <line x1="520" y1="60" x2="550" y2="60" stroke="#a371f7" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        
+                        <!-- Phase 4: Calibration -->
+                        <g filter="url(#glow)">
+                            <rect x="560" y="30" width="140" height="60" rx="8" fill="#1a2230" stroke="#d29922" stroke-width="2"/>
+                            <text x="630" y="55" text-anchor="middle" fill="#d29922" font-size="12" font-weight="600">4. 校准</text>
+                            <text x="630" y="75" text-anchor="middle" fill="#8b949e" font-size="10">PID·Z-offset·PA</text>
+                        </g>
+                        
+                        <!-- Arrow 4 -->
+                        <line x1="700" y1="60" x2="730" y2="60" stroke="#d29922" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        
+                        <!-- Phase 5: Testing -->
+                        <g filter="url(#glow)">
+                            <rect x="740" y="30" width="140" height="60" rx="8" fill="#1a2230" stroke="#f85149" stroke-width="2"/>
+                            <text x="810" y="55" text-anchor="middle" fill="#f85149" font-size="12" font-weight="600">5. 测试打印</text>
+                            <text x="810" y="75" text-anchor="middle" fill="#8b949e" font-size="10">XYZ Cube·温塔</text>
+                        </g>
+                        
+                        <!-- Arrow 5 -->
+                        <line x1="880" y1="60" x2="910" y2="60" stroke="#f85149" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        
+                        <!-- Phase 6: Packaging -->
+                        <g filter="url(#glow)">
+                            <rect x="920" y="30" width="60" height="60" rx="8" fill="#1a2230" stroke="#6e7681" stroke-width="2"/>
+                            <text x="950" y="55" text-anchor="middle" fill="#6e7681" font-size="12" font-weight="600">6. 出厂</text>
+                            <text x="950" y="75" text-anchor="middle" fill="#8b949e" font-size="10">包装</text>
+                        </g>
+                        
+                        <!-- Sub-steps row -->
+                        <line x1="90" y1="90" x2="90" y2="120" stroke="#3fb950" stroke-width="1" stroke-dasharray="4"/>
+                        <rect x="20" y="120" width="140" height="50" rx="6" fill="#121820" stroke="#2a3545"/>
+                        <text x="90" y="140" text-anchor="middle" fill="#e6edf3" font-size="10">机架水平校准</text>
+                        <text x="90" y="158" text-anchor="middle" fill="#8b949e" font-size="9">CoreXY对角线 ≤0.5mm</text>
+                        
+                        <rect x="200" y="120" width="140" height="50" rx="6" fill="#121820" stroke="#2a3545"/>
+                        <text x="270" y="140" text-anchor="middle" fill="#e6edf3" font-size="10">TMC驱动配置</text>
+                        <text x="270" y="158" text-anchor="middle" fill="#8b949e" font-size="9">run_current = 电机额定×80%</text>
+                        
+                        <rect x="380" y="120" width="140" height="50" rx="6" fill="#121820" stroke="#2a3545"/>
+                        <text x="450" y="140" text-anchor="middle" fill="#e6edf3" font-size="10">stepper/加热配置</text>
+                        <text x="450" y="158" text-anchor="middle" fill="#8b949e" font-size="9">rotation_distance计算</text>
+                        
+                        <rect x="560" y="120" width="140" height="50" rx="6" fill="#121820" stroke="#2a3545"/>
+                        <text x="630" y="140" text-anchor="middle" fill="#e6edf3" font-size="10">探针/热床调平</text>
+                        <text x="630" y="158" text-anchor="middle" fill="#8b949e" font-size="9">SCREWS_TILT_CALCULATE</text>
+                        
+                        <rect x="740" y="120" width="140" height="50" rx="6" fill="#121820" stroke="#2a3545"/>
+                        <text x="810" y="140" text-anchor="middle" fill="#e6edf3" font-size="10">首层/质量验证</text>
+                        <text x="810" y="158" text-anchor="middle" fill="#8b949e" font-size="9">20mm XYZ Cube</text>
+                        
+                        <rect x="920" y="120" width="60" height="50" rx="6" fill="#121820" stroke="#2a3545"/>
+                        <text x="950" y="140" text-anchor="middle" fill="#e6edf3" font-size="10">质检归档</text>
+                        <text x="950" y="158" text-anchor="middle" fill="#8b949e" font-size="9">固件记录</text>
+                        
+                        <!-- Timeline at bottom -->
+                        <line x1="20" y1="250" x2="980" y2="250" stroke="#2a3545" stroke-width="2"/>
+                        
+                        <circle cx="90" cy="250" r="6" fill="#3fb950"/>
+                        <text x="90" y="280" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="600">1h</text>
+                        
+                        <circle cx="270" cy="250" r="6" fill="#58a6ff"/>
+                        <text x="270" y="280" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="600">30m</text>
+                        
+                        <circle cx="450" cy="250" r="6" fill="#a371f7"/>
+                        <text x="450" y="280" text-anchor="middle" fill="#a371f7" font-size="11" font-weight="600">30m</text>
+                        
+                        <circle cx="630" cy="250" r="6" fill="#d29922"/>
+                        <text x="630" y="280" text-anchor="middle" fill="#d29922" font-size="11" font-weight="600">2h</text>
+                        
+                        <circle cx="810" cy="250" r="6" fill="#f85149"/>
+                        <text x="810" y="280" text-anchor="middle" fill="#f85149" font-size="11" font-weight="600">1.5h</text>
+                        
+                        <circle cx="950" cy="250" r="6" fill="#6e7681"/>
+                        <text x="950" y="280" text-anchor="middle" fill="#6e7681" font-size="11" font-weight="600">30m</text>
+                        
+                        <!-- Duration labels -->
+                        <text x="180" y="300" text-anchor="middle" fill="#8b949e" font-size="10">──────────────</text>
+                        <text x="360" y="300" text-anchor="middle" fill="#8b949e" font-size="10">──────────────</text>
+                        <text x="540" y="300" text-anchor="middle" fill="#8b949e" font-size="10">──────────────</text>
+                        <text x="720" y="300" text-anchor="middle" fill="#8b949e" font-size="10">──────────────</text>
+                        <text x="880" y="300" text-anchor="middle" fill="#8b949e" font-size="10">────</text>
+                        
+                        <!-- Total -->
+                        <rect x="380" y="330" width="240" height="50" rx="8" fill="rgba(63,185,80,0.1)" stroke="#3fb950" stroke-width="2"/>
+                        <text x="500" y="355" text-anchor="middle" fill="#3fb950" font-size="14" font-weight="700">总耗时 ≈ 4-6 小时</text>
+                        <text x="500" y="372" text-anchor="middle" fill="#8b949e" font-size="11">Kingroon KLP1 V2.2 参考值</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value">80+</div>
+                    <div class="stat-label">检查项目</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">6</div>
+                    <div class="stat-label">核心阶段</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">4-6h</div>
+                    <div class="stat-label">预计工时</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">100%</div>
+                    <div class="stat-label">可交互追踪</div>
+                </div>
+            </div>
+
+            <!-- Brand Reference -->
+            <div class="highlight">
+                <h4>📌 参考机型与来源</h4>
+                <p>本指南以 <strong>KINGROON KLP1 V2.2</strong>（CoreXY + Klipper）为主参考机，兼容以下品牌的调试逻辑：</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;">
+                    <span class="badge badge-green">Voron V0/V2.4/Trident</span>
+                    <span class="badge badge-blue">Creality K1/K1 Max</span>
+                    <span class="badge badge-yellow">Bambu Lab X1/P1/A1</span>
+                    <span class="badge badge-purple">Anycubic Kobra</span>
+                    <span class="badge badge-blue">RatRig V-Core</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 1: Mechanical -->
+        <section id="mechanical" class="section">
+            <div class="section-header">
+                <div class="section-icon mechanical">🔧</div>
+                <div>
+                    <h2>1. 机械装配类</h2>
+                    <div class="section-number">机架水平、皮带张力、导轨垂直度、热床平整度</div>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="card">
+                    <h3>🔲 机架水平校准</h3>
+                    <p>确保打印机底座处于水平状态，这是所有后续校准的基准。使用水平仪在 X/Y/Z 三个方向检测。</p>
+                    <div class="table-title">检查标准</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>项目</th><th>标准值</th><th>工具</th></tr>
+                            <tr><td>XY 平面水平度</td><td>&lt; 0.5mm/m</td><td>水平仪</td></tr>
+                            <tr><td>对角线偏差</td><td>&lt; 0.5mm</td><td>卷尺</td></tr>
+                            <tr><td>框架扭曲</td><td>无晃动</td><td>手动检查</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>⚡ XY 皮带张力</h3>
+                    <p>CoreXY 皮带的张力直接影响打印精度。两侧皮带张力必须相等，否则会导致 gantry 倾斜。</p>
+                    <div class="alert alert-warning">
+                        <div class="alert-icon">⚠️</div>
+                        <div class="alert-content">皮带张力不均会导致斜向 ringing 纹和椭圆形打印问题。</div>
+                    </div>
+                    <div class="table-title">推荐张力值</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>机型类型</th><th>频率范围</th><th>张力(估算)</th></tr>
+                            <tr><td>Voron V0</td><td>110-130 Hz</td><td>~8-10 N</td></tr>
+                            <tr><td>Voron V2.4/Trident</td><td>80-100 Hz</td><td>~6-8 N</td></tr>
+                            <tr><td>Bambu X1/P1</td><td>60-75 Hz</td><td>~5-7 N</td></tr>
+                            <tr><td>KINGROON KLP1</td><td>90-110 Hz</td><td>~7-9 N</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📏 Z 导轨垂直度</h3>
+                    <p>Z轴两根导轨必须完全平行且垂直于 XY 平面。对于双 Z 电机机型，两侧高度必须一致。</p>
+                    <div class="table-title">CoreXY Z轴校准</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>步骤</th><th>方法</th></tr>
+                            <tr><td>1. 手动检测</td><td>移动 gantry 到中间位置，用直角尺检测</td></tr>
+                            <tr><td>2. 电机独立调节</td><td>松开联轴器，分别调整每根导轨</td></tr>
+                            <tr><td>3. 运行 QUAD_GANTRY_LEVEL</td><td>Klipper 自动补偿（V2.4）</td></tr>
+                            <tr><td>4. 运行 Z_TILT_ADJUST</td><td>Klipper 自动调平（Trident）</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🛏️ 热床平整度</h3>
+                    <p>热床本身和安装方式都可能导致变形。建议加热后测量，模拟实际打印状态。</p>
+                    <div class="table-title">热床检测标准</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>状态</th><th>平整度</th><th>处理方式</td></tr>
+                            <tr><td>冷态</td><td>&lt; 0.1mm</td><td>直接检测</td></tr>
+                            <tr><td>热态(60°C)</td><td>&lt; 0.2mm</td><td>加热后检测</td></tr>
+                            <tr><td>极端变形</td><td>&gt; 0.5mm</td><td>更换或加垫片</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🔩 皮带轮/惰轮紧固</h3>
+                    <p>检查所有皮带轮、惰轮、联轴器的固定螺丝。振动可能导致螺丝松动。</p>
+                    <div class="command-block">
+                        <span class="command-prefix">#</span>
+                        <span class="command-text">紧固检查清单：GT2 皮带轮螺丝、惰轮轴承座、电机固定螺丝、联轴器顶丝</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🔌 线缆整理</h3>
+                    <p>确保所有线缆走线合理，不影响运动部件。使用线缆夹和束线带固定。</p>
+                    <div class="alert alert-info">
+                        <div class="alert-icon">💡</div>
+                        <div class="alert-content">CoreXY 运动复杂，线缆必须留有足够余量并固定在非移动部件上。</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mechanical Checklist -->
+            <div class="card">
+                <h3>✅ 机械装配 Checklist</h3>
+                <ul class="checklist" id="mechChecklist">
+                    <li><span class="check-box"></span><span>检查机架所有连接螺丝是否紧固（2020型材角码连接）</span></li>
+                    <li><span class="check-box"></span><span>测量框架对角线，确保误差 &lt; 0.5mm</span></li>
+                    <li><span class="check-box"></span><span>检测 XY 平面水平度（水平仪）</span></li>
+                    <li><span class="check-box"></span><span>安装并检查皮带张力（频率计或 pluck test）</span></li>
+                    <li><span class="check-box"></span><span>确认两侧皮带张力相等（CoreXY 关键）</span></li>
+                    <li><span class="check-box"></span><span>检查 Z 轴导轨平行度和垂直度</span></li>
+                    <li><span class="check-box"></span><span>紧固所有皮带轮/惰轮螺丝</span></li>
+                    <li><span class="check-box"></span><span>检查联轴器是否居中、有无松动</span></li>
+                    <li><span class="check-box"></span><span>检测热床平整度（冷态/热态）</span></li>
+                    <li><span class="check-box"></span><span>整理线缆，确保不干涉运动部件</span></li>
+                    <li><span class="check-box"></span><span>手动移动各轴，确认无卡顿/异响</span></li>
+                    <li><span class="check-box"></span><span>涂抹润滑脂到 Z 丝杠（如果适用）</span></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 2: Electrical -->
+        <section id="electrical" class="section">
+            <div class="section-header">
+                <div class="section-icon electrical">⚡</div>
+                <div>
+                    <h2>2. 电气/电子类</h2>
+                    <div class="section-number">主板固件、TMC驱动配置、热端/热床接线、风扇、限位开关</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🔧 主板固件刷写</h3>
+                <p>KINGROON KLP1 预装了 Klipper 固件，但对于新主板或需要更新时需要重新刷写。</p>
+                
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab(this, 'klipper-flash')">Klipper 刷写</button>
+                    <button class="tab" onclick="switchTab(this, 'tmc-config')">TMC 驱动配置</button>
+                    <button class="tab" onclick="switchTab(this, 'wiring')">接线检查</button>
+                </div>
+
+                <div id="klipper-flash" class="tab-content active">
+                    <div class="table-title">Klipper 固件编译步骤</div>
+                    <pre><code># 1. 在树莓派/主机上安装 Klipper
+git clone https://github.com/Klipper3d/klipper
+cd klipper
+
+# 2. 配置编译选项
+make menuconfig
+# 选择: 
+#   Processor architecture: ARM (STM32)
+#   Processor model: STM32F103
+#   Build options:
+#     [] Use USB for communication (需要CAN或USB)
+#     [x] Use serial for communication
+#     Serial port: /dev/ttyAMA0 或 /dev/serial/by-id/xxx
+
+# 3. 编译固件
+make
+
+# 4. 将 klipper.bin 复制到 SD 卡
+# 重命名为 firmware.bin 并刷入</code></pre>
+
+                    <div class="alert alert-info">
+                        <div class="alert-icon">💡</div>
+                        <div class="alert-content">KINGROON KLP1 出厂已预装 Fluidd/Mainsail 界面，首次调试可直接在 Web 界面操作。</div>
+                    </div>
+                </div>
+
+                <div id="tmc-config" class="tab-content">
+                    <div class="table-title">TMC2209/TMC2226 驱动配置（Klipper）</div>
+                    <pre><code>[tmc2209 stepper_x]
+uart_pin: PF2
+run_current: 0.8      # 电机额定电流 × 80%
+hold_current: 0.4     # run_current 的 50%
+microsteps: 16
+stealthchop_threshold: 0  # 建议设为 0 使用 SpreadCycle
+
+[tmc2209 stepper_y]
+uart_pin: PF3
+run_current: 0.8
+hold_current: 0.4
+microsteps: 16
+stealthchop_threshold: 0
+
+[tmc2209 stepper_z]
+uart_pin: PF4
+run_current: 0.6      # Z 轴电机通常较小
+hold_current: 0.3
+microsteps: 16
+
+[tmc2209 extruder]
+uart_pin: PF5
+run_current: 0.6      # 根据挤出机类型调整
+hold_current: 0.3
+microsteps: 16
+stealthchop_threshold: 0</code></pre>
+
+                    <div class="table-title">常见电机额定电流对应的 run_current</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>电机规格</th><th>run_current 推荐</th><th>说明</th></tr>
+                            <tr><td>NEMA17 1.0A</td><td>0.8A (80%)</td><td>标准双极步进</td></tr>
+                            <tr><td>NEMA17 1.5A</td><td>1.2A (80%)</td><td>高扭矩电机</td></tr>
+                            <tr><td>NEMA17 1.8A</td><td>1.44A (80%)</td><td>高性能电机</td></tr>
+                            <tr><td>NEMA14 0.9A</td><td>0.72A (80%)</td><td>轻量级挤出机</td></tr>
+                        </table>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <div class="alert-icon">⚠️</div>
+                        <div class="alert-content">驱动芯片温度超过 70°C 可能导致热保护重启。请确保散热良好。</div>
+                    </div>
+                </div>
+
+                <div id="wiring" class="tab-content">
+                    <div class="table-title">接线检查清单</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>类别</th><th>检查项</th><th>验证方法</th></tr>
+                            <tr><td rowspan="3">加热器</td><td>热端加热棒接线牢固</td><td>测量电阻 15-20Ω</td></tr>
+                            <tr><td>热床加热线接线（需要接插件/焊锡）</td><td>检查端子无松动</td></tr>
+                            <tr><td>热床功率与电源匹配</td><td>确认电压/功率规格</td></tr>
+                            <tr><td rowspan="3">温度传感器</td><td>热端热敏电阻（通常 100k NTC）</td><td>室温读数 ~100kΩ</td></tr>
+                            <tr><td>热床热敏电阻</td><td>室温读数 ~100kΩ</td></tr>
+                            <tr><td>接线端子紧固</td><td>轻拉测试</td></tr>
+                            <tr><td rowspan="2">风扇</td><td>热端风扇接线正确</td><td>确认正负极</td></tr>
+                            <tr><td>控制风扇（PWM）接线</td><td>运行 M106/M107 测试</td></tr>
+                            <tr><td rowspan="2">限位开关</td><td>X/Y/Z 限位开关接线</td><td>测试触发状态</td></tr>
+                            <tr><td>探针（BLTouch/Klicky）接线</td><td>运行 PROBE_CALIBRATE 前测试</td></tr>
+                            <tr><td rowspan="2">步进电机</td><td>电机相序正确</td><td>G1 移动测试方向</td></tr>
+                            <tr><td>热插拔禁止</td><td>断电状态下连接</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Electrical Checklist -->
+            <div class="card">
+                <h3>✅ 电气配置 Checklist</h3>
+                <ul class="checklist" id="elecChecklist">
+                    <li><span class="check-box"></span><span>确认主板固件版本（Klipper/Fluidd/Mainsail）</span></li>
+                    <li><span class="check-box"></span><span>检查所有电机接线相序（X/Y/Z/E）</span></li>
+                    <li><span class="check-box"></span><span>配置 TMC2209 run_current（电机额定×80%）</span></li>
+                    <li><span class="check-box"></span><span>设置 microsteps 为 16（或 32）</span></li>
+                    <li><span class="check-box"></span><span>验证热端/热床加热器接线牢固</span></li>
+                    <li><span class="check-box"></span><span>测试热敏电阻读数（室温 ~100kΩ）</span></li>
+                    <li><span class="check-box"></span><span>检查风扇接线方向和 PWM 控制</span></li>
+                    <li><span class="check-box"></span><span>测试 X/Y/Z 限位开关触发</span></li>
+                    <li><span class="check-box"></span><span>验证探针（BLTouch）部署和触发</span></li>
+                    <li><span class="check-box"></span><span>检查电源电压（24V 或 12V）匹配</span></li>
+                    <li><span class="check-box"></span><span>确认接地良好</span></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 3: Software Configuration -->
+        <section id="software" class="section">
+            <div class="section-header">
+                <div class="section-icon software">💾</div>
+                <div>
+                    <h2>3. 软件配置类</h2>
+                    <div class="section-number">printer.cfg 核心配置段详解</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📄 printer.cfg 基础配置</h3>
+                <p>KINGROON KLP1 使用 Klipper，配置文件是 printer.cfg。以下是核心配置段的详细说明。</p>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this.parentElement)">
+                    <h4>[stepper_x] / [stepper_y] / [stepper_z] 步进电机配置</h4>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <pre><code>[stepper_x]
+step_pin: PF13
+dir_pin: PF12
+enable_pin: !PF14
+microsteps: 16
+rotation_distance: 40    # 皮带驱动计算值
+
+# 对于 GT2 皮带 + 20T 皮带轮:
+# rotation_distance = 齿数 × 齿距 = 20 × 2 = 40mm
+
+# 或者使用 steps_per_mm 转换:
+# rotation_distance = full_steps_per_rotation × microsteps / steps_per_mm
+# = 200 × 16 / 80 = 40
+
+endstop_pin: ^PG6        # X 轴限位开关
+position_min: 0
+position_max: 220        # 根据机型调整
+position_endstop: 0
+
+# CoreXY 需要特殊运动学
+[stepper_x]
+kinematics: corexy
+max_z_velocity: 50
+max_z_accel: 1000</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this.parentElement)">
+                    <h4>[extruder] 挤出机配置</h4>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <pre><code>[extruder]
+step_pin: P2.13
+dir_pin: P0.11
+enable_pin: !P2.12
+microsteps: 16
+# rotation_distance 对于直接驱动挤出机:
+# ≈ 齿轮周长 = π × 齿轮有效直径
+# LGX 等常见齿轮: rotation_distance ≈ 22-24mm
+rotation_distance: 22.678
+gear_ratio: 44:14, 37:17   # 如果使用减速挤出机
+
+heater_pin: P2.7
+heater_cartridge_pin: P2.7
+sensor_type: NTC 100k B3950
+sensor_pin: P0.24
+
+# Kingroon KLP1 典型值
+max_extrude_only_distance: 500
+max_extrude_only_velocity: 50
+max_extrude_only_accel: 2000
+
+pressure_advance: 0.04    # 初始值，后续需要校准</code></pre>
+
+                        <div class="table-title">常见挤出机的 rotation_distance 参考值</div>
+                        <div class="table-wrapper">
+                            <table>
+                                <tr><th>挤出机类型</th><th>rotation_distance</th><th>说明</th></tr>
+                                <tr><td>BMG/MG90s</td><td>7.15 (含 3:1 减速)</td><td>需实测校准</td></tr>
+                                <tr><td>LGX 原始</td><td>22.678</td><td>不含减速</td></tr>
+                                <tr><td>LGX 减速版</td><td>7.56</td><td>需实测校准</td></tr>
+                                <tr><td>Kingroon KLP1</td><td>22.0-24.0</td><td>实测确定</td></tr>
+                                <tr><td>Bambu Lab</td><td>4.25</td><td>实测确定</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this.parentElement)">
+                    <h4>[heater_bed] 热床配置</h4>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <pre><code>[heater_bed]
+heater_pin: P2.5
+sensor_type: NTC 100k B3950
+sensor_pin: P0.23
+# min_temp: 0
+# max_temp: 120
+
+# PID 控制（推荐替代 Bang-Bang）
+control: pid
+pid_kp: 23.06
+pid_ki: 1.15
+pid_kd: 110.08
+# 这些值需要通过 PID_CALIBRATE 获得</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this.parentElement)">
+                    <h4>[probe] 探针配置（BLTouch/Klicky）</h4>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <pre><code>[probe]
+pin: ^P1.29            # 根据实际接线
+x_offset: 0
+y_offset: 0
+z_offset: 0           # 需要通过 PROBE_CALIBRATE 校准
+speed: 5               # 探测速度 mm/s
+samples: 3
+samples_result: median
+sample_retract_dist: 3.0
+samples_tolerance: 0.006
+samples_tolerance_retries: 3</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this.parentElement)">
+                    <h4>[fan] 风扇配置</h4>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <pre><code>[fan]
+pin: P1.18             # 热端散热风扇
+cycle_time: 0.010     # 10ms PWM 周期
+
+[heater_fan my_nozzle_fan]
+# 热端风扇 - 温度控制自动启停
+pin: P1.18
+heater: extruder
+fan_speed: 1.0
+
+[controller_fan my_controller_fan]
+# 主板/驱动散热风扇
+pin: P2.0
+fan_speed: 0.5</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this.parentElement)">
+                    <h4>[safe_z_home] / [bed_mesh] / [screws_tilt_adjust]</h4>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <pre><code>[safe_z_home]
+home_xy_position: 110,110  # 热床中心位置
+speed: 50
+z_hop: 10                   # 归零前抬起高度
+z_hop_speed: 15
+
+[bed_mesh]
+# 热床网格补偿
+speed: 120
+horizontal_move_z: 5
+mesh_radius: 90             # 网格半径
+mesh_origin: 0, 0
+mesh_pps: 2,2              # points per section
+algorithm: bicubic
+bicubic_tension: 0.2
+faulty_region_1_start: 0.0, 0.0
+faulty_region_1_end: 0.0, 0.0
+# 多次测量点（KLP1 36点）
+probe_count: 6,6
+
+[screws_tilt_adjust]
+# 手动热床调平辅助
+screw1: 20, 20
+screw1_name: Front Left
+screw2: 200, 20
+screw2_name: Front Right
+screw3: 200, 200
+screw3_name: Rear Right
+screw4: 20, 200
+screw4_name: Rear Left
+horizontal_move_z: 10
+speed: 50
+screw_thread: CW-M3        # 根据实际螺纹调整</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Software Checklist -->
+            <div class="card">
+                <h3>✅ 软件配置 Checklist</h3>
+                <ul class="checklist" id="softChecklist">
+                    <li><span class="check-box"></span><span>确认 printer.cfg 语法正确（无错误提示）</span></li>
+                    <li><span class="check-box"></span><span>配置 stepper_x/y/z 的 step_pin、dir_pin、enable_pin</span></li>
+                    <li><span class="check-box"></span><span>计算并设置 rotation_distance（皮带驱动或丝杠驱动）</span></li>
+                    <li><span class="check-box"></span><span>配置 extruder rotation_distance 和热端参数</span></li>
+                    <li><span class="check-box"></span><span>配置 heater_bed（热床）温度传感器和加热引脚</span></li>
+                    <li><span class="check-box"></span><span>配置 [probe] 探针引脚和参数</span></li>
+                    <li><span class="check-box"></span><span>配置 [fan] 风扇 PWM 引脚</span></li>
+                    <li><span class="check-box"></span><span>设置 [safe_z_home] 归零安全高度</span></li>
+                    <li><span class="check-box"></span><span>配置 [bed_mesh] 热床网格参数</span></li>
+                    <li><span class="check-box"></span><span>设置 [screws_tilt_adjust] 手动调平参数（如果有螺丝调平）</span></li>
+                    <li><span class="check-box"></span><span>FIRMWARE_RESTART 测试配置生效</span></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 4: Calibration -->
+        <section id="calibration" class="section">
+            <div class="section-header">
+                <div class="section-icon calibration">🎯</div>
+                <div>
+                    <h2>4. 校准类</h2>
+                    <div class="section-number">皮带张力、Z垂直度、热床调平、探针、PID、挤出机、共振补偿等</div>
+                </div>
+            </div>
+
+            <div class="progress-section">
+                <h3>校准完成进度</h3>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="calProgress" style="width: 0%;">0%</div>
+                </div>
+                <p style="color: var(--text-muted); font-size: 13px; margin-top: 8px;">点击下方清单项目追踪进度</p>
+            </div>
+
+            <!-- Calibration Steps -->
+            <div class="grid">
+                <div class="card">
+                    <h3>🎸 皮带张力校准</h3>
+                    <p>使用频率计或手机频谱分析 app 测量皮带振动频率。</p>
+                    <div class="command-block">
+                        <span class="command-prefix">$</span>
+                        <span class="command-text">频率目标：CoreXY A/B 皮带均约 110 Hz（150mm 跨度）</span>
+                    </div>
+                    <div class="alert alert-info">
+                        <div class="alert-icon">💡</div>
+                        <div class="alert-content">手机 app 推荐：Spectroid（Android）、Decibel X（iOS）。测试时 gantry 位于皮带中间位置。</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📐 Z 导轨垂直度校准</h3>
+                    <p>确保 Z 轴两根导轨平行且垂直于 XY 平面。</p>
+                    <div class="command-block">
+                        <span class="command-prefix">#</span>
+                        <span class="command-text">G28          # 归零
+Z_TILT_ADJUST   # Trident 双 Z 自动调平
+# 或
+QUAD_GANTRY_LEVEL  # V2.4 四点 Z 调平</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🔧 SCREWS_TILT_CALCULATE 热床调平</h3>
+                    <p>使用探针测量各调平螺丝位置的 Z 高度，计算调整量。</p>
+                    <div class="command-block">
+                        <span class="command-prefix">#</span>
+                        <span class="command-text">G28
+SCREWS_TILT_CALCULATE</span>
+                    </div>
+                    <p style="margin-top: 12px; color: var(--text-secondary); font-size: 13px;">输出示例：<br>
+                    front left screw : adjust 00:00 (基准)<br>
+                    front right screw : adjust CW 00:02 (顺时针转2圈)<br>
+                    rear right screw : adjust CCW 00:01 (逆时针转1圈)</p>
+                </div>
+
+                <div class="card">
+                    <h3>📡 PROBE_CALIBRATE 探针 Z-offset</h3>
+                    <p>校准探针触发点与喷嘴末端的距离差。</p>
+                    <div class="command-block">
+                        <span class="command-prefix">#</span>
+                        <span class="command-text">G28
+PROBE_CALIBRATE</span>
+                    </div>
+                    <p style="margin-top: 12px; color: var(--text-secondary); font-size: 13px;">操作流程：<br>
+                    1. 探针移动到热床中心<br>
+                    2. 使用 A4 纸进行"纸测"<br>
+                    3. ACCEPT 确认<br>
+                    4. SAVE_CONFIG 保存</p>
+                </div>
+
+                <div class="card">
+                    <h3>📊 bed_mesh 网格测量</h3>
+                    <p>创建热床高度补偿网格，用于补偿热床不平整。</p>
+                    <div class="command-block">
+                        <span class="command-prefix">#</span>
+                        <span class="command-text">BED_MESH_CALIBRATE</span>
+                    </div>
+                    <div class="alert alert-info">
+                        <div class="alert-icon">💡</div>
+                        <div class="alert-content">KINGROON KLP1 建议 6×6=36 点网格。打印大件时效果明显。</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🌡️ PID_CALIBRATE 温度控制</h3>
+                    <p>校准 PID 参数使温度控制更稳定，减少波动。</p>
+                    <div class="command-block">
+                        <span class="command-prefix">#</span>
+                        <span class="command-text">PID_CALIBRATE HEATER=extruder TARGET=210
+PID_CALIBRATE HEATER=heater_bed TARGET=60
+SAVE_CONFIG</span>
+                    </div>
+                    <div class="table-title">推荐校准温度</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>耗材</th><th>热端温度</th><th>热床温度</th></tr>
+                            <tr><td>PLA</td><td>200-210°C</td><td>55-60°C</td></tr>
+                            <tr><td>PETG</td><td>235-250°C</td><td>70-80°C</td></tr>
+                            <tr><td>ABS</td><td>250-260°C</td><td>95-110°C</td></tr>
+                            <tr><td>ASA</td><td>250-260°C</td><td>90-100°C</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📏 e-steps / rotation_distance 挤出校准</h3>
+                    <p>确保 100mm 挤出命令实际挤出 100mm 耗材。</p>
+                    <div class="command-block">
+                        <span class="command-prefix">#</span>
+                        <span class="command-text">G91
+G1 E100 F100
+G1 E-100 F100
+# 测量实际挤出量并计算修正值</span>
+                    </div>
+                    <p style="margin-top: 12px; color: var(--text-secondary); font-size: 13px;">修正公式：<br>
+                    New rotation_distance = Old × (期望值 / 实测值)</p>
+                </div>
+
+                <div class="card">
+                    <h3>⚡ Pressure Advance 压力补偿</h3>
+                    <p>消除拐角过冲和欠冲，提升打印精度。</p>
+                    <div class="command-block">
+                        <span class="command-prefix">#</span>
+                        <span class="command-text">TUNING_TOWER COMMAND=SET_PRESSURE_ADVANCE 
+  PARAMETER=ADVANCE START=0 FACTOR=0.005</span>
+                    </div>
+                    <div class="table-title">Pressure Advance 推荐范围</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>挤出机类型</th><th>典型 PA 值</th></tr>
+                            <tr><td>直接驱动 (Direct Drive)</td><td>0.02 - 0.08</td></tr>
+                            <tr><td>远端 Bowden</td><td>0.3 - 1.0</td></tr>
+                            <tr><td>KINGROON KLP1 (直接驱动)</td><td>0.03 - 0.06</td></tr>
+                            <tr><td>Bambu Lab X1</td><td>0.02 - 0.04</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🌊 SHAPER_CALIBRATE 共振补偿</h3>
+                    <p>使用 ADXL345 加速度计测量并补偿共振，提升高速打印质量。</p>
+                    <div class="command-block">
+                        <span class="command-prefix">#</span>
+                        <span class="command-text">SHAPER_CALIBRATE</span>
+                    </div>
+                    <div class="alert alert-info">
+                        <div class="alert-icon">💡</div>
+                        <div class="alert-content">KINGROON KLP1 出厂预设了 Input Shaper 参数。如更换耗材或大幅调整速度，建议重新校准。</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>💧 流量/线宽校准</h3>
+                    <p>使用单壁测试打印校准实际线宽与期望值的比例。</p>
+                    <div class="command-block">
+                        <span class="command-prefix">#</span>
+                        <span class="command-text">推荐打印 20mm 立方体单壁
+用卡尺测量实际壁厚
+调整 Flow = 期望壁厚 / 实测壁厚 × 100%</span>
+                    </div>
+                    <div class="table-title">典型 Flow Ratio 推荐值</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>耗材类型</th><th>Flow Ratio</th></tr>
+                            <tr><td>PLA</td><td>0.92 - 0.98</td></tr>
+                            <tr><td>PETG</td><td>0.90 - 0.96</td></tr>
+                            <tr><td>ABS</td><td>0.90 - 0.95</td></tr>
+                            <tr><td>TPU</td><td>0.85 - 0.92</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calibration Checklist -->
+            <div class="card">
+                <h3>✅ 校准 Checklist</h3>
+                <ul class="checklist" id="calChecklist">
+                    <li><span class="check-box"></span><span>皮带张力校准（频率计测量，目标约 110Hz）</span></li>
+                    <li><span class="check-box"></span><span>确认两侧皮带张力相等</span></li>
+                    <li><span class="check-box"></span><span>Z 导轨垂直度检测（Z_TILT_ADJUST 或 QUAD_GANTRY_LEVEL）</span></li>
+                    <li><span class="check-box"></span><span>SCREWS_TILT_CALCULATE 热床调平</span></li>
+                    <li><span class="check-box"></span><span>PROBE_CALIBRATE 探针 Z-offset</span></li>
+                    <li><span class="check-box"></span><span>BED_MESH_CALIBRATE 热床网格</span></li>
+                    <li><span class="check-box"></span><span>PID_CALIBRATE 热端温度</span></li>
+                    <li><span class="check-box"></span><span>PID_CALIBRATE 热床温度</span></li>
+                    <li><span class="check-box"></span><span>挤出机校准（100mm 测试）</span></li>
+                    <li><span class="check-box"></span><span>Pressure Advance 校准（拐角测试）</span></li>
+                    <li><span class="check-box"></span><span>SHAPER_CALIBRATE 共振补偿（如有 ADXL345）</span></li>
+                    <li><span class="check-box"></span><span>流量校准（单壁测试）</span></li>
+                    <li><span class="check-box"></span><span>SAVE_CONFIG 保存所有校准结果</span></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 5: Testing -->
+        <section id="testing" class="section">
+            <div class="section-header">
+                <div class="section-icon testing">🖨️</div>
+                <div>
+                    <h2>5. 测试打印类</h2>
+                    <div class="section-number">XYZ Cube、温度塔、回抽塔、流量塔、首层测试</div>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="card">
+                    <h3>📦 XYZ Cube 校准立方</h3>
+                    <p>最基础的测试打印，用于检验尺寸精度和整体打印质量。</p>
+                    <div class="table-title">推荐参数</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>参数</th><th>推荐值</th></tr>
+                            <tr><td>尺寸</td><td>20mm × 20mm × 20mm</td></tr>
+                            <tr><td>层高</td><td>0.2mm</td></tr>
+                            <tr><td>壁数</td><td>3（0.8mm）</td></tr>
+                            <tr><td>填充</td><td>15-20%</td></tr>
+                            <tr><td>速度</td><td>60mm/s（首层 20-30mm/s）</td></tr>
+                            <tr><td>耗材</td><td>PLA（易打印）</td></tr>
+                        </table>
+                    </div>
+                    <div class="alert alert-success">
+                        <div class="alert-icon">✓</div>
+                        <div class="alert-content">合格标准：尺寸误差 &lt; 0.2mm，各面平整无翘曲，层线均匀。</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🌡️ 温度塔 (Temperature Tower)</h3>
+                    <p>测试不同温度下的打印质量，找到最佳打印温度。</p>
+                    <div class="command-block">
+                        <span class="command-prefix">#</span>
+                        <span class="command-text">OrcaSlicer / PrusaSlicer 内置温度塔
+或手动 G-code:
+# 每 10mm 降低 5°C
+# 测试范围：190°C - 230°C (PLA)</span>
+                    </div>
+                    <p style="margin-top: 12px; color: var(--text-secondary); font-size: 13px;">观察要点：<br>
+                    • 拐角清晰度<br>
+                    • 底部附着力<br>
+                    • 层间结合力<br>
+                    • 表面光洁度</p>
+                </div>
+
+                <div class="card">
+                    <h3>↩️ 回抽塔 (Retraction Tower)</h3>
+                    <p>测试不同回抽距离/速度下的挂丝情况。</p>
+                    <div class="command-block">
+                        <span class="command-prefix">#</span>
+                        <span class="command-text">建议起始值：
+回抽距离：4-6mm（直接驱动）
+回抽速度：25-45mm/s
+测试步进：每层变化 0.2mm 或 5mm/s</span>
+                    </div>
+                    <p style="margin-top: 12px; color: var(--text-secondary); font-size: 13px;">Kingroon KLP1 推荐：回抽 3-5mm，速度 30-40mm/s</p>
+                </div>
+
+                <div class="card">
+                    <h3>💧 流量塔 (Flow Rate Tower)</h3>
+                    <p>测试不同流量值下的挤出均匀性。</p>
+                    <div class="command-block">
+                        <span class="command-prefix">#</span>
+                        <span class="command-text">OrcaSlicer 内置 Flow Rate 校准
+测试范围：85% - 105%
+步进：2%
+目标：找到最均匀壁厚的流量值</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🔲 首层测试 (First Layer Test)</h3>
+                    <p>首层质量是所有打印成败的关键，必须细致调整。</p>
+                    <div class="table-title">首层诊断</div>
+                    <div class="table-wrapper">
+                        <table>
+                            <tr><th>现象</th><th>原因</th><th>调整方法</th></tr>
+                            <tr><td>线条分离有间隙</td><td>Z 偏高</td><td>减小 Z offset / 降低喷嘴高度</td></tr>
+                            <tr><td>线条被压平有隆起</td><td>Z 偏低</td><td>增加 Z offset / 升高喷嘴高度</td></tr>
+                            <tr><td>局部不均匀</td><td>热床不平</td><td>重新热床调平 + bed_mesh</td></tr>
+                            <tr><td>线条粗糙/ blob</td><td>流量问题</td><td>检查挤出机张力、喉管堵塞</td></tr>
+                            <tr><td>卷边/翘曲</td><td>温度过高/床不够热</td><td>降低热床/喷嘴温度</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🎯 综合质量验证</h3>
+                    <p>完成以上测试后，进行综合质量验证。</p>
+                    <div class="alert alert-info">
+                        <div class="alert-icon">💡</div>
+                        <div class="alert-content">建议使用 All-in-one 校准文件一次性完成多项测试。</div>
+                    </div>
+                    <div class="command-block">
+                        <span class="command-prefix">📁</span>
+                        <span class="command-text">推荐模型（可从 Thingiverse/Cults3D 下载）：
+• All-in-One 3D Printer Calibration
+• Teaching Tech Calibration Guide
+• Kingroon/OrcaSlicer 内置校准文件</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testing Checklist -->
+            <div class="card">
+                <h3>✅ 测试打印 Checklist</h3>
+                <ul class="checklist" id="testChecklist">
+                    <li><span class="check-box"></span><span>打印 20mm XYZ Cube 检查尺寸精度</span></li>
+                    <li><span class="check-box"></span><span>打印温度塔确定最佳热端温度</span></li>
+                    <li><span class="check-box"></span><span>打印回抽塔优化回抽参数</span></li>
+                    <li><span class="check-box"></span><span>打印流量塔校准 Flow Ratio</span></li>
+                    <li><span class="check-box"></span><span>打印首层测试确认 Z-offset 正确</span></li>
+                    <li><span class="check-box"></span><span>检查所有测试件无明显缺陷</span></li>
+                    <li><span class="check-box"></span><span>打印 50mm+ 较大模型验证综合质量</span></li>
+                    <li><span class="check-box"></span><span>保存所有测试件照片存档</span></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 6: Packaging -->
+        <section id="packaging" class="section">
+            <div class="section-header">
+                <div class="section-icon packaging">📦</div>
+                <div>
+                    <h2>6. 包装出厂类</h2>
+                    <div class="section-number">固件版本记录、配置备份、出厂质检表、包装清单</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📋 固件版本记录</h3>
+                <p>记录机器当前固件版本，用于质量追溯和技术支持。</p>
+                <div class="table-wrapper">
+                    <table>
+                        <tr><th>项目</th><th>记录内容</th><th>说明</th></tr>
+                        <tr><td>Klipper 版本</td><td>如 v0.12.0-xxx</td><td>通过 M115 或 Fluidd 查看</td></tr>
+                        <tr><td>Moonraker 版本</td><td>如 v1.x.x</td><td>Web API 版本</td></tr>
+                        <tr><td>Fluidd/Mainsail 版本</td><td>如 v1.30.x</td><td>Web 界面版本</td></tr>
+                        <tr><td>树莓派 OS 版本</td><td>如 Raspberry Pi OS 2023-xx</td><td>如适用</td></tr>
+                        <tr><td>主板固件日期</td><td>编译日期</td><td>klipper.bin 元数据</td></tr>
+                    </table>
+                </div>
+                <div class="command-block">
+                    <span class="command-prefix">$</span>
+                    <span class="command-text">M115  # 查询 Klipper 固件版本
+GET http://localhost:80/server/info  # Moonraker API</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>💾 配置备份</h3>
+                <p>完整备份所有配置文件，便于故障恢复和批量部署。</p>
+                <div class="command-block">
+                    <span class="command-prefix">$</span>
+                    <span class="command-text"># Fluidd/Mainsail Web 界面
+# Configuration → Backup Configuration
+
+# 或 SSH 手动备份
+cp ~/klipper_config/printer.cfg ./backup_$(date +%Y%m%d).cfg
+tar -czvf klipper_backup.tar.gz ~/klipper_config/</span>
+                </div>
+                <div class="alert alert-success">
+                    <div class="alert-icon">✓</div>
+                    <div class="alert-content">建议备份文件：printer.cfg、所有宏文件、屏幕配置、切片机配置。</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📝 出厂质检表</h3>
+                <p>标准化质检流程，确保每台机器都经过相同检验。</p>
+                <div class="table-wrapper">
+                    <table>
+                        <tr><th>序号</th><th>检验项目</th><th>标准</th><th>结果</th><th>检验员</th><th>日期</th></tr>
+                        <tr><td>1</td><td>外观检查</td><td>无划伤/缺件</td><td>□ 通过 □ 不通过</td><td></td><td></td></tr>
+                        <tr><td>2</td><td>机架水平</td><td>&lt;0.5mm/m</td><td>□ 通过 □ 不通过</td><td></td><td></td></tr>
+                        <tr><td>3</td><td>皮带张力</td><td>X/Y 约 110Hz</td><td>□ 通过 □ 不通过</td><td></td><td></td></tr>
+                        <tr><td>4</td><td>归零精度</td><td>限位触发正常</td><td>□ 通过 □ 不通过</td><td></td><td></td></tr>
+                        <tr><td>5</td><td>热床调平</td><td>36 点网格完成</td><td>□ 通过 □ 不通过</td><td></td><td></td></tr>
+                        <tr><td>6</td><td>Z-offset</td><td>首层正常</td><td>□ 通过 □ 不通过</td><td></td><td></td></tr>
+                        <tr><td>7</td><td>PID 校准</td><td>温控稳定</td><td>□ 通过 □ 不通过</td><td></td><td></td></tr>
+                        <tr><td>8</td><td>XYZ 测试打印</td><td>尺寸误差&lt;0.2mm</td><td>□ 通过 □ 不通过</td><td></td><td></td></tr>
+                        <tr><td>9</td><td>网络连接</td><td>Web 界面可访问</td><td>□ 通过 □ 不通过</td><td></td><td></td></tr>
+                        <tr><td>10</td><td>固件备份</td><td>配置文件已导出</td><td>□ 通过 □ 不通过</td><td></td><td></td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📦 包装清单</h3>
+                <p>确保机器和配件完整包装，防潮防震。</p>
+                <div class="table-wrapper">
+                    <table>
+                        <tr><th>类别</th><th>物品</th><th>数量</th><th>备注</th></tr>
+                        <tr><td rowspan="4">主机</td><td>3D 打印机整机</td><td>1</td><td>已装好线缆</td></tr>
+                        <tr><td>玻璃/弹簧钢热床</td><td>1</td><td>已安装</td></tr>
+                        <tr><td>电源线</td><td>1</td><td>当地规格</td></tr>
+                        <tr><td>USB 线（可选）</td><td>1</td><td>用于调试</td></tr>
+                        <tr><td rowspan="4">配件</td><td>PLA 耗材</td><td>1 卷</td><td>已穿入挤出机</td></tr>
+                        <tr><td>铲刀</td><td>1</td><td>取模用</td></tr>
+                        <tr><td>内六角扳手套装</td><td>1</td><td>M3/M4</td></tr>
+                        <tr><td>TF/SD 卡</td><td>1</td><td>含测试文件</td></tr>
+                        <tr><td rowspan="2">文档</td><td>快速入门指南</td><td>1</td><td>含 IP 地址说明</td></tr>
+                        <tr><td>保修卡</td><td>1</td><td>正品凭证</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Packaging Checklist -->
+            <div class="card">
+                <h3>✅ 包装出厂 Checklist</h3>
+                <ul class="checklist" id="packChecklist">
+                    <li><span class="check-box"></span><span>记录 Klipper/Moonraker/Fluidd 版本号</span></li>
+                    <li><span class="check-box"></span><span>备份 printer.cfg 配置文件</span></li>
+                    <li><span class="check-box"></span><span>导出所有宏和屏幕配置</span></li>
+                    <li><span class="check-box"></span><span>打印并填写出厂质检表</span></li>
+                    <li><span class="check-box"></span><span>保存测试件照片</span></li>
+                    <li><span class="check-box"></span><span>确认所有配件完整</span></li>
+                    <li><span class="check-box"></span><span>清洁机器外观</span></li>
+                    <li><span class="check-box"></span><span>缠保护膜（运动部件）</span></li>
+                    <li><span class="check-box"></span><span>封箱并贴序列号标签</span></li>
+                    <li><span class="check-box"></span><span>录入库存系统</span></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Key Parameters Summary -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon" style="background: rgba(63,185,80,0.2); color: var(--accent-green);">📊</div>
+                <div>
+                    <h2>关键参数推荐值速查表</h2>
+                    <div class="section-number">KINGROON KLP1 V2.2 参考配置</div>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <tr><th>类别</th><th>参数</th><th>推荐值</th><th>备注</th></tr>
+                    <tr><td rowspan="4">皮带张力</td><td>X/Y 皮带频率</td><td>90-110 Hz</td><td>CoreXY 机型</td></tr>
+                    <tr><td>Voron V0 皮带频率</td><td>110-130 Hz</td><td>更小机型更高张力</td></tr>
+                    <tr><td>Voron V2.4 皮带频率</td><td>80-100 Hz</td><td>更大机型可稍松</td></tr>
+                    <tr><td>Bambu X1/P1 皮带频率</td><td>60-75 Hz</td><td>原装配置</td></tr>
+                    <tr><td rowspan="3">TMC 驱动</td><td>run_current</td><td>电机额定 × 80%</td><td>安全余量</td></tr>
+                    <tr><td>hold_current</td><td>run_current × 50%</td><td>减少发热</td></tr>
+                    <tr><td>microsteps</td><td>16 或 32</td><td>推荐 16</td></tr>
+                    <tr><td rowspan="3">rotation_distance</td><td>GT2 20T 皮带轮</td><td>40 mm</td><td>20齿 × 2mm</td></tr>
+                    <tr><td>KLP1 挤出机</td><td>22-24 mm</td><td>需实测校准</td></tr>
+                    <tr><td>8mm 丝杠</td><td>8 mm</td><td>T8 丝杠</td></tr>
+                    <tr><td rowspan="2">Pressure Advance</td><td>直接驱动</td><td>0.02-0.08</td><td>取决于耗材</td></tr>
+                    <tr><td>Kingroon KLP1</td><td>0.03-0.06</td><td>PLA/PETG</td></tr>
+                    <tr><td rowspan="2">PID 参数</td><td>热端 (PLA 210°C)</td><td>Kp≈25-35, Ki≈1-2, Kd≈80-120</td><td>运行 PID_CALIBRATE</td></tr>
+                    <tr><td>热床 (PLA 60°C)</td><td>Kp≈20-30, Ki≈1-2, Kd≈80-120</td><td>运行 PID_CALIBRATE</td></tr>
+                    <tr><td rowspan="2">热床网格</td><td>KLP1 探针点数</td><td>6×6=36 点</td><td>200mm 床面</td></tr>
+                    <tr><td>网格半径</td><td>床尺寸 - 10mm</td><td>留安全边距</td></tr>
+                    <tr><td rowspan="2">Flow Ratio</td><td>PLA</td><td>0.92-0.98</td><td>单壁校准</td></tr>
+                    <tr><td>PETG</td><td>0.90-0.96</td><td>单壁校准</td></tr>
+                </table>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>本文档参考 KINGROON、Voron Design、Klipper 官方文档、Bambu Lab 社区资料整理</p>
+            <p style="margin-top: 8px;">KINGROON KLP1 V2.2 出厂调试指南 | CoreXY + Klipper</p>
+        </footer>
+    </main>
+
+    <script>
+        // Tab switching
+        function switchTab(button, tabId) {
+            const parent = button.closest('.card');
+            parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            parent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            button.classList.add('active');
+            parent.querySelector('#' + tabId).classList.add('active');
+        }
+
+        // Accordion
+        function toggleAccordion(accordion) {
+            accordion.classList.toggle('open');
+        }
+
+        // Checklist interaction
+        document.querySelectorAll('.checklist').forEach(list => {
+            list.addEventListener('click', (e) => {
+                const li = e.target.closest('li');
+                if (li) {
+                    li.classList.toggle('checked');
+                    updateProgress();
+                }
+            });
+        });
+
+        // Progress tracking
+        function updateProgress() {
+            const totalItems = document.querySelectorAll('.checklist li').length;
+            const checkedItems = document.querySelectorAll('.checklist li.checked').length;
+            const percentage = Math.round((checkedItems / totalItems) * 100);
+            
+            const progressBar = document.getElementById('calProgress');
+            if (progressBar) {
+                progressBar.style.width = percentage + '%';
+                progressBar.textContent = percentage + '%';
+            }
+        }
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                const target = document.getElementById(targetId);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Update active nav
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Intersection Observer for active nav highlighting
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    navLinks.forEach(link => {
+                        link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+                    });
+                }
+            });
+        }, { threshold: 0.3 });
+
+        sections.forEach(section => observer.observe(section));
+
+        // Copy command functionality
+        document.querySelectorAll('.command-copy').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const commandBlock = e.target.closest('.command-block');
+                const text = commandBlock.querySelector('.command-text').textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    btn.textContent = '已复制!';
+                    setTimeout(() => btn.textContent = '复制', 2000);
+                });
+            });
+        });
+
+        // Initialize
+        updateProgress();
+    </script>
+</body>
+</html>

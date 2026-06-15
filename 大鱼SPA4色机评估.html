@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>大鱼SPA魔改 ¥366 评估</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#0f172a;color:#e2e8f0;line-height:1.6;padding:20px}
+.container{max-width:1200px;margin:0 auto}
+h1{font-size:28px;text-align:center;margin-bottom:8px;background:linear-gradient(135deg,#fb923c,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{text-align:center;color:#94a3b8;margin-bottom:24px;font-size:14px}
+.alert{background:linear-gradient(135deg,#7c2d12,#ea580c);padding:16px;border-radius:12px;margin-bottom:20px;border:2px solid #fb923c}
+.alert h2{color:#fff;font-size:18px;margin-bottom:6px}
+.alert p{color:#fed7aa;font-size:14px}
+.tabs{display:flex;gap:6px;margin-bottom:0;background:#1e293b;padding:8px;border-radius:12px 12px 0 0;overflow-x:auto}
+.tab{padding:10px 18px;background:#334155;color:#cbd5e1;border-radius:8px;cursor:pointer;font-size:14px;white-space:nowrap;transition:all .2s}
+.tab:hover{background:#475569}
+.tab.active{background:linear-gradient(135deg,#ea580c,#f59e0b);color:#fff;font-weight:600}
+.panel{display:none;background:#1e293b;padding:20px;border-radius:0 0 12px 12px;border:1px solid #334155;border-top:none;min-height:500px}
+.panel.active{display:block}
+.spec-card{background:#0f172a;padding:14px;border-radius:10px;margin-bottom:12px;border-left:4px solid #ea580c}
+.spec-card h3{color:#fb923c;font-size:15px;margin-bottom:6px}
+.spec-card .row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1e293b;font-size:13px}
+.spec-card .row:last-child{border:none}
+.spec-card .label{color:#94a3b8}
+.spec-card .value{color:#fef3c7;font-weight:600}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.compare-card{background:#0f172a;padding:14px;border-radius:10px;border:1px solid #334155}
+.compare-card.bad{border-left:4px solid #ef4444}
+.compare-card.good{border-left:4px solid #22c55e}
+.compare-card.warn{border-left:4px solid #eab308}
+.compare-card h4{color:#fb923c;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.compare-card ul{list-style:none;padding:0}
+.compare-card li{padding:4px 0;font-size:12.5px;color:#cbd5e1;position:relative;padding-left:18px}
+.compare-card li::before{content:"•";position:absolute;left:6px;color:#fb923c}
+.compare-card.bad li::before{color:#ef4444}
+.compare-card.good li::before{color:#22c55e}
+.compare-card.warn li::before{color:#eab308}
+.price-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+.price-table th,.price-table td{padding:8px 10px;text-align:left;border-bottom:1px solid #334155}
+.price-table th{background:#0f172a;color:#fb923c;font-weight:600}
+.price-table td.num{color:#fef3c7;text-align:right;font-weight:600}
+.price-table .total{background:#7c2d12;color:#fff;font-weight:700}
+.price-table .total td{color:#fff}
+.risk-meter{background:#0f172a;border-radius:10px;padding:14px;margin:10px 0}
+.risk-bar{height:24px;background:#1e293b;border-radius:12px;overflow:hidden;display:flex;margin:10px 0}
+.risk-seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:600}
+.risk-seg.low{background:#22c55e}
+.risk-seg.mid{background:#eab308}
+.risk-seg.high{background:#ef4444}
+.verdict-box{background:linear-gradient(135deg,#064e3b,#065f46);padding:18px;border-radius:12px;margin:14px 0;border:2px solid #10b981}
+.verdict-box.no{background:linear-gradient(135deg,#7f1d1d,#991b1b);border-color:#ef4444}
+.verdict-box h3{color:#fff;font-size:17px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.verdict-box p{color:#d1fae5;font-size:13.5px;margin:6px 0}
+.verdict-box.no p{color:#fecaca}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin-right:4px}
+.tag.red{background:#7f1d1d;color:#fecaca}
+.tag.yellow{background:#713f12;color:#fef3c7}
+.tag.green{background:#14532d;color:#bbf7d0}
+.tag.blue{background:#1e3a8a;color:#bfdbfe}
+.timeline{position:relative;padding-left:24px;margin:10px 0}
+.timeline::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:linear-gradient(180deg,#ea580c,#fb923c)}
+.tl-item{position:relative;margin-bottom:14px;padding-left:14px}
+.tl-item::before{content:"";position:absolute;left:-20px;top:6px;width:12px;height:12px;border-radius:50%;background:#ea580c;border:2px solid #0f172a}
+.tl-item h4{color:#fb923c;font-size:14px;margin-bottom:4px}
+.tl-item p{color:#cbd5e1;font-size:12.5px}
+.btn{display:inline-block;padding:6px 14px;background:linear-gradient(135deg,#ea580c,#f59e0b);color:#fff;border-radius:6px;font-size:12.5px;text-decoration:none;font-weight:600;margin-top:6px;cursor:pointer;border:none}
+.qa{background:#0f172a;padding:12px;border-radius:8px;margin:8px 0}
+.qa-q{color:#fb923c;font-weight:600;margin-bottom:4px;font-size:13.5px}
+.qa-a{color:#cbd5e1;font-size:13px}
+.divider{height:1px;background:#334155;margin:14px 0}
+.highlight-box{background:#422006;padding:12px;border-radius:8px;margin:10px 0;border-left:4px solid #f59e0b}
+.highlight-box strong{color:#fb923c}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.kpi{background:#0f172a;padding:10px;border-radius:8px;text-align:center;border:1px solid #334155}
+.kpi .num{font-size:22px;font-weight:700;color:#fb923c}
+.kpi .lbl{font-size:11px;color:#94a3b8;margin-top:2px}
+.kpi .sub{font-size:10px;color:#64748b}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🐟 大鱼 SPA 魔改 4 色机 ¥366 评估</h1>
+<p class="subtitle">卖家 Ealin_奕霖（佛山，10年老店，646 浏览 7 想要，已降价 39%）</p>
+
+<div class="alert">
+<h2>⚡ 一句话结论</h2>
+<p><strong>¥366 入手 1.5 折</strong> —— 散件价值约 ¥2000-2500，但你已经有了 KLP1 + 准备入手 K1 改造机 ¥300。<strong>建议：作为"多色学习副机"入手，而不是主力机。</strong>总投入 ¥366 + ¥300 调校 = ¥666，相当于免费获得 4 色打印能力。</p>
+</div>
+
+<div class="tabs">
+<div class="tab active" onclick="showPanel(0)">🔍 机器识别</div>
+<div class="tab" onclick="showPanel(1)">💰 ¥366 价值核对</div>
+<div class="tab" onclick="showPanel(2)">⚖️ vs K1 改造机</div>
+<div class="tab" onclick="showPanel(3)">✅ 买不买 + 怎么验</div>
+</div>
+
+<!-- Tab 1: 机器识别 -->
+<div class="panel active" id="p0">
+<div class="spec-card">
+<h3>📐 整机结构：i3 悬臂 + 4 色改装</h3>
+<div class="row"><span class="label">结构类型</span><span class="value">i3 悬臂（X/Y/Z 三轴 + 龙门升降 Z）</span></div>
+<div class="row"><span class="label">打印尺寸</span><span class="value">150 × 150 × 150 mm（小尺寸）</span></div>
+<div class="row"><span class="label">结构原型</span><span class="value">B 站大鱼 SPA 开源项目</span></div>
+<div class="row"><span class="label">主控</span><span class="value">STM32F103C6T6A（自研四轴板，TMC2209 驱动）</span></div>
+<div class="row"><span class="label">供电</span><span class="value">12V 电源（注意：限制高温打印）</span></div>
+<div class="row"><span class="label">上位机</span><span class="value">红米 Note4x（老安卓机，Klipper）</span></div>
+<div class="row"><span class="label">CAN 工具板</span><span class="value">有（但原装线不稳，卖家送必趣线可换）</span></div>
+</div>
+
+<div class="spec-card">
+<h3>🛠️ 三大魔改件（卖家描述）</h3>
+<div class="row"><span class="label">① 工具头</span><span class="value">FZ 工具头（风流才子设计，Voron 风格轻量化）</span></div>
+<div class="row"><span class="label">② 多色模块</span><span class="value">木子 AMS-LITE 4 色（拓竹 A1 同款方案的改装版）</span></div>
+<div class="row"><span class="label">③ 周边件</span><span class="value">屏幕 + TAP 接近开关自动调平 + 切刀擦嘴</span></div>
+</div>
+
+<div class="highlight-box">
+<strong>🔎 关键技术细节：</strong>
+<ul style="margin-left:20px;margin-top:6px;color:#fed7aa;font-size:13px">
+<li><strong>FZ 头</strong>：风流才子设计的轻量化工具头，原本是适配 Voron 0.2 平台（<a href="https://klipper.club/trinus/t273_p1.html" target="_blank" style="color:#fbbf24">参考 Klipper 玩客</a>），用在 i3 悬臂上是少见组合——i3 速度快时机振明显，可能影响 FZ 头的精度发挥</li>
+<li><strong>木子 AMS-LITE</strong>：拓竹 AMS Lite（4 色，$199 ≈ ¥1400）的第三方兼容方案，闲鱼二手约 ¥500-800。这台机器上集成的是木子版（<a href="https://wiki.bambulab.com/zh/ams-lite/manual/intro-ams-lite" target="_blank" style="color:#fbbf24">Bambu Lab Wiki</a> 原版 A1 系列专用，第三方改装需要改代码）</li>
+<li><strong>大鱼 SPA</strong>：B 站开源项目（<a href="https://blog.csdn.net/u011641184/article/details/129631361" target="_blank" style="color:#fbbf24">参考 CSDN 复刻</a>），裸硬件成本 600+，DIY 圈口碑：便宜、能折腾、调平麻烦</li>
+</ul>
+</div>
+
+<div class="kpi-grid">
+<div class="kpi"><div class="num">150</div><div class="lbl">mm 打印尺寸</div><div class="sub">小尺寸</div></div>
+<div class="kpi"><div class="num">12V</div><div class="lbl">供电</div><div class="sub">限高温料</div></div>
+<div class="kpi"><div class="num">4 色</div><div class="lbl">多色能力</div><div class="sub">木子 AMS</div></div>
+<div class="kpi"><div class="num">STM32</div><div class="lbl">主控</div><div class="sub">F103 系列</div></div>
+</div>
+</div>
+
+<!-- Tab 2: 价值核对 -->
+<div class="panel" id="p1">
+<h3 style="color:#fb923c;margin-bottom:10px">💰 ¥366 散件价值核对</h3>
+<table class="price-table">
+<thead>
+<tr><th>关键件</th><th>规格</th><th class="num">散件买价</th></tr>
+</thead>
+<tbody>
+<tr><td>大鱼 SPA 整机裸件</td><td>STM32F103 主板 + TMC2209 + 12V 电源 + 框架</td><td class="num">¥600-800</td></tr>
+<tr><td>FZ 工具头</td><td>风流才子设计 + 嘉立创开源集线板</td><td class="num">¥150-250</td></tr>
+<tr><td>木子 AMS-LITE 4 色</td><td>4 色供料 + 切刀擦嘴 + PTFE 料管</td><td class="num">¥500-800</td></tr>
+<tr><td>屏幕 + TAP 调平</td><td>拓竹 M5 屏兼容 / 接近开关</td><td class="num">¥80-150</td></tr>
+<tr><td>必趣 CAN 通讯线</td><td>卖家赠送（替换不稳的原装线）</td><td class="num">¥30-50</td></tr>
+<tr><td>红米 Note4x 上位机</td><td>Android 老手机（Klipper 用）</td><td class="num">¥50-100</td></tr>
+<tr style="border-top:2px solid #fb923c"><td colspan="2" style="color:#fb923c;font-weight:600">散件总价值（按全新）</td><td class="num" style="color:#fb923c;font-size:16px">¥1410-2150</td></tr>
+<tr><td colspan="2" style="color:#cbd5e1">+ 已调试好 = 节省 1-2 周折腾时间</td><td class="num">+ ¥500 时间成本</td></tr>
+<tr class="total"><td colspan="2">含时间成本的真实价值</td><td class="num">¥1910-2650</td></tr>
+<tr style="background:#7c2d12"><td colspan="2" style="color:#fff;font-weight:700">卖家要价</td><td class="num" style="color:#fff;font-size:18px">¥366</td></tr>
+<tr style="background:#14532d"><td colspan="2" style="color:#fff;font-weight:700">折扣率</td><td class="num" style="color:#fff;font-size:18px">1.5 折起</td></tr>
+</tbody>
+</table>
+
+<div class="alert" style="margin-top:16px;background:linear-gradient(135deg,#14532d,#166534);border-color:#22c55e">
+<h2>✅ 价格层面：明显捡漏</h2>
+<p>¥366 入手散件价值 ¥1900-2600 的整机，<strong>单算硬件已经 1.5 折</strong>，加上"已调试好 + 切刀擦嘴全套 + 木子 AMS"三个软价值，等于白送。<strong>作为副机/学习机绝对划算。</strong></p>
+</div>
+
+<div class="divider"></div>
+
+<h3 style="color:#fb923c;margin-bottom:10px">⚠️ 隐藏成本（不包邮 + 风险件）</h3>
+<div class="compare-grid">
+<div class="compare-card warn">
+<h4>💸 必须花的额外钱</h4>
+<ul>
+<li><strong>顺丰运费</strong>（佛山→长三角）：¥80-120</li>
+<li><strong>必趣 CAN 线</strong>：¥30-50（卖家送）</li>
+<li><strong>红米 Note4x 升级</strong>：换树莓派 4B = ¥250-350 / 捡二手 Pi 3B = ¥80-120</li>
+<li><strong>PEI 打印板</strong>（150×150mm）：¥30-50</li>
+<li><strong>必趣线 + 树莓派 + PEI</strong> ≈ ¥140-520</li>
+</ul>
+</div>
+<div class="compare-card bad">
+<h4>🔧 可能要花的钱</h4>
+<ul>
+<li><strong>树莓派电源</strong>（5V 3A）：¥30</li>
+<li><strong>TF 卡 + 读卡器</strong>：¥20</li>
+<li><strong>改 CAN 通讯代码</strong>：时间成本 1-3 天</li>
+<li><strong>重新切片配置</strong>：时间成本 0.5-1 天</li>
+<li><strong>12V→24V 升压板</strong>（如想打高温料）：¥50-100</li>
+</ul>
+</div>
+</div>
+
+<div class="highlight-box">
+<strong>💡 实际总投入：</strong><br>
+最低配置（用红米 + 卖家送必趣线）：¥366 + ¥100 运费 + ¥30 PEI 板 = <strong style="color:#fb923c">¥496</strong><br>
+推荐配置（红米 + 必趣线 + 二手 Pi 3B）：¥496 + ¥80 = <strong style="color:#fb923c">¥576</strong><br>
+完美配置（树莓派 4B + 必趣线）：¥496 + ¥280 = <strong style="color:#fb923c">¥776</strong>
+</div>
+</div>
+
+<!-- Tab 3: vs K1 改造机 -->
+<div class="panel" id="p2">
+<h3 style="color:#fb923c;margin-bottom:10px">⚖️ 两台机器的取舍</h3>
+<table class="price-table">
+<thead>
+<tr><th>维度</th><th>大鱼 SPA 4 色机 ¥366</th><th>K1 改造机 ¥300</th></tr>
+</thead>
+<tbody>
+<tr><td>结构</td><td>i3 悬臂（小尺寸入门）</td><td>CoreXY（Voron Stealthburner 头）</td></tr>
+<tr><td>打印尺寸</td><td>150 × 150 mm</td><td>K1 原生 220 × 220 mm</td></tr>
+<tr><td>主控</td><td>STM32F103（自研板，调试需改代码）</td><td>需自配 BTT Manta M8P / LDO K1 板</td></tr>
+<tr><td>驱动</td><td>TMC2209 内置</td><td>4 × 鸣志 48V 外置（¥1600 价值）</td></tr>
+<tr><td>电源</td><td>12V（限制高温）</td><td>48V + 24V 双电源（解锁高温）</td></tr>
+<tr><td>多色能力</td><td>✅ 4 色木子 AMS-LITE（核心卖点）</td><td>❌ 无（需另购 ¥500-800）</td></tr>
+<tr><td>最高温度</td><td>240°C（PTFE 上限）</td><td>500°C（bi-metal 全金属喉管）</td></tr>
+<tr><td>DIY 改件价值</td><td>¥1900-2600（已装好）</td><td>¥4500+（鸣志驱动 1600 + 电源 600 + 框架 2000）</td></tr>
+<tr><td>改造学习价值</td><td>中（i3 + 4色 + FZ头）</td><td>高（CoreXY + 48V + Voron 工具头）</td></tr>
+<tr><td>性能上限</td><td>拓竹 A1 + AMS Lite 同级</td><td>拓竹 P1S 90% + H2D 流速</td></tr>
+<tr><td>速度上限</td><td>200-300mm/s（i3 悬臂限制）</td><td>1000-1800mm/s（CoreXY + 48V）</td></tr>
+<tr><td>适合耗材</td><td>PLA / PETG</td><td>PLA / PETG / ABS / PC / 碳纤维 / 500°C 工业料</td></tr>
+<tr><td>尺寸限制</td><td>❌ 150mm 小（手办 OK，大件不行）</td><td>✅ 220mm 主流尺寸</td></tr>
+<tr><td>改完总成本</td><td>¥366 + ¥200 调校 = <strong style="color:#fb923c">¥566</strong></td><td>¥300 + ¥2000 改件 = <strong style="color:#fb923c">¥2300</strong></td></tr>
+</tbody>
+</table>
+
+<div class="divider"></div>
+
+<h3 style="color:#fb923c;margin-bottom:10px">🎯 互补关系 vs 重复关系</h3>
+<div class="compare-grid">
+<div class="compare-card good">
+<h4>✅ 互补组合（推荐）</h4>
+<ul>
+<li><strong>K1 改造机</strong>：主力机，220mm 打印 + CoreXY + 高温 + 高速 + 大件/工程件</li>
+<li><strong>大鱼 SPA 4 色</strong>：副机，4 色多色 + 小件 + PLA 多色手办/小批量</li>
+<li>两台机器<strong>场景不冲突</strong>，K1 改造机负责"大件 + 高温 + 高速"，大鱼 SPA 负责"多色 + 小件 + 折腾学习"</li>
+<li>总投入：¥2300 + ¥566 = <strong style="color:#22c55e">¥2866</strong>，相当于拓竹 P1S + AMS Lite 套装（¥4000+）的 70% 价格</li>
+</ul>
+</div>
+<div class="compare-card bad">
+<h4>❌ 重复关系（不推荐）</h4>
+<ul>
+<li>如果你只想要"主力机"，K1 改造机 ¥300 已经够用</li>
+<li>如果 K1 改造机能再加 ¥500-800 改装多色（4 进 1 出 + Y 分线器），可以省掉这台</li>
+<li>但<strong>改装多色 + 刷 Klipper + 联调</strong> 时间成本 1-2 周</li>
+<li>大鱼 SPA <strong>已调试好 + 木子 AMS 即插即用</strong> = 节省 1-2 周时间</li>
+<li>如果时间比钱重要 → 选大鱼 SPA；如果想深度改造学习 → K1 改造机自己改多色</li>
+</ul>
+</div>
+</div>
+
+<div class="highlight-box">
+<strong>🧠 Andy 哥的选择判断：</strong><br>
+你有 KLP1（主力）+ 准备入手 K1 改造机（¥300 性能解锁），再买大鱼 SPA ¥366 4 色机的价值在于：<br>
+① <strong>多色能力</strong>：KLP1 / K1 改造机都没法直接 4 色，多色是单独的能力维度<br>
+② <strong>学习机</strong>：i3 悬臂 + FZ 头 + 木子 AMS 的组合，改造逻辑和 K1 改造机（CoreXY + Voron 头）完全不同，正好补全两种结构的认知<br>
+③ <strong>即买即用</strong>：¥366 省了 1-2 周调机时间
+</div>
+</div>
+
+<!-- Tab 4: 买不买 + 怎么验 -->
+<div class="panel" id="p3">
+<h3 style="color:#fb923c;margin-bottom:10px">🎯 最终决策</h3>
+<div class="verdict-box">
+<h3>✅ 建议：作为"多色学习副机"入手</h3>
+<p>前提：你已经有 KLP1 主力机 + 准备入手 K1 改造机（¥300）</p>
+<p>理由：</p>
+<p>① <strong>1.5 折捡漏</strong>，散件价值 ¥1900-2600，¥366 是教科书级白菜价</p>
+<p>② <strong>4 色多色能力是 K1 改造机没有的</strong>，互补不重复</p>
+<p>③ <strong>总投入低</strong>：¥366 + ¥200 调校 = ¥566，比 K1 改造机改多色（¥500-800 + 2 周时间）更划算</p>
+<p>④ <strong>学习维度</strong>：i3 悬臂 + FZ 头 + 木子 AMS 是和 K1 改造机完全不同的技术栈</p>
+</div>
+
+<div class="verdict-box no">
+<h3>❌ 不建议：如果以下情况</h3>
+<p>• 你只想要"一台机器搞定所有"——> 选 K1 改造机 ¥300（CoreXY 性能上限更高）</p>
+<p>• 你想打 ABS / PC / 碳纤维 / 工业料——> 12V 主板是硬伤，PASS</p>
+<p>• 你想打大件（>150mm）——> 尺寸太小，PASS</p>
+<p>• 你没时间折腾、不想看代码——> 卖家明确"不建议新手、不包调试、部分代码要改"，PASS</p>
+<p>• 你想即买即用、不想改配置——> 卖家说"代码要改" + "CAN 线不稳" + "不包调试"，需有心理准备</p>
+</div>
+
+<div class="divider"></div>
+
+<h3 style="color:#fb923c;margin-bottom:10px">🔍 远程验机 6 步（自提 / 视频验机）</h3>
+<div class="timeline">
+<div class="tl-item">
+<h4>1️⃣ 卖家拍整体视频（30秒）</h4>
+<p>要求：通电 → 开机 → 屏幕显示正常 → 手动归零 XYZ → 加热床升温到 60°C → 风扇转动。要求卖家发完整视频，确认无报错。</p>
+</div>
+<div class="tl-item">
+<h4>2️⃣ 拍 4 色送料测试</h4>
+<p>要求：4 个 AMS 槽分别送料到喷嘴 → 切换 3 次 → 检查是否漏料 / 堵料 / 拉丝。这是木子 AMS-LITE 的核心功能，必须验证。</p>
+</div>
+<div class="tl-item">
+<h4>3️⃣ 拍切刀擦嘴测试</h4>
+<p>要求：切刀切料 → 擦嘴动作流畅 → 切面平整。如果切面毛糙或擦嘴卡顿，说明调试不到位。</p>
+</div>
+<div class="tl-item">
+<h4>4️⃣ 试打标准模型（方块 + 小人）</h4>
+<p>要求卖家打 20×20×20mm 实心方块 + 拓竹测试小人（小物件就行），看表面质量、层纹、悬垂。<strong>如果卖家不愿意打</strong>，说明机器可能有暗病。</p>
+</div>
+<div class="tl-item">
+<h4>5️⃣ 拍主板 + 驱动特写</h4>
+<p>要求：拍 STM32F103 主板照片 → 看电容有没有鼓包 → 看 TMC2209 散热片是否齐全 → 看接线是否整齐 → 闻有没有焦味。</p>
+</div>
+<div class="tl-item">
+<h4>6️⃣ 询问 3 个关键问题</h4>
+<p>① 用了多久？为什么出？（正常回答是"升级 / 换机 / 玩腻了"）<br>
+② 是否原包装？发票？保修凭证？（虽然 ¥366 不指望保修，但要问清楚）<br>
+③ 能不能走闲鱼担保交易？（不接自提就要求担保，避免扯皮）</p>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<h3 style="color:#fb923c;margin-bottom:10px">🛒 入手后的 5 步调校</h3>
+<div class="timeline">
+<div class="tl-item">
+<h4>第 1 步：换 CAN 通讯线（¥50）</h4>
+<p>卖家送的必趣线换上 → 解决"原装线不太稳"的通讯问题，否则可能频繁断连</p>
+</div>
+<div class="tl-item">
+<h4>第 2 步：升级上位机（红米→树莓派）</h4>
+<p>红米 Note4x 太老，Klipper 兼容性差。捡二手 Pi 3B + 5V 3A 电源 + TF 卡 ≈ ¥130</p>
+</div>
+<div class="tl-item">
+<h4>第 3 步：重新调平 + 改 CAN 代码</h4>
+<p>卖家说"部分代码要改" = 大概率是 Klipper 的 toolhead 配置文件需要按你的机器改。准备 1-2 天时间看 GitHub Issue 和 Klipper 文档</p>
+</div>
+<div class="tl-item">
+<h4>第 4 步：装 PEI 板 + 测试 4 色切片</h4>
+<p>PEI 板 ¥30 → 装上 → 用 OrcaSlicer / Bambu Studio 配置 4 色打印 → 跑测试模型</p>
+</div>
+<div class="tl-item">
+<h4>第 5 步：升级路径（如想打高温料）</h4>
+<p>12V 主板限制 240°C → 想打 ABS/PC 需要 12V→24V 升压板（¥80）或换 24V 主板（¥150）</p>
+</div>
+</div>
+
+<div class="alert" style="margin-top:16px;background:linear-gradient(135deg,#1e3a8a,#1e40af);border-color:#3b82f6">
+<h2>🎁 给 Andy 哥的最终建议</h2>
+<p><strong>入！</strong> ¥366 入手 4 色学习机，是 2026 年闲鱼 3D 打印圈少有的"白菜价捡漏"。<br>
+前提：<strong>当成"多色副机"和"结构学习机"</strong>，不要当主力机。<br>
+和 K1 改造机 <strong>互补不冲突</strong>，两台加起来 ¥2900，比拓竹 P1S + AMS Lite 套装（¥4000+）便宜 30%。<br>
+风险：CAN 线 + 12V 限制 + 150mm 尺寸 + 卖家不包调试，<strong>需要有 1-2 周折腾时间预算</strong>。</p>
+</div>
+</div>
+
+</div>
+
+<script>
+function showPanel(idx){
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active',i===idx);
+  });
+  document.querySelectorAll('.panel').forEach((p,i)=>{
+    p.classList.toggle('active',i===idx);
+  });
+}
+</script>
+</body>
+</html>
