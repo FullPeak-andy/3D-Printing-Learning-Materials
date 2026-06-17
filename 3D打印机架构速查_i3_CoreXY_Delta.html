@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D 打印机架构速查 - i3 / CoreXY / Delta 工具头运动轨迹对比 | KLP1 调试系列 #52</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-card: #2a2a2a;
+            --bg-elevated: #3a3a3a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --accent: #00ff7f;
+            --accent-blue: #00bfff;
+            --accent-purple: #b266ff;
+            --warning: #ff9900;
+            --error: #ff4444;
+            --border: #404040;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 {
+            color: var(--accent);
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        h2 {
+            color: var(--accent);
+            margin-top: 40px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+        h3 {
+            color: #ffffff;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,255,127,0.15);
+            border-color: var(--accent);
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin: 25px 0 15px 0;
+            flex-wrap: wrap;
+        }
+        .tab {
+            background: var(--bg-elevated);
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+            font-size: 1.05em;
+        }
+        .tab:hover { transform: translateY(-2px); }
+        .tab.active.i3 { background: var(--accent-blue); color: #000; }
+        .tab.active.corexy { background: var(--accent); color: #000; }
+        .tab.active.delta { background: var(--accent-purple); color: #fff; }
+        .tab-content {
+            display: none;
+            padding: 25px;
+            background: var(--bg-card);
+            border-radius: 6px;
+            border-left: 4px solid var(--accent);
+        }
+        .tab-content.active { display: block; }
+        .tab-content[data-arch="i3"] { border-left-color: var(--accent-blue); }
+        .tab-content[data-arch="corexy"] { border-left-color: var(--accent); }
+        .tab-content[data-arch="delta"] { border-left-color: var(--accent-purple); }
+        canvas {
+            background: #000;
+            border-radius: 6px;
+            max-width: 100%;
+            margin: 15px 0;
+            display: block;
+        }
+        .canvas-wrap {
+            position: relative;
+            text-align: center;
+        }
+        .canvas-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9em;
+            color: var(--accent);
+        }
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        .btn {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn:hover { background: var(--accent); color: #000; }
+        .btn.active { background: var(--accent); color: #000; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th {
+            background: var(--bg-elevated);
+            padding: 10px;
+            text-align: left;
+            color: var(--accent);
+        }
+        td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        tr:hover { background: var(--bg-elevated); }
+        .highlight { color: var(--accent); font-weight: bold; }
+        .blue { color: var(--accent-blue); font-weight: bold; }
+        .purple { color: var(--accent-purple); font-weight: bold; }
+        .warning { color: var(--warning); font-weight: bold; }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin: 0 2px;
+        }
+        .badge-green { background: rgba(0,255,127,0.2); color: var(--accent); }
+        .badge-blue { background: rgba(0,191,255,0.2); color: var(--accent-blue); }
+        .badge-purple { background: rgba(178,102,255,0.2); color: var(--accent-purple); }
+        .badge-orange { background: rgba(255,153,0,0.2); color: var(--warning); }
+        .badge-red { background: rgba(255,68,68,0.2); color: var(--error); }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .info-box {
+            background: var(--bg-elevated);
+            border-radius: 6px;
+            padding: 15px;
+            border-left: 3px solid var(--accent);
+        }
+        .info-box h4 {
+            color: var(--accent);
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        .info-box p {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+        .nav-back {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--accent);
+            color: #000;
+            padding: 10px 18px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            z-index: 100;
+        }
+        .footer {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-top: 50px;
+            padding: 20px;
+            border-top: 1px solid var(--border);
+        }
+        .legend {
+            display: flex;
+            gap: 15px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+            font-size: 0.9em;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <a href="#top" class="nav-back">↑ 顶部</a>
+    <div class="container" id="top">
+        <h1>🏗️ 3D 打印机架构速查</h1>
+        <p class="subtitle">i3 / CoreXY / Delta 工具头运动轨迹对比 + 优劣势 + 主流机型归属</p>
+
+        <div class="card">
+            <h3>🎯 一句话识别 3 种架构</h3>
+            <div class="info-grid">
+                <div class="info-box" style="border-left-color: var(--accent-blue);">
+                    <h4>🔵 i3 直角坐标</h4>
+                    <p>看顶端导轨 = <span class="blue">1 根横 + 1 根横 + 1 根竖</span></p>
+                </div>
+                <div class="info-box" style="border-left-color: var(--accent);">
+                    <h4>🟢 CoreXY</h4>
+                    <p>看顶端导轨 = <span class="highlight">2 根水平横导轨 + 2 根斜拉杆</span></p>
+                </div>
+                <div class="info-box" style="border-left-color: var(--accent-purple);">
+                    <h4>🟣 Delta 三角洲</h4>
+                    <p>看顶端 = <span class="purple">3 根垂直导轨 + 3 根碳纤维拉杆</span></p>
+                </div>
+            </div>
+        </div>
+
+        <h2>📊 3 种架构动画演示</h2>
+        <div class="tabs">
+            <div class="tab active i3" data-arch="i3">🔵 i3 直角坐标</div>
+            <div class="tab corexy" data-arch="corexy">🟢 CoreXY</div>
+            <div class="tab delta" data-arch="delta">🟣 Delta 三角洲</div>
+        </div>
+
+        <div class="tab-content active" data-arch="i3">
+            <h3>🔵 i3 直角坐标（Prusa MK4 / 拓竹 A1 / Ender 3）</h3>
+            <div class="canvas-wrap">
+                <span class="canvas-label">i3 Animation · 拓竹 A1 风格</span>
+                <canvas id="canvas-i3" width="800" height="500"></canvas>
+            </div>
+            <div class="btn-row">
+                <button class="btn" onclick="toggleAnim('i3')">⏯️ 开始/暂停</button>
+                <button class="btn" onclick="resetAnim('i3')">🔄 重置</button>
+            </div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-color" style="background: #00bfff;"></div>X 导轨（左右移动）</div>
+                <div class="legend-item"><div class="legend-color" style="background: #ffaa00;"></div>Y 导轨（前后移动）</div>
+                <div class="legend-item"><div class="legend-color" style="background: #ff66aa;"></div>Z 丝杆（上下移动）</div>
+                <div class="legend-item"><div class="legend-color" style="background: #00ff7f;"></div>工具头</div>
+            </div>
+            <h3>🎬 运动原理</h3>
+            <p><span class="blue">工具头</span>在 <span class="blue">X 导轨</span>上左右滑 → X 导轨装在 <span class="warning">Y 导轨</span>上前后滑 → Y 导轨装在 <span class="purple">Z 丝杆</span>上上下滑</p>
+            <p style="margin-top: 10px;">每个轴独立电机驱动（4 个电机：X、Y、Z、E），3 段运动完全解耦</p>
+        </div>
+
+        <div class="tab-content" data-arch="corexy">
+            <h3>🟢 CoreXY（Voron 2.4 / KLP1 / K1 Max / X1 Carbon）</h3>
+            <div class="canvas-wrap">
+                <span class="canvas-label">CoreXY Animation · Voron 2.4 风格</span>
+                <canvas id="canvas-corexy" width="800" height="500"></canvas>
+            </div>
+            <div class="btn-row">
+                <button class="btn" onclick="toggleAnim('corexy')">⏯️ 开始/暂停</button>
+                <button class="btn" onclick="resetAnim('corexy')">🔄 重置</button>
+            </div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-color" style="background: #00ff7f;"></div>Y 导轨 × 2（工具头前后移动）</div>
+                <div class="legend-item"><div class="legend-color" style="background: #ffaa00;"></div>X 皮带（X 型绕法，左右移动）</div>
+                <div class="legend-item"><div class="legend-color" style="background: #ff66aa;"></div>Z 丝杆</div>
+                <div class="legend-item"><div class="legend-color" style="background: #00bfff;"></div>CoreXY 拉杆 × 2</div>
+            </div>
+            <h3>🎬 运动原理</h3>
+            <p><span class="blue">2 根 Y 导轨</span>架在前后，<span class="highlight">工具头</span>在 2 根 Y 导轨上<span class="warning">前后滑</span></p>
+            <p style="margin-top: 10px;"><span class="warning">X 方向</span>由左右 2 个电机 + 皮带 "X 型绕法" 驱动 → 工具头左右滑</p>
+            <p style="margin-top: 10px;"><span class="purple">Z 方向</span>由 1 根丝杆驱动（和 i3 一样）</p>
+            <p style="margin-top: 10px; color: var(--accent);">💡 <b>X 和 Y 共用 2 个电机</b>，所以电机数比 i3 少 1 个（5 个：2 个 XY + 1 个 Z + 1 个 E）</p>
+        </div>
+
+        <div class="tab-content" data-arch="delta">
+            <h3>🟣 Delta 三角洲（FLSUN Super Racer / FLSUN V400 / ANYCUBIC Kossel）</h3>
+            <div class="canvas-wrap">
+                <span class="canvas-label">Delta Animation · FLSUN Super Racer 风格</span>
+                <canvas id="canvas-delta" width="800" height="500"></canvas>
+            </div>
+            <div class="btn-row">
+                <button class="btn" onclick="toggleAnim('delta')">⏯️ 开始/暂停</button>
+                <button class="btn" onclick="resetAnim('delta')">🔄 重置</button>
+            </div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-color" style="background: #b266ff;"></div>3 根垂直导轨（3 个角）</div>
+                <div class="legend-item"><div class="legend-color" style="background: #ff66aa;"></div>3 根碳纤维拉杆（顶部 3 角到中央）</div>
+                <div class="legend-item"><div class="legend-color" style="background: #00ff7f;"></div>中央打印头（被动吊挂）</div>
+                <div class="legend-item"><div class="legend-color" style="background: #ffaa00;"></div>圆形热床</div>
+            </div>
+            <h3>🎬 运动原理</h3>
+            <p><span class="purple">3 个滑车</span>分别在 <span class="purple">3 根垂直导轨</span>上独立上下运动</p>
+            <p style="margin-top: 10px;">3 根<span class="purple">碳纤维拉杆</span>从 3 个滑车<span class="warning">同时拉中央打印头</span>到 X/Y 位置</p>
+            <p style="margin-top: 10px;"><span class="highlight">Z 方向 = 3 根滑车同步上抬/下放</span>（无独立 Z 丝杆）</p>
+            <p style="margin-top: 10px; color: var(--accent);">💡 <b>工具头是被动吊挂的</b>（被 3 根拉杆拉），运动件质量极轻</p>
+        </div>
+
+        <h2>⚔️ 3 种架构优劣势对比</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>维度</th>
+                    <th>🔵 i3</th>
+                    <th>🟢 CoreXY</th>
+                    <th>🟣 Delta</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><b>加速度上限</b></td><td>3000-6000 mm/s² <span class="badge badge-blue">中</span></td><td>8000-15000 mm/s² <span class="badge badge-green">高</span></td><td>10000-20000 mm/s² <span class="badge badge-purple">超高</span></td></tr>
+                <tr><td><b>速度上限</b></td><td>200-300 mm/s <span class="badge badge-blue">中</span></td><td>300-500 mm/s <span class="badge badge-green">高</span></td><td>300-500 mm/s <span class="badge badge-purple">高</span></td></tr>
+                <tr><td><b>精度</b></td><td><span class="badge badge-green">⭐⭐⭐⭐⭐ 0.05mm</span></td><td><span class="badge badge-green">⭐⭐⭐⭐⭐ 0.05mm</span></td><td><span class="badge badge-orange">⭐⭐⭐ 0.10mm</span></td></tr>
+                <tr><td><b>噪音</b></td><td><span class="badge badge-orange">🔊 中等</span></td><td><span class="badge badge-green">🔇 安静（皮带传动）</span></td><td><span class="badge badge-green">🔇 安静</span></td></tr>
+                <tr><td><b>成本</b></td><td><span class="badge badge-green">$200-500</span></td><td><span class="badge badge-orange">$500-2000</span></td><td><span class="badge badge-orange">$300-800</span></td></tr>
+                <tr><td><b>复杂度</b></td><td><span class="badge badge-green">🟢 简单</span></td><td><span class="badge badge-orange">🟡 中等</span></td><td><span class="badge badge-red">🔴 复杂</span></td></tr>
+                <tr><td><b>维护难度</b></td><td><span class="badge badge-green">🟢 容易</span></td><td><span class="badge badge-orange">🟡 中等</span></td><td><span class="badge badge-red">🔴 难（拉杆长度需校准）</span></td></tr>
+                <tr><td><b>占地面积/打印体积</b></td><td><span class="badge badge-orange">🟡 中（高 1.5-2 倍）</span></td><td><span class="badge badge-orange">🟡 中</span></td><td><span class="badge badge-green">🟢 高（圆柱体利用率高）</span></td></tr>
+                <tr><td><b>打印床形状</b></td><td>矩形（方形件友好）</td><td>矩形（方形件友好）</td><td>圆形（方形件浪费 22% 边角）</td></tr>
+                <tr><td><b>多色支持</b></td><td><span class="badge badge-green">✅ 拓竹 AMS</span></td><td><span class="badge badge-orange">🟡 Voron 改 ERCF</span></td><td><span class="badge badge-red">🔴 罕见</span></td></tr>
+                <tr><td><b>适合场景</b></td><td>日常打印、性价比首选</td><td>高速高质量、Voron/KLP1 改造</td><td>大尺寸快速原型、装饰件</td></tr>
+            </tbody>
+        </table>
+
+        <h2>🚀 主流机型速查</h2>
+        <table>
+            <thead>
+                <tr><th>机型</th><th>架构</th><th>价格</th><th>速度上限</th><th>特点</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><b>拓竹 A1 / A1 mini</b></td><td><span class="badge badge-blue">i3</span></td><td>¥1500-2500</td><td>500 mm/s</td><td>性价比之王，开箱即用</td></tr>
+                <tr><td><b>拓竹 X1 Carbon</b></td><td><span class="badge badge-green">CoreXY</span></td><td>¥7000+</td><td>500 mm/s</td><td>LiDAR + AI 视觉 + AMS 多色</td></tr>
+                <tr><td><b>Prusa MK4</b></td><td><span class="badge badge-blue">i3</span></td><td>€1000+</td><td>200 mm/s</td><td>精度怪兽，欧洲工业风</td></tr>
+                <tr><td><b>Ender 3 V2</b></td><td><span class="badge badge-blue">i3</span></td><td>¥800-1500</td><td>200 mm/s</td><td>改装之王（改 CoreXY 也行）</td></tr>
+                <tr><td><b>Creality K1 / K1 Max</b></td><td><span class="badge badge-green">CoreXY</span></td><td>¥3000-5000</td><td>600 mm/s</td><td>拓竹 A1 直接对手，AI LiDAR</td></tr>
+                <tr><td><b>KLP1（你的）</b></td><td><span class="badge badge-green">CoreXY</span></td><td>¥2200</td><td>500 mm/s</td><td>CoreXY + Klipper + Input Shaper</td></tr>
+                <tr><td><b>Voron 2.4</b></td><td><span class="badge badge-green">CoreXY</span></td><td>$1500-2000（DIY）</td><td>500+ mm/s</td><td>CoreXY 之王，开源 3D 打印天花板</td></tr>
+                <tr><td><b>FLSUN Super Racer</b></td><td><span class="badge badge-purple">Delta</span></td><td>¥2500-4000</td><td>500 mm/s</td><td>Delta 高速 + 加速度怪兽</td></tr>
+                <tr><td><b>FLSUN V400</b></td><td><span class="badge badge-purple">Delta</span></td><td>¥4000+</td><td>700 mm/s</td><td>Delta 高速升级版</td></tr>
+                <tr><td><b>ANYCUBIC Kossel</b></td><td><span class="badge badge-purple">Delta</span></td><td>¥3000-5000</td><td>300 mm/s</td><td>Delta 经典老款</td></tr>
+            </tbody>
+        </table>
+
+        <h2>💡 选型建议（按需求）</h2>
+        <div class="info-grid">
+            <div class="info-box" style="border-left-color: var(--accent-blue);">
+                <h4>💰 预算 ¥1500-2500</h4>
+                <p>选 <span class="blue">拓竹 A1（i3）</span>或 <span class="highlight">KLP1（CoreXY）</span></p>
+                <p style="margin-top: 5px;">A1 偏生态，KLP1 偏改造</p>
+            </div>
+            <div class="info-box" style="border-left-color: var(--accent);">
+                <h4>⚡ 追求速度</h4>
+                <p>选 <span class="highlight">Voron 2.4 / FLSUN Super Racer</span></p>
+                <p style="margin-top: 5px;">CoreXY 综合最强，Delta 速度最快</p>
+            </div>
+            <div class="info-box" style="border-left-color: var(--accent-purple);">
+                <h4>📐 大尺寸打印</h4>
+                <p>选 <span class="purple">Delta（Voron Trident 350+）</span></p>
+                <p style="margin-top: 5px;">圆柱体利用率高</p>
+            </div>
+            <div class="info-box" style="border-left-color: var(--warning);">
+                <h4>🎨 多色打印</h4>
+                <p>选 <span class="warning">拓竹 X1 + AMS</span>或 <span class="warning">Voron + ERCF</span></p>
+                <p style="margin-top: 5px;">Delta 多色罕见</p>
+            </div>
+            <div class="info-box" style="border-left-color: var(--accent);">
+                <h4>🛠️ 喜欢折腾改造</h4>
+                <p>选 <span class="highlight">KLP1 / Voron 2.4</span>（CoreXY）</p>
+                <p style="margin-top: 5px;">可加 BTT Eddy、加 CHS 改造、改装 ERCF</p>
+            </div>
+            <div class="info-box" style="border-left-color: var(--accent-blue);">
+                <h4>🔰 新手入门</h4>
+                <p>选 <span class="blue">拓竹 A1（i3）</span></p>
+                <p style="margin-top: 5px;">开箱即用，AI 帮调平</p>
+            </div>
+        </div>
+
+        <h2>🎯 KLP1 在 3 种架构中的位置</h2>
+        <div class="card">
+            <h3>你的 KLP1 = CoreXY 入门旗舰</h3>
+            <p style="margin-top: 10px;">✅ <b>架构优势</b>：CoreXY 比 i3 速度快 30-50%，比 Delta 精度高</p>
+            <p style="margin-top: 8px;">✅ <b>加速度</b>：cfg max_accel=6000 mm/s²（介于 i3 和 Voron 2.4 之间）</p>
+            <p style="margin-top: 8px;">✅ <b>改装潜力</b>：可加 BTT Eddy（¥350）追平 Voron 2.4，可改 ERCF V3 实现多色</p>
+            <p style="margin-top: 8px;">✅ <b>价格</b>：¥2200 = Voron 2.4 的 1/3，拓竹 X1 的 1/3</p>
+            <p style="margin-top: 8px;">⚠️ <b>上限</b>：架构天花板在 CoreXY（不能像 Delta 那样突破 15000+ mm/s²）</p>
+        </div>
+
+        <div class="footer">
+            <p>KLP1 调试系列 #52 · 2026-06-17 · Andy & LED 库存回收 & 闲鱼销售助理</p>
+            <p style="margin-top: 5px; font-size: 0.9em;">配套教程：#47 Skirt / #48 拉丝 / #49 擦拭塔 / #50 智能监控 / #51 Root</p>
+        </div>
+    </div>
+
+    <script>
+        const anims = {
+            i3: { running: true, t: 0, speed: 0.02 },
+            corexy: { running: false, t: 0, speed: 0.02 },
+            delta: { running: false, t: 0, speed: 0.02 }
+        };
+
+        function toggleAnim(name) { anims[name].running = !anims[name].running; }
+        function resetAnim(name) { anims[name].t = 0; }
+
+        function drawI3() {
+            const canvas = document.getElementById('canvas-i3');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const t = anims.i3.t;
+            ctx.clearRect(0, 0, 800, 500);
+            ctx.fillStyle = '#333';
+            ctx.fillRect(50, 420, 700, 20);
+            ctx.fillStyle = '#888';
+            ctx.font = '12px monospace';
+            ctx.fillText('Z 丝杆（上下移动）', 50, 460);
+            ctx.fillStyle = '#ff66aa';
+            ctx.fillRect(50, 420, 700, 4);
+            const yPos = 200 + Math.sin(t * 0.5) * 50;
+            ctx.fillStyle = '#ffaa00';
+            ctx.fillRect(80, yPos, 640, 12);
+            ctx.fillStyle = '#888';
+            ctx.fillText('Y 导轨（前后移动）', 80, yPos - 8);
+            const xOffset = Math.sin(t * 0.8) * 200;
+            ctx.fillStyle = '#00bfff';
+            ctx.fillRect(100 + xOffset, yPos - 20, 300, 12);
+            ctx.fillStyle = '#888';
+            ctx.fillText('X 导轨', 100 + xOffset, yPos - 28);
+            const headX = 250 + xOffset;
+            const headY = yPos - 35;
+            ctx.fillStyle = '#00ff7f';
+            ctx.beginPath();
+            ctx.arc(headX, headY, 12, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 11px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('喷嘴', headX, headY + 4);
+            ctx.textAlign = 'left';
+            ctx.strokeStyle = 'rgba(0,255,127,0.4)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(headX, headY + 12);
+            ctx.lineTo(headX, 400);
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(0,255,127,0.2)';
+            ctx.fillRect(headX - 15, 350, 30, 50);
+            ctx.fillStyle = '#00bfff';
+            ctx.font = 'bold 16px monospace';
+            ctx.fillText('i3 直角坐标：3 段独立运动（X / Y / Z）', 50, 30);
+            ctx.fillStyle = '#ff66aa';
+            ctx.font = '12px monospace';
+            const zH = Math.floor((420 - headY) / 4);
+            ctx.fillText('Z = ' + zH + ' 层', 720, 30);
+        }
+
+        function drawCoreXY() {
+            const canvas = document.getElementById('canvas-corexy');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const t = anims.corexy.t;
+            ctx.clearRect(0, 0, 800, 500);
+            ctx.fillStyle = '#333';
+            ctx.fillRect(50, 420, 700, 20);
+            const yPos1 = 100;
+            const yPos2 = 200;
+            ctx.strokeStyle = '#00ff7f';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(80, yPos1);
+            ctx.lineTo(720, yPos1);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(80, yPos2);
+            ctx.lineTo(720, yPos2);
+            ctx.stroke();
+            ctx.fillStyle = '#00ff7f';
+            ctx.font = '11px monospace';
+            ctx.fillText('Y 导轨 × 2', 700, yPos1 - 8);
+            const yOffset = Math.sin(t * 0.5) * 30;
+            const xOffset = Math.sin(t * 0.8) * 200;
+            const headX = 400 + xOffset;
+            const headY = yPos1 + 30 + yOffset;
+            ctx.strokeStyle = '#ffaa00';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(80, yPos1 - 20);
+            ctx.lineTo(headX, headY);
+            ctx.lineTo(720, yPos2 - 20);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(720, yPos1 - 20);
+            ctx.lineTo(headX, headY);
+            ctx.lineTo(80, yPos2 - 20);
+            ctx.stroke();
+            ctx.strokeStyle = '#00bfff';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(80, yPos1 - 20);
+            ctx.lineTo(headX, headY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(720, yPos1 - 20);
+            ctx.lineTo(headX, headY);
+            ctx.stroke();
+            ctx.fillStyle = '#00ff7f';
+            ctx.beginPath();
+            ctx.arc(headX, headY, 14, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 11px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('打印头', headX, headY + 4);
+            ctx.textAlign = 'left';
+            ctx.strokeStyle = 'rgba(0,255,127,0.4)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(headX, headY + 14);
+            ctx.lineTo(headX, 400);
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(0,255,127,0.2)';
+            ctx.fillRect(headX - 18, 350, 36, 50);
+            ctx.fillStyle = '#00ff7f';
+            ctx.font = 'bold 16px monospace';
+            ctx.fillText('CoreXY：2 电机 X 型皮带 + 2 根 Y 导轨', 50, 30);
+        }
+
+        function drawDelta() {
+            const canvas = document.getElementById('canvas-delta');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const t = anims.delta.t;
+            ctx.clearRect(0, 0, 800, 500);
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = '#b266ff';
+            [200, 600, 400].forEach(x => {
+                ctx.beginPath();
+                ctx.moveTo(x, 60);
+                ctx.lineTo(x, 380);
+                ctx.stroke();
+            });
+            const sliderHeights = [
+                100 + Math.sin(t * 0.6) * 30,
+                100 + Math.sin(t * 0.6 + 2.0) * 30,
+                100 + Math.sin(t * 0.6 + 4.0) * 30
+            ];
+            const corners = [{x: 200}, {x: 600}, {x: 400}];
+            corners.forEach((c, i) => {
+                ctx.fillStyle = '#b266ff';
+                ctx.fillRect(c.x - 18, sliderHeights[i], 36, 24);
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 11px monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText('滑车', c.x, sliderHeights[i] + 16);
+                ctx.textAlign = 'left';
+            });
+            const headX = 400;
+            const headY = 280;
+            ctx.strokeStyle = '#ff66aa';
+            ctx.lineWidth = 3;
+            corners.forEach((c, i) => {
+                ctx.beginPath();
+                ctx.moveTo(c.x, sliderHeights[i] + 12);
+                ctx.lineTo(headX, headY);
+                ctx.stroke();
+            });
+            ctx.fillStyle = '#00ff7f';
+            ctx.beginPath();
+            ctx.arc(headX, headY, 14, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 11px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('打印头', headX, headY + 4);
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#ffaa00';
+            ctx.beginPath();
+            ctx.arc(400, 430, 80, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#000';
+            ctx.font = '11px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('圆形热床', 400, 435);
+            ctx.textAlign = 'left';
+            ctx.strokeStyle = 'rgba(0,255,127,0.4)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(headX, headY + 14);
+            ctx.lineTo(headX, 410);
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(0,255,127,0.2)';
+            ctx.fillRect(headX - 12, 380, 24, 30);
+            ctx.fillStyle = '#b266ff';
+            ctx.font = 'bold 16px monospace';
+            ctx.fillText('Delta：3 垂直导轨 + 3 拉杆吊中央打印头', 50, 30);
+        }
+
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const arch = tab.dataset.arch;
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelector('.tab-content[data-arch="' + arch + '"]').classList.add('active');
+                Object.keys(anims).forEach(k => anims[k].running = (k === arch));
+            });
+        });
+
+        function animate() {
+            Object.keys(anims).forEach(k => {
+                if (anims[k].running) anims[k].t += anims[k].speed;
+            });
+            if (anims.i3.running) drawI3();
+            if (anims.corexy.running) drawCoreXY();
+            if (anims.delta.running) drawDelta();
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+</html>
