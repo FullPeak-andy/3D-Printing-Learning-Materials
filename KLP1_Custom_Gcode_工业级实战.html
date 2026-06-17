@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Custom G-code per Layer 工业级实战 | 3D打印学习系列 #56</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0e27;--card:#1a1f3a;--cyan:#00d9ff;--red:#ff6b6b;--green:#51cf66;--yellow:#ffd93d;--text:#e0e6ed;--muted:#8892a4;--radius:12px;--shadow:0 8px 32px rgba(0,0,0,0.4);--ease:cubic-bezier(0.4,0,0.2,1)}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);line-height:1.7;min-height:100vh;overflow-x:hidden}
+.container{max-width:1200px;margin:0 auto;padding:20px}
+
+/* Banner */
+.banner{text-align:center;padding:80px 20px;background:linear-gradient(135deg,var(--bg) 0%,#141833 50%,var(--bg) 100%);border-bottom:1px solid rgba(0,217,255,0.2);position:relative;overflow:hidden}
+.banner::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 50% 0%,rgba(0,217,255,0.15) 0%,transparent 60%);pointer-events:none}
+.banner::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.banner h1{font-size:52px;font-weight:800;background:linear-gradient(135deg,var(--cyan),#fff,var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:20px;animation:fadeIn 0.8s var(--ease);letter-spacing:-1px}
+.banner .subtitle{font-size:20px;color:var(--muted);max-width:800px;margin:0 auto 24px;animation:fadeIn 0.8s var(--ease) 0.2s both}
+.banner .features{display:flex;justify-content:center;gap:30px;flex-wrap:wrap;margin-top:30px;animation:fadeIn 0.8s var(--ease) 0.4s both}
+.banner .feature{background:rgba(0,217,255,0.08);border:1px solid rgba(0,217,255,0.2);padding:12px 20px;border-radius:30px;font-size:14px;color:var(--cyan)}
+.banner .badge{display:inline-block;background:linear-gradient(135deg,rgba(0,217,255,0.2),rgba(0,217,255,0.1));border:1px solid rgba(0,217,255,0.4);color:var(--cyan);padding:8px 20px;border-radius:25px;font-size:15px;margin-top:24px;animation:pulse 3s infinite;font-weight:500}
+@keyframes fadeIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.8;transform:scale(1.02)}}
+
+/* Section */
+.section{padding:60px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.section-title{font-size:36px;font-weight:700;margin-bottom:36px;display:flex;align-items:center;gap:16px}
+.section-title::before{content:'';width:5px;height:36px;background:linear-gradient(180deg,var(--cyan),rgba(0,217,255,0.3));border-radius:3px;flex-shrink:0}
+.section-title span{color:var(--cyan);font-size:42px;font-weight:800}
+.section-intro{color:var(--muted);margin-bottom:30px;font-size:16px;max-width:900px}
+
+/* Cards */
+.card{background:var(--card);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,0.05);transition:all 0.3s var(--ease)}
+.card:hover{border-color:rgba(0,217,255,0.3);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.5)}
+
+/* Path Tree */
+.path-tree{background:rgba(0,217,255,0.03);border-radius:var(--radius);padding:24px;border:1px solid rgba(0,217,255,0.1)}
+.path-breadcrumb{font-size:14px;color:var(--muted);margin-bottom:20px;padding:12px 16px;background:rgba(0,0,0,0.3);border-radius:8px;border-left:3px solid var(--cyan)}
+.path-breadcrumb span{color:var(--yellow)}
+.path-item{display:flex;align-items:flex-start;padding:16px 20px;margin:10px 0;border-radius:10px;cursor:pointer;transition:all 0.3s var(--ease);position:relative;background:rgba(0,0,0,0.2)}
+.path-item:hover,.path-item.active{background:rgba(0,217,255,0.08);border-left:4px solid var(--cyan);padding-left:24px}
+.path-item .arrow{color:var(--cyan);margin:2px 10px;font-size:14px;flex-shrink:0}
+.path-item .node{color:var(--yellow);font-weight:500}
+.path-item .tag{margin-left:auto;padding:4px 10px;background:rgba(255,217,60,0.15);color:var(--yellow);border-radius:12px;font-size:12px}
+.path-item .details{max-height:0;overflow:hidden;transition:max-height 0.5s var(--ease)}
+.path-item.active .details{max-height:800px}
+.path-item pre{background:#0a0e20;padding:18px;border-radius:10px;margin-top:14px;font-family:'Consolas','Monaco',monospace;font-size:13px;color:var(--green);overflow-x:auto;border:1px solid rgba(255,255,255,0.05)}
+.path-item .code-comment{color:#5c6370}
+.path-item .code-keyword{color:var(--cyan)}
+.path-item .code-var{color:var(--yellow)}
+
+/* Placeholder Cards */
+.placeholder-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}
+.placeholder-card{background:var(--card);border-radius:var(--radius);padding:28px;border:1px solid rgba(255,255,255,0.05);cursor:pointer;transition:all 0.4s var(--ease);position:relative;overflow:hidden}
+.placeholder-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--cyan),#fff,var(--cyan));opacity:0;transition:opacity 0.3s}
+.placeholder-card::after{content:'';position:absolute;top:-50%;right:-50%;width:100%;height:100%;background:radial-gradient(circle,rgba(0,217,255,0.1) 0%,transparent 70%);opacity:0;transition:opacity 0.3s}
+.placeholder-card:hover::before{opacity:1}
+.placeholder-card:hover::after{opacity:1}
+.placeholder-card:hover{border-color:rgba(0,217,255,0.4);transform:translateY(-6px);box-shadow:0 16px 48px rgba(0,217,255,0.15)}
+.placeholder-card .var-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.placeholder-card .var-icon{width:48px;height:48px;background:rgba(0,217,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.placeholder-card .var-name{font-family:'Consolas','Monaco',monospace;font-size:32px;color:var(--cyan);font-weight:700}
+.placeholder-card .var-meaning{color:var(--text);font-size:18px;margin-bottom:16px;font-weight:500}
+.placeholder-card .var-usage{color:var(--muted);font-size:14px;padding:14px;background:rgba(0,0,0,0.4);border-radius:10px;border:1px solid rgba(255,255,255,0.05)}
+.placeholder-card .var-example{margin-top:16px;font-family:monospace;color:var(--yellow);font-size:14px;padding:12px;background:rgba(255,217,60,0.08);border-radius:8px;border-left:3px solid var(--yellow)}
+.placeholder-card .highlight-code{display:none;position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,var(--card) 60%,transparent);padding:30px 20px 20px;padding-top:50px}
+.highlight-code pre{font-size:12px;color:var(--green);background:#0a0e20;padding:14px;border-radius:8px}
+
+/* Animation Canvas */
+.canvas-container{background:var(--card);border-radius:var(--radius);padding:28px;margin-bottom:32px;border:1px solid rgba(255,255,255,0.05);position:relative}
+.canvas-container::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--cyan),var(--yellow),var(--red));border-radius:var(--radius) var(--radius) 0 0}
+.canvas-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:16px}
+.canvas-title{font-size:22px;font-weight:600;display:flex;align-items:center;gap:10px}
+.canvas-title .icon{font-size:28px}
+.canvas-controls{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:10px;border:none;cursor:pointer;font-size:14px;font-weight:600;transition:all 0.25s var(--ease);font-family:inherit}
+.btn-primary{background:linear-gradient(135deg,var(--cyan),#00b8d9);color:#000;box-shadow:0 4px 15px rgba(0,217,255,0.3)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,217,255,0.4)}
+.btn-secondary{background:rgba(255,255,255,0.1);color:var(--text);border:1px solid rgba(255,255,255,0.1)}
+.btn-secondary:hover{background:rgba(255,255,255,0.15);transform:translateY(-1px)}
+.btn-danger{background:linear-gradient(135deg,var(--red),#e05555);color:#fff;box-shadow:0 4px 15px rgba(255,107,107,0.3)}
+.btn-speed{background:rgba(0,217,255,0.08);color:var(--cyan);min-width:55px;padding:10px 14px;border:1px solid rgba(0,217,255,0.2)}
+.btn-speed:hover{background:rgba(0,217,255,0.15)}
+.btn-speed.active{background:var(--cyan);color:#000;font-weight:700;border-color:var(--cyan)}
+.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none!important}
+
+.canvas-body{display:grid;grid-template-columns:1.2fr 1fr;gap:28px}
+@media(max-width:1000px){.canvas-body{grid-template-columns:1fr}}
+.canvas-viewer{background:linear-gradient(135deg,#0d1025,#0a0e20);border-radius:12px;aspect-ratio:16/10;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,0.05)}
+.canvas-code{background:#0a0e20;border-radius:12px;padding:20px;font-family:'Consolas','Monaco',monospace;font-size:13px;overflow:auto;max-height:420px;border:1px solid rgba(255,255,255,0.05)}
+.canvas-code pre{margin:0;color:var(--muted);white-space:pre-wrap;line-height:1.8}
+.canvas-code .line{padding:3px 10px;border-radius:6px;transition:all 0.3s}
+.canvas-code .line.active{background:rgba(255,217,60,0.25);color:var(--yellow);box-shadow:0 0 10px rgba(255,217,60,0.2)}
+.canvas-code .comment{color:#5c6370;font-style:italic}
+.canvas-code .keyword{color:var(--cyan);font-weight:600}
+.canvas-code .var{color:var(--yellow)}
+.canvas-code .value{color:var(--green)}
+
+.layer-display{position:absolute;top:16px;right:16px;background:rgba(0,0,0,0.9);padding:14px 22px;border-radius:12px;text-align:center;border:2px solid var(--cyan);box-shadow:0 4px 20px rgba(0,217,255,0.2);z-index:10}
+.layer-display .num{font-size:40px;font-weight:800;color:var(--cyan);line-height:1}
+.layer-display .label{font-size:12px;color:var(--muted);margin-top:6px;text-transform:uppercase;letter-spacing:1px}
+
+/* Macro Description */
+.macro-desc{background:rgba(0,217,255,0.05);border-radius:10px;padding:16px 20px;margin-bottom:20px;border-left:4px solid var(--cyan);font-size:14px;color:var(--muted)}
+
+/* Z Probe Animation */
+#zprobe-canvas{position:relative;width:100%;height:100%;padding:20px}
+.bed{position:absolute;bottom:18%;left:8%;right:8%;height:18%;background:linear-gradient(135deg,#2a2a4a,#1a1a3a,#2a2a4a);border:3px solid #4a4a6a;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:15px;font-weight:500}
+.bed::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;border:2px dashed rgba(0,217,255,0.4);border-radius:50%}
+.bed::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:8px;height:8px;background:var(--cyan);border-radius:50%}
+.nozzle{position:absolute;bottom:38%;left:50%;transform:translateX(-50%);width:50px;height:70px;transition:bottom 0.6s var(--ease)}
+.nozzle-body{width:100%;height:100%;background:linear-gradient(180deg,#888,#666,#555);clip-path:polygon(25% 0%,75% 0%,100% 25%,100% 100%,0% 100%,0% 25%);border-radius:4px}
+.nozzle-tip{position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);width:10px;height:15px;background:linear-gradient(180deg,#666,#333);clip-path:polygon(20% 0%,80% 0%,100% 100%,0% 100%)}
+.nozzle.cooling{animation:cooling 0.5s}
+@keyframes cooling{0%,100%{filter:brightness(1)}50%{filter:brightness(1.5)}}
+.probe-info{position:absolute;top:50px;left:16px;background:rgba(0,0,0,0.85);padding:14px 18px;border-radius:10px;font-size:14px;border:1px solid rgba(0,217,255,0.2)}
+.probe-info .label{color:var(--muted);margin-bottom:4px}
+.probe-info .value{color:var(--green);font-weight:700;font-size:20px;font-family:monospace}
+.probe-info.warning{background:rgba(255,0,0,0.2);border-color:var(--red)}
+.probe-info.warning .value{color:var(--red);animation:blink 0.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+.stop-alert{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,var(--red),#cc0000);color:#fff;padding:24px 36px;border-radius:16px;font-size:22px;font-weight:800;display:none;animation:shake 0.6s,alertPulse 0.5s;box-shadow:0 0 40px rgba(255,0,0,0.5);z-index:20}
+.stop-alert.show{display:flex;align-items:center;gap:12px}
+.stop-alert .icon{font-size:28px}
+@keyframes shake{0%,100%{transform:translate(-50%,-50%) rotate(0)}15%{transform:translate(-50%,-50%) rotate(-8deg)}35%{transform:translate(-50%,-50%) rotate(8deg)}55%{transform:translate(-50%,-50%) rotate(-5deg)}75%{transform:translate(-50%,-50%) rotate(5deg)}}
+@keyframes alertPulse{0%{transform:translate(-50%,-50%) scale(0.8);opacity:0}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
+.probe-log{position:absolute;bottom:16px;left:16px;right:16px;background:rgba(0,0,0,0.8);padding:12px 16px;border-radius:8px;font-size:12px;max-height:80px;overflow-y:auto}
+.probe-log .entry{color:var(--muted);margin:4px 0;padding:4px 8px;background:rgba(0,217,255,0.1);border-radius:4px}
+.probe-log .entry.alert{background:rgba(255,0,0,0.2);color:var(--red)}
+
+/* FBG Animation */
+#fbg-canvas{position:relative;width:100%;height:100%;padding:20px}
+.print-object{position:absolute;top:12%;left:15%;right:15%;bottom:32%;background:linear-gradient(180deg,rgba(0,217,255,0.15),rgba(0,217,255,0.05));border:2px solid rgba(0,217,255,0.3);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;position:relative;overflow:hidden}
+.print-object::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 4%,rgba(0,217,255,0.05) 4%,rgba(0,217,255,0.05) 5%)}
+.fiber{position:absolute;top:0;bottom:0;left:50%;width:5px;background:linear-gradient(180deg,var(--cyan),transparent 30%,transparent 70%,var(--cyan));transform:translateX(-50%);transition:all 0.4s;z-index:2}
+.fiber.glow{background:linear-gradient(180deg,#00ffff,#fff 50%,#00ffff);box-shadow:0 0 25px #00ffff,0 0 50px rgba(0,255,255,0.5);animation:fiberGlow 1s infinite}
+@keyframes fiberGlow{0%,100%{box-shadow:0 0 25px #00ffff,0 0 50px rgba(0,255,255,0.5)}50%{box-shadow:0 0 35px #00ffff,0 0 70px rgba(0,255,255,0.7)}}
+.spectrum{position:absolute;bottom:16px;left:16px;background:rgba(0,0,0,0.85);padding:14px 18px;border-radius:10px;width:220px;border:1px solid rgba(0,217,255,0.2)}
+.spectrum-title{font-size:12px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.spectrum-graph{height:70px;position:relative;background:linear-gradient(180deg,#111,#0a0a15);border-radius:6px;overflow:hidden}
+.spectrum-line{position:absolute;bottom:0;left:0;right:0;height:100%;background:linear-gradient(90deg,transparent 0%,var(--cyan) 40%,#fff 50%,var(--cyan) 60%,transparent 100%);opacity:0.3;transition:all 0.5s}
+.spectrum-line.active{opacity:1;animation:spectrumMove 1.5s infinite}
+@keyframes spectrumMove{0%{transform:translateX(-20%)}100%{transform:translateX(20%)}}
+.spectrum-value{margin-top:8px;font-family:monospace;color:var(--cyan);font-size:16px;font-weight:600}
+.fbg-markers{position:absolute;right:16px;top:50px;background:rgba(0,0,0,0.85);padding:12px 16px;border-radius:10px;border:1px solid rgba(0,217,255,0.2)}
+.fbg-marker{color:var(--muted);font-size:13px;margin:6px 0;padding:6px 10px;border-radius:6px;transition:all 0.3s;display:flex;align-items:center;gap:8px}
+.fbg-marker::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--muted);transition:all 0.3s}
+.fbg-marker.active{background:var(--cyan);color:#000;font-weight:700}
+.fbg-marker.active::before{background:#000;box-shadow:0 0 8px var(--cyan)}
+.fbg-data{position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.85);padding:12px 16px;border-radius:10px;border:1px solid rgba(0,217,255,0.2);font-size:12px}
+.fbg-data .row{display:flex;justify-content:space-between;gap:16px;margin:4px 0}
+.fbg-data .key{color:var(--muted)}
+.fbg-data .val{color:var(--cyan);font-weight:600}
+
+/* CT Marker Animation */
+#ct-canvas{position:relative;width:100%;height:100%;padding:20px}
+.layer-stack{position:absolute;top:10%;left:10%;width:48%;height:75%;display:flex;flex-direction:column;gap:2px;overflow:hidden;border-radius:8px;border:2px solid rgba(0,217,255,0.2)}
+.layer{height:6px;background:linear-gradient(90deg,rgba(0,217,255,0.3),rgba(0,217,255,0.1));border-radius:2px;position:relative;transition:all 0.3s}
+.layer.printing{background:linear-gradient(90deg,rgba(0,217,255,0.6),rgba(0,217,255,0.4));animation:layerPrint 0.3s}
+@keyframes layerPrint{0%{background:rgba(0,255,136,0.6)}100%{background:linear-gradient(90deg,rgba(0,217,255,0.6),rgba(0,217,255,0.4))}}
+.layer.has-marker::after{content:'';position:absolute;right:18%;top:50%;transform:translateY(-50%);width:14px;height:14px;background:linear-gradient(135deg,var(--yellow),#ffaa00);border-radius:50%;box-shadow:0 0 12px var(--yellow);animation:markerPulse 2s infinite}
+@keyframes markerPulse{0%,100%{box-shadow:0 0 8px var(--yellow)}50%{box-shadow:0 0 16px var(--yellow),0 0 24px rgba(255,217,0,0.5)}}
+.ct-scan{position:absolute;top:10%;right:5%;width:38%;height:75%;background:#0a0a15;border:2px solid rgba(0,217,255,0.3);border-radius:12px;overflow:hidden}
+.ct-scan-header{background:rgba(0,217,255,0.1);padding:10px 14px;font-size:12px;color:var(--cyan);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid rgba(0,217,255,0.2)}
+.ct-image{position:absolute;inset:0;opacity:0;transition:opacity 0.6s;display:flex;align-items:center;justify-content:center}
+.ct-image.active{opacity:1}
+.ct-crosshair{position:absolute;width:60px;height:60px;border:2px solid var(--cyan);border-radius:50%}
+.ct-crosshair::before,.ct-crosshair::after{content:'';position:absolute;background:var(--cyan)}
+.ct-crosshair::before{width:2px;height:100%;left:50%;transform:translateX(-50%)}
+.ct-crosshair::after{width:100%;height:2px;top:50%;transform:translateY(-50%)}
+.ct-grid{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 19px,rgba(0,217,255,0.1) 19px,rgba(0,217,255,0.1) 20px),repeating-linear-gradient(90deg,transparent,transparent 19px,rgba(0,217,255,0.1) 19px,rgba(0,217,255,0.1) 20px)}
+.ct-label{position:absolute;bottom:10px;left:10px;right:10px;display:flex;justify-content:space-between;font-size:11px;color:var(--muted);background:rgba(0,0,0,0.7);padding:6px 10px;border-radius:4px}
+.ct-info{position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.8);padding:10px 14px;border-radius:8px;font-size:12px}
+.ct-info .row{display:flex;gap:12px;margin:3px 0}
+.ct-info .key{color:var(--muted)}
+.ct-info .val{color:var(--yellow);font-weight:600}
+
+/* Compatibility Table */
+.comp-table{overflow-x:auto}
+.comp-table table{width:100%;border-collapse:collapse}
+.comp-table th,.comp-table td{padding:18px 16px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.05)}
+.comp-table th{background:rgba(0,217,255,0.08);color:var(--cyan);font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:1px}
+.comp-table tr{transition:background 0.2s}
+.comp-table tr:hover{background:rgba(0,217,255,0.05)}
+.comp-table td:first-child{font-family:monospace;color:var(--yellow)}
+.comp-table .yes{color:var(--green);font-weight:800;font-size:18px}
+.comp-table .no{color:var(--red);font-weight:800;font-size:18px}
+.comp-table .partial{color:var(--yellow);font-weight:600;font-size:14px}
+.comp-table .cfg-hint{display:none;margin-top:10px;padding:12px;background:#0a0e20;border-radius:8px;font-size:13px;color:var(--muted);border-left:3px solid var(--cyan)}
+.comp-table tr:hover .cfg-hint{display:block}
+.comp-table .note{font-size:12px;color:var(--muted)}
+
+/* Andy's Roadmap */
+.roadmap{display:flex;justify-content:center;align-items:stretch;flex-wrap:wrap;gap:24px;padding:50px 20px}
+.roadmap-step{display:flex;flex-direction:column;align-items:center;gap:16px;cursor:pointer;flex:1;min-width:200px;max-width:280px}
+.roadmap-circle{width:140px;height:140px;border-radius:50%;background:linear-gradient(135deg,var(--card),#252a4d);border:4px solid var(--cyan);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;transition:all 0.4s var(--ease);position:relative;box-shadow:0 0 30px rgba(0,217,255,0.2)}
+.roadmap-circle:hover{border-color:var(--yellow);transform:scale(1.08);box-shadow:0 0 40px rgba(255,217,255,0.3)}
+.roadmap-circle .num{position:absolute;top:-10px;left:-10px;width:32px;height:32px;background:linear-gradient(135deg,var(--cyan),#00b8d9);color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;box-shadow:0 4px 12px rgba(0,217,255,0.4)}
+.roadmap-circle .icon{font-size:36px;margin-bottom:6px}
+.roadmap-circle .title{font-size:15px;font-weight:700;text-align:center;line-height:1.3}
+.roadmap-arrow{color:var(--cyan);font-size:32px;display:flex;align-items:center}
+@media(max-width:800px){.roadmap-arrow{transform:rotate(90deg)}}
+.roadmap-detail{background:var(--card);border-radius:var(--radius);padding:28px;margin-top:24px;display:none;border:1px solid rgba(0,217,255,0.3);box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+.roadmap-detail.show{display:block;animation:fadeIn 0.4s var(--ease)}
+.roadmap-detail h3{color:var(--cyan);margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:18px}
+.roadmap-detail pre{background:#0a0e20;padding:20px;border-radius:12px;font-size:13px;color:var(--green);overflow-x:auto;line-height:1.8;border:1px solid rgba(255,255,255,0.05)}
+.roadmap-tip{text-align:center;padding:20px;background:rgba(0,217,255,0.05);border-radius:12px;margin-top:30px;border:1px solid rgba(0,217,255,0.1)}
+.roadmap-tip .icon{font-size:24px;margin-bottom:8px}
+.roadmap-tip p{color:var(--muted);font-size:15px}
+.roadmap-tip strong{color:var(--cyan)}
+
+/* FAQ */
+.faq-list{display:flex;flex-direction:column;gap:14px}
+.faq-item{background:var(--card);border-radius:var(--radius);overflow:hidden;border:1px solid rgba(255,255,255,0.05);transition:all 0.3s}
+.faq-item:hover{border-color:rgba(0,217,255,0.2)}
+.faq-q{padding:22px 26px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:16px;transition:all 0.3s}
+.faq-q:hover{background:rgba(0,217,255,0.05);padding-left:30px}
+.faq-q::after{content:'▼';font-size:12px;color:var(--cyan);transition:transform 0.3s;flex-shrink:0}
+.faq-item.open .faq-q{color:var(--cyan);background:rgba(0,217,255,0.05)}
+.faq-item.open .faq-q::after{transform:rotate(180deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height 0.5s var(--ease);padding:0 26px}
+.faq-item.open .faq-a{max-height:600px;padding:0 26px 24px}
+.faq-a p{color:var(--muted);line-height:1.9;font-size:15px}
+.faq-a code{background:rgba(0,217,255,0.1);color:var(--cyan);padding:2px 8px;border-radius:4px;font-family:monospace;font-size:13px}
+.faq-a strong{color:var(--text)}
+
+/* Footer */
+.footer{text-align:center;padding:50px 20px;margin-top:60px;background:linear-gradient(180deg,transparent,rgba(0,217,255,0.02));border-top:1px solid rgba(255,255,255,0.05)}
+.footer .tag{color:var(--cyan);font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:12px}
+.footer .tag span{font-size:28px}
+.footer .meta{color:var(--muted);font-size:14px;margin:16px 0;line-height:2}
+.footer .meta a{color:var(--cyan);text-decoration:none;transition:color 0.2s}
+.footer .meta a:hover{color:#fff;text-decoration:underline}
+.footer .copy{font-size:12px;color:rgba(255,255,255,0.3);margin-top:20px}
+
+/* Responsive */
+@media(max-width:768px){
+.banner h1{font-size:32px}
+.section-title{font-size:26px}
+.section-title span{font-size:32px}
+.placeholder-grid{grid-template-columns:1fr}
+.canvas-body{grid-template-columns:1fr}
+.roadmap{flex-direction:column;align-items:center}
+.roadmap-arrow{transform:rotate(90deg)}
+.bed{height:12%;bottom:15%}
+}
+
+/* Animations */
+.fade-in{opacity:0;transform:translateY(40px);transition:opacity 0.8s var(--ease),transform 0.8s var(--ease)}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+.delay-1{transition-delay:0.1s}
+.delay-2{transition-delay:0.2s}
+.delay-3{transition-delay:0.3s}
+.delay-4{transition-delay:0.4s}
+</style>
+</head>
+<body>
+
+<!-- Banner -->
+<div class="banner">
+  <h1>Custom G-code per Layer<br>工业级实战</h1>
+  <p class="subtitle">SuperSlicer 最深的功能，比 PrusaSlicer 多 6 个变量，比 OrcaSlicer 强 3 倍</p>
+  <div class="features">
+    <span class="feature">⚙️ 4 个钩子位置</span>
+    <span class="feature">📐 4 个占位符变量</span>
+    <span class="feature">🎯 3 套工业级宏</span>
+    <span class="feature">🔧 KLP1 兼容</span>
+  </div>
+  <span class="badge">🖨️ 3D打印学习系列 #56 | Andy 工业化路线</span>
+</div>
+
+<div class="container">
+
+<!-- Section 1: 4 Hooks -->
+<section class="section fade-in">
+  <h2 class="section-title"><span>4</span> 个钩子位置</h2>
+  <p class="section-intro">SuperSlicer 的 Custom G-code 在 Settings → Printer Settings → Custom G-code 中配置，分为 4 个执行时机：</p>
+  <div class="path-tree">
+    <div class="path-breadcrumb">📍 <span>Settings</span> → <span>Printer Settings</span> → <span style="color:var(--cyan)">Custom G-code</span></div>
+    <div class="path-item" onclick="togglePath(this)">
+      <span class="node">Before layer change G-code</span>
+      <span class="arrow">→</span>
+      <span class="tag">层切换前</span>
+      <div class="details">
+        <p style="color:var(--muted);margin:12px 0;font-size:14px">在打印层切换之前执行，适合做喷嘴清理、位置调整等准备工作。</p>
+        <pre>; 层切换前 - 喷嘴清理宏
+<span class="code-comment">; 适用于 Silk PLA 等易拉丝材料</span>
+<span class="code-keyword">G91</span>              <span class="code-comment">; 相对定位</span>
+<span class="code-keyword">G1</span> Z5 F600       <span class="code-comment">; 抬升 5mm 避免碰撞</span>
+<span class="code-keyword">G1</span> X5 Y0 F3000  <span class="code-comment">; 快速移动甩丝</span>
+<span class="code-keyword">G1</span> X-5 F3000   <span class="code-comment">; 往复清理</span>
+<span class="code-keyword">G90</span>              <span class="code-comment">; 恢复绝对定位</span>
+<span class="code-keyword">M117</span> <span class="code-var">层{layer_num}完成</span></pre>
+      </div>
+    </div>
+    <div class="path-item active" onclick="togglePath(this)">
+      <span class="node">After layer change G-code</span>
+      <span class="arrow">→</span>
+      <span class="tag" style="background:rgba(255,217,60,0.2);color:var(--yellow)">⭐ 最常用</span>
+      <div class="details">
+        <p style="color:var(--muted);margin:12px 0;font-size:14px">层切换完成后执行，最常用的钩子位置，适合传感器触发、进度上报等。</p>
+        <pre>; 层切换后 - 探针检测宏
+<span class="code-comment">; 每 10 层执行一次 Z 探针检测</span>
+{if layer_num % 10 == 0 && layer_num > 0}
+  <span class="code-keyword">M117</span> <span class="code-var">探针_第{layer_num}层</span>
+  <span class="code-keyword">G91</span>
+  <span class="code-keyword">G1</span> Z5 F600
+  <span class="code-keyword">G90</span>
+  <span class="code-keyword">G1</span> X110 Y110 F9000
+  <span class="code-keyword">G30</span>
+  {if <span class="code-var">printer.probe.last_result</span> > 0.05}
+    <span class="code-keyword">M112</span>  <span class="code-comment">; 超差急停</span>
+  {endif}
+{endif}</pre>
+      </div>
+    </div>
+    <div class="path-item" onclick="togglePath(this)">
+      <span class="node">Between objects G-code</span>
+      <span class="arrow">→</span>
+      <span class="tag">多对象之间</span>
+      <div class="details">
+        <p style="color:var(--muted);margin:12px 0;font-size:14px">打印多个对象时，在完成一个对象后、开始下一个对象前执行。</p>
+        <pre>; 多对象切换提示
+<span class="code-comment">; 适合长时间打印的进度提醒</span>
+{if total_layer_number > 50}
+  <span class="code-keyword">M118</span> <span class="code-var">OBJECT_CHANGE Layer={layer_num}</span>
+  <span class="code-keyword">M300</span> S800 P300  <span class="code-comment">; 蜂鸣提醒</span>
+  <span class="code-keyword">RESPOND</span> MSG=<span class="code-var">"Object {layer_num}/{(total_layer_number/50)|int}"</span>
+{endif}</pre>
+      </div>
+    </div>
+    <div class="path-item" onclick="togglePath(this)">
+      <span class="node">Change filament G-code</span>
+      <span class="arrow">→</span>
+      <span class="tag">换料时</span>
+      <div class="details">
+        <p style="color:var(--muted);margin:12px 0;font-size:14px">在换料时执行，适合做喷嘴清理、颜色切换提示等。</p>
+        <pre>; 换料提醒宏
+<span class="code-comment">; 多色打印时提醒操作员</span>
+<span class="code-keyword">M117</span> <span class="code-var">换料: {filament_name}</span>
+<span class="code-keyword">G91</span>
+<span class="code-keyword">G1</span> E-8 F300   <span class="code-comment">; 退料</span>
+<span class="code-keyword">G1</span> Z10 F600   <span class="code-comment">; 抬升</span>
+<span class="code-keyword">G90</span>
+<span class="code-keyword">RESPOND</span> MSG=<span class="code-var">"请插入 {filament_name}"</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 2: 4 Placeholders -->
+<section class="section fade-in delay-1">
+  <h2 class="section-title"><span>4</span> 个占位符变量</h2>
+  <p class="section-intro">SuperSlicer 支持的层相关占位符，在切片时会被替换为实际数值：</p>
+  <div class="placeholder-grid">
+    <div class="placeholder-card">
+      <div class="var-header">
+        <div class="var-icon">📏</div>
+        <div class="var-name">{layer_num}</div>
+      </div>
+      <div class="var-meaning">当前层号</div>
+      <div class="var-usage">🔧 触发条件判断 · 层数计数 · 进度跟踪</div>
+      <div class="var-example">示例值: 0 → 1 → 2 → ... → 147</div>
+    </div>
+    <div class="placeholder-card">
+      <div class="var-header">
+        <div class="var-icon">📐</div>
+        <div class="var-name">{layer_z}</div>
+      </div>
+      <div class="var-meaning">当前 Z 高度</div>
+      <div class="var-usage">📏 Z 探针对齐 · 位置校准 · 高度验证</div>
+      <div class="var-example">示例值: 0.2mm → 0.4mm → ... → 29.4mm</div>
+    </div>
+    <div class="placeholder-card">
+      <div class="var-header">
+        <div class="var-icon">📊</div>
+        <div class="var-name">{total_layer_number}</div>
+      </div>
+      <div class="var-meaning">总层数</div>
+      <div class="var-usage">📊 进度百分比计算 · 完成度显示 · 耗时估算</div>
+      <div class="var-example">示例值: 147 (全程打印)</div>
+    </div>
+    <div class="placeholder-card">
+      <div class="var-header">
+        <div class="var-icon">🏷️</div>
+        <div class="var-name">{filament_name}</div>
+      </div>
+      <div class="var-meaning">耗材名称</div>
+      <div class="var-usage">🏷️ 多料标记 · 批次追踪 · 颜色区分</div>
+      <div class="var-example">示例值: PLA, PETG, ABS, TPU, Silk Gold</div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 3: Macro 1 - Z Probe -->
+<section class="section fade-in delay-2">
+  <h2 class="section-title"><span>宏 1</span> Z 探针在线平整度检测</h2>
+  <div class="canvas-container">
+    <div class="canvas-header">
+      <div class="canvas-title">
+        <span class="icon">📡</span>
+        每 10 层执行一次 Z 探针检测
+      </div>
+      <div class="canvas-controls">
+        <button class="btn btn-primary" onclick="startMacro1()">▶ 播放</button>
+        <button class="btn btn-secondary" onclick="pauseMacro1()">⏸ 暂停</button>
+        <button class="btn btn-secondary" onclick="resetMacro1()">🔄 重置</button>
+        <button class="btn btn-speed" onclick="setSpeed(0.5,1)">0.5x</button>
+        <button class="btn btn-speed active" onclick="setSpeed(1,1)">1x</button>
+        <button class="btn btn-speed" onclick="setSpeed(2,1)">2x</button>
+        <button class="btn btn-speed" onclick="setSpeed(4,1)">4x</button>
+      </div>
+    </div>
+    <div class="macro-desc">📌 <strong>原理：</strong>利用 BLTouch/杜邦线探针，每 10 层暂停打印，移动到热床中心执行 G30 探测。当平整度超过 0.05mm（BLTouch 重复精度 ±0.05mm）时触发 M112 急停，防止继续打印导致报废。</div>
+    <div class="canvas-body">
+      <div class="canvas-viewer">
+        <div class="layer-display"><div class="num" id="m1-layer">0</div><div class="label">当前层</div></div>
+        <div id="zprobe-canvas">
+          <div class="bed">热床 (210×210mm)</div>
+          <div class="nozzle" id="m1-nozzle"><div class="nozzle-body"></div><div class="nozzle-tip"></div></div>
+          <div class="probe-info" id="m1-probe">
+            <div class="label">Z 探针读数</div>
+            <div class="value" id="m1-zval">--- mm</div>
+          </div>
+          <div class="stop-alert" id="m1-stop"><span class="icon">⚠️</span> M112 急停!</div>
+          <div class="probe-log" id="m1-log"></div>
+        </div>
+      </div>
+      <div class="canvas-code">
+        <pre id="m1-code">{if layer_num % 10 == 0 && layer_num > 0}
+<span class="comment">  ; === 第 10/20/30... 层探针检测 ===</span>
+  <span class="keyword">M117</span> <span class="var">探针_第{layer_num}层</span>
+  <span class="keyword">G91</span>                    <span class="comment">; 相对定位</span>
+  <span class="keyword">G1</span> Z5 F600              <span class="comment">; 抬升 5mm</span>
+  <span class="keyword">G90</span>                    <span class="comment">; 绝对定位</span>
+  <span class="keyword">G1</span> X110 Y110 F9000     <span class="comment">; 移动到探针位置</span>
+  <span class="keyword">G30</span>                    <span class="comment">; 执行探针</span>
+  {if <span class="var">printer.probe.last_result</span> > 0.05}
+    <span class="keyword">M117</span> <span class="value">Z_超差停机</span>_{printer.probe.last_result}
+    <span class="keyword">M112</span>                  <span class="comment">; 急停!</span>
+  {endif}
+  <span class="keyword">M118</span> <span class="var">探针_第{layer_num}层_完成</span>
+{endif}</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 4: Macro 2 - FBG -->
+<section class="section fade-in delay-3">
+  <h2 class="section-title"><span>宏 2</span> FBG 光纤布拉格光栅监测</h2>
+  <div class="canvas-container">
+    <div class="canvas-header">
+      <div class="canvas-title">
+        <span class="icon">💎</span>
+        在 50/100/150 层触发光纤传感采样
+      </div>
+      <div class="canvas-controls">
+        <button class="btn btn-primary" onclick="startMacro2()">▶ 播放</button>
+        <button class="btn btn-secondary" onclick="pauseMacro2()">⏸ 暂停</button>
+        <button class="btn btn-secondary" onclick="resetMacro2()">🔄 重置</button>
+        <button class="btn btn-speed" onclick="setSpeed(0.5,2)">0.5x</button>
+        <button class="btn btn-speed active" onclick="setSpeed(1,2)">1x</button>
+        <button class="btn btn-speed" onclick="setSpeed(2,2)">2x</button>
+        <button class="btn btn-speed" onclick="setSpeed(4,2)">4x</button>
+      </div>
+    </div>
+    <div class="macro-desc">📌 <strong>原理：</strong>FBG（Fiber Bragg Grating）光纤光栅传感器埋在打印件内部，可实时监测应力应变和温度变化。在关键层触发外部 FBG 解调仪采样，记录结构健康数据。</div>
+    <div class="canvas-body">
+      <div class="canvas-viewer">
+        <div class="layer-display"><div class="num" id="m2-layer">0</div><div class="label">当前层</div></div>
+        <div id="fbg-canvas">
+          <div class="print-object">透明 PLA 打印件</div>
+          <div class="fiber" id="m2-fiber"></div>
+          <div class="fbg-data">
+            <div class="row"><span class="key">Wavelength</span><span class="val" id="m2-wl">1550.00 nm</span></div>
+            <div class="row"><span class="key">Strain</span><span class="val" id="m2-strain">0.00 με</span></div>
+            <div class="row"><span class="key">Temp</span><span class="val" id="m2-temp">25.0 °C</span></div>
+          </div>
+          <div class="spectrum">
+            <div class="spectrum-title">光谱监测</div>
+            <div class="spectrum-graph"><div class="spectrum-line" id="m2-spectrum"></div></div>
+            <div class="spectrum-value" id="m2-wavelength">λ: 1550.00 nm</div>
+          </div>
+          <div class="fbg-markers">
+            <div class="fbg-marker" id="m2-m50">Layer 50</div>
+            <div class="fbg-marker" id="m2-m100">Layer 100</div>
+            <div class="fbg-marker" id="m2-m150">Layer 150</div>
+          </div>
+        </div>
+      </div>
+      <div class="canvas-code">
+        <pre id="m2-code">{if layer_num == 50 || layer_num == 100 || layer_num == 150}
+<span class="comment">  ; === FBG 应力/温度采样点 ===</span>
+  <span class="keyword">M117</span> <span class="var">FBG_采样_第{layer_num}层</span>
+  <span class="keyword">M106</span> S255              <span class="comment">; LED 全亮提示</span>
+  <span class="keyword">G4</span> P800                <span class="comment">; 等待 800ms 稳定</span>
+  <span class="keyword">M118</span> <span class="var">FBG_TRIGGER Layer={layer_num} Z={layer_z}</span>
+  <span class="comment">; 通过 Moonraker 触发外部解调仪</span>
+  <span class="keyword">G4</span> P300                <span class="comment">; 采样保持时间</span>
+  <span class="keyword">M107</span>                  <span class="comment">; 关闭 LED</span>
+  <span class="keyword">RESPOND</span> MSG=<span class="value">"FBG_DONE_{layer_num}"</span>
+{endif}</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 5: Macro 3 - CT Markers -->
+<section class="section fade-in delay-4">
+  <h2 class="section-title"><span>宏 3</span> X 光/CT 扫描参考标记</h2>
+  <div class="canvas-container">
+    <div class="canvas-header">
+      <div class="canvas-title">
+        <span class="icon">🔬</span>
+        每 50 层放置金属微珠标记
+      </div>
+      <div class="canvas-controls">
+        <button class="btn btn-primary" onclick="startMacro3()">▶ 播放</button>
+        <button class="btn btn-secondary" onclick="pauseMacro3()">⏸ 暂停</button>
+        <button class="btn btn-secondary" onclick="resetMacro3()">🔄 重置</button>
+        <button class="btn btn-speed" onclick="setSpeed(0.5,3)">0.5x</button>
+        <button class="btn btn-speed active" onclick="setSpeed(1,3)">1x</button>
+        <button class="btn btn-speed" onclick="setSpeed(2,3)">2x</button>
+        <button class="btn btn-speed" onclick="setSpeed(4,3)">4x</button>
+      </div>
+    </div>
+    <div class="macro-desc">📌 <strong>原理：</strong>在关键层（50/100/150...）挤出极少量（0.015mm）高密度材料（钨粉或铅玻璃珠），形成 X 射线可见标记。打印完成后进行 CT 扫描时，这些标记可用于配准定位和内部缺陷检测。</div>
+    <div class="canvas-body">
+      <div class="canvas-viewer">
+        <div class="layer-display"><div class="num" id="m3-layer">0</div><div class="label">当前层</div></div>
+        <div id="ct-canvas">
+          <div class="layer-stack" id="m3-stack"></div>
+          <div class="ct-scan">
+            <div class="ct-scan-header">CT 扫描视图</div>
+            <div class="ct-grid"></div>
+            <div class="ct-image" id="m3-ct">
+              <div class="ct-crosshair"></div>
+            </div>
+            <div class="ct-info">
+              <div class="row"><span class="key">Layer</span><span class="val" id="m3-ct-layer">-</span></div>
+              <div class="row"><span class="key">Marker</span><span class="val" id="m3-ct-marker">-</span></div>
+            </div>
+            <div class="ct-label">
+              <span>0</span><span>Scan Position</span><span>40</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="canvas-code">
+        <pre id="m3-code">{if layer_num % 50 == 0 && layer_num > 0}
+<span class="comment">  ; === CT 扫描参考标记 ===</span>
+  <span class="keyword">M117</span> <span class="var">CT_MARKER_第{layer_num}层</span>
+  <span class="comment">; 移动到标记位置 (X100,Y100)</span>
+  <span class="keyword">G1</span> X100 Y100 F1800
+  <span class="comment">; 绘制 0.2mm 方形微珠标记</span>
+  <span class="keyword">G1</span> X100 Y100.2 E0.015 F300
+  <span class="keyword">G1</span> X100.2 Y100.2 E0.015
+  <span class="keyword">G1</span> X100.2 Y100 E0.015
+  <span class="keyword">G1</span> X100 Y100 E0.015
+  <span class="keyword">G1</span> X100 Y100 F1800
+  <span class="keyword">M118</span> <span class="value">CT_MARKER_DONE_{layer_num}</span>
+{endif}</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 6: KLP1 Compatibility -->
+<section class="section fade-in">
+  <h2 class="section-title"><span>KLP1</span> Klipper 兼容性表</h2>
+  <p class="section-intro">以下 G-code 功能在 Klipper 固件中的兼容性说明：</p>
+  <div class="card comp-table">
+    <table>
+      <thead><tr><th>功能</th><th>状态</th><th>备注说明</th></tr></thead>
+      <tbody>
+        <tr><td>{printer.probe.last_result}</td><td class="yes">✅</td><td>Klipper 原生支持，返回探针测量值（mm）<div class="cfg-hint">[probe] section: query_probewaits=0</div></td></tr>
+        <tr><td>RESPOND MSG</td><td class="yes">✅</td><td>Klipper 0.10+ 支持，通过 Moonraker 转发<div class="cfg-hint">Mainsail/Fluidd Console 标签页查看</div></td></tr>
+        <tr><td>M118</td><td class="yes">✅</td><td>转发到 Moonraker WebSocket，需要开启 notifications<div class="cfg-hint">[respond] 默认开启</div></td></tr>
+        <tr><td>{if ... } 占位符</td><td class="yes">✅</td><td>SuperSlicer 切片时展开为实际值<div class="cfg-hint">条件表达式在切片阶段计算完成</div></td></tr>
+        <tr><td>M300 (蜂鸣)</td><td class="yes">✅</td><td>需要配置 beeper<div class="cfg-hint">[output_pin beeper] pin=PA15</div></td></tr>
+        <tr><td>M112 (急停)</td><td class="yes">✅</td><td>直接触发 emergency_stop，完全兼容<div class="cfg-hint">等同于 emergency_stop 命令</div></td></tr>
+        <tr><td>G4 (延时)</td><td class="yes">✅</td><td>完全兼容<div class="cfg-hint">P=毫秒(P0-300000), S=秒</div></td></tr>
+        <tr><td>M104/M109 (温度)</td><td class="partial">⚠️ 部分</td><td>接收但不执行，建议用 Klipper 原生命令<div class="cfg-hint">推荐 SET_HEATER_TEMP heater=extruder target=210</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Section 7: Andy Roadmap -->
+<section class="section fade-in">
+  <h2 class="section-title"><span>Andy</span> 工业化路线 3 核心宏</h2>
+  <p class="section-intro">推荐 Andy 按以下顺序部署三个核心宏，从基础到高级，逐步构建完整的工业检测体系：</p>
+  <div class="roadmap">
+    <div class="roadmap-step" onclick="toggleRoadmap(1)">
+      <div class="roadmap-circle">
+        <span class="num">1</span>
+        <div class="icon">📡</div>
+        <div class="title">探针宏</div>
+      </div>
+      <span style="color:var(--muted);font-size:14px;text-align:center">在线平整度检测<br>自动质量控制</span>
+    </div>
+    <div class="roadmap-arrow">→</div>
+    <div class="roadmap-step" onclick="toggleRoadmap(2)">
+      <div class="roadmap-circle">
+        <span class="num">2</span>
+        <div class="icon">📊</div>
+        <div class="title">进度宏</div>
+      </div>
+      <span style="color:var(--muted);font-size:14px;text-align:center">实时状态上报<br>远程监控</span>
+    </div>
+    <div class="roadmap-arrow">→</div>
+    <div class="roadmap-step" onclick="toggleRoadmap(3)">
+      <div class="roadmap-circle">
+        <span class="num">3</span>
+        <div class="icon">📸</div>
+        <div class="title">拍照宏</div>
+      </div>
+      <span style="color:var(--muted);font-size:14px;text-align:center">完工自动记录<br>质量存档</span>
+    </div>
+  </div>
+  <div class="roadmap-detail" id="roadmap-detail-1">
+    <h3>📡 探针宏 - 在线平整度检测</h3>
+    <pre>; 每10层Z探针检测，超过0.05mm自动停机
+; 部署优先级: ★★★★★
+{if layer_num % 10 == 0 && layer_num > 0}
+  M117 探针_第{layer_num}层
+  G91
+  G1 Z5 F600
+  G90
+  G1 X110 Y110 F9000
+  G30
+  {if printer.probe.last_result > 0.05}
+    M117 Z_超差_{printer.probe.last_result}
+    M112  ; 急停!
+  {endif}
+  M118 探针_第{layer_num}层_完成
+{endif}</pre>
+  </div>
+  <div class="roadmap-detail" id="roadmap-detail-2">
+    <h3>📊 进度上报宏</h3>
+    <pre>; 每25层上报进度到控制台/OctoPrint
+; 部署优先级: ★★★★☆
+{if layer_num % 25 == 0}
+  M118 PROGRESS={layer_num}/{total_layer_number}
+  RESPOND MSG="Layer {layer_num}/{(total_layer_number / 10)|round}0%"
+{endif}
+
+; 打印完成时
+{if layer_num == total_layer_number}
+  M118 PRINT_COMPLETE
+  RESPOND MSG="✅ 打印完成! Total: {total_layer_number} layers"
+{endif}</pre>
+  </div>
+  <div class="roadmap-detail" id="roadmap-detail-3">
+    <h3>📸 完工拍照宏</h3>
+    <pre>; 完成后自动移动到拍照位置
+; 部署优先级: ★★★☆☆
+{if layer_num == total_layer_number}
+  M117 正在拍照存档...
+  G91
+  G1 X0 Y50 Z30 F3000
+  G4 P2000  ; 等待稳定
+  M118 PHOTO_READY
+  RESPOND MSG="📸 请在Mainsail控制台确认拍照"
+{endif}</pre>
+  </div>
+  <div class="roadmap-tip">
+    <div class="icon">💡</div>
+    <p><strong>建议部署顺序：</strong>先部署 <strong>① 探针宏</strong>（质量保障）→ 稳定运行 1 周后加 <strong>② 进度宏</strong>（远程监控）→ 最后加 <strong>③ 拍照宏</strong>（完工存档）</p>
+  </div>
+</section>
+
+<!-- Section 8: FAQ -->
+<section class="section fade-in">
+  <h2 class="section-title"><span>FAQ</span> 常见问题解答</h2>
+  <div class="faq-list">
+    <div class="faq-item">
+      <div class="faq-q">Custom G-code 在哪一层生效？</div>
+      <div class="faq-a">
+        <p>Custom G-code 在<strong>切片时</strong>进行变量替换，而不是打印运行时执行。<code>SuperSlicer</code> 在生成 G-code 时会把 <code>{layer_num}</code> 等占位符展开为实际数值，<code>Klipper</code> 收到的文件里<strong>已经没有占位符</strong>了。</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">{layer_num} 是从 0 还是 1 开始？</div>
+      <div class="faq-a">
+        <p>从 <strong>0</strong> 开始。第 1 层打印时 <code>layer_num = 0</code>，第 2 层时 <code>layer_num = 1</code>。<br>注意：<code>layer_num == 0</code> 表示首层，<code>layer_num == 1</code> 表示第 2 层。</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">RESPOND MSG 在 Mainsail 哪里看？</div>
+      <div class="faq-a">
+        <p>在 <code>Mainsail</code> 或 <code>Fluidd</code> 的 <strong>Console</strong> 标签页。<code>Moonraker</code> 会将 RESPOND 消息通过 WebSocket 转发，实时显示在控制台。也可在 OctoPrint 的 Terminal 标签查看。</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">M117 和 M118 区别？</div>
+      <div class="faq-a">
+        <p><code>M117</code> = LCD 显示（如果有屏幕则显示文字）；<code>M118</code> = 通过 Moonraker 转发到 WebSocket，可被 OctoPrint/Fluidd/Mainsail 捕获。<strong>M118 更适合远程监控场景。</strong></p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">SuperSlicer 切片时变量替换还是 Klipper 运行时替换？</div>
+      <div class="faq-a">
+        <p><strong>切片时替换。</strong> SuperSlicer 在生成 G-code 时会计算 <code>{if layer_num % 10 == 0}</code> 等条件表达式，并把结果写入输出文件。Klipper 只是执行已经展开的纯 G-code。</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">{if ... } 表达式支持函数吗？</div>
+      <div class="faq-a">
+        <p>支持。常用数学函数：<code>round()</code>、<code>floor()</code>、<code>ceil()</code>、<code>abs()</code>。<br>示例：<code>{(layer_num / 10)|round}</code> 计算层数除以 10 的四舍五入值。</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Klipper 能用 Marlin 的 M 代码吗？</div>
+      <div class="faq-a">
+        <p>约 <strong>80%</strong> 兼容。常用代码（<code>M112</code>、<code>M114</code>、<code>M117</code>、<code>M118</code>、<code>G4</code>、<code>M300</code>）都兼容。温度相关代码建议用 Klipper 原生命令。</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">探针急停阈值 0.05mm 怎么来的？</div>
+      <div class="faq-a">
+        <p>基于 <code>BLTouch</code> 的<strong>重复精度 ±0.05mm</strong>（官方规格）。超过此值可能表示：热床未调平、Z offset 偏移、材料膨胀/收缩、喷嘴堵塞。需要人工检查。</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">FBG 光纤监测需要什么硬件？</div>
+      <div class="faq-a">
+        <p>需要：① <code>FBG 传感器解调仪</code>（如 Micron Optics sm130、Bristol mIRR）；② <code>光纤光栅传感器</code>埋在打印件内部；③ 通过 <code>M118</code> 触发外部设备采样记录。</p>
+      </div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">CT 标记微珠用什么材料？</div>
+      <div class="faq-a">
+        <p>通常用<strong>钨粉</strong>（W）或<strong>铅玻璃珠</strong>，X 射线对比度高，直径 0.2-0.5mm。用量极小（每点约 0.015mm³），不影响打印件结构强度，便于 CT 配准定位。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <p class="tag"><span>🖨️</span> 3D打印学习系列 #56</p>
+  <p class="meta">创建日期: 2026-06-18 | 为 Andy 工业化路线定制</p>
+  <p class="meta">GitHub: <a href="https://github.com/FullPeak-andy/3D-Printing-Learning-Materials" target="_blank">FullPeak-andy / 3D-Printing-Learning-Materials</a></p>
+  <p class="copy">© 2026 3D Printing Learning Series. All rights reserved.</p>
+</footer>
+
+<script>
+// Path tree toggle
+function togglePath(el){el.classList.toggle('active')}
+
+// FAQ toggle
+document.querySelectorAll('.faq-q').forEach(q=>q.addEventListener('click',function(){this.parentElement.classList.toggle('open')}));
+
+// Roadmap toggle
+function toggleRoadmap(n){
+  document.querySelectorAll('.roadmap-detail').forEach(d=>d.classList.remove('show'));
+  document.getElementById('roadmap-detail-'+n).classList.add('show');
+}
+
+// Speed settings
+var speeds={1:1,2:1,3:1};
+function setSpeed(v,m){
+  speeds[m]=v;
+  event.target.parentElement.querySelectorAll('.btn-speed').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// Macro 1 - Z Probe
+var m1Interval=null,m1Running=false,m1Paused=false,m1Layer=0,m1MaxLayer=70,m1Log=[];
+function startMacro1(){
+  if(m1Running&&!m1Paused)return;
+  m1Running=true;m1Paused=false;
+  m1Interval=setInterval(stepMacro1,100/speeds[1]);
+}
+function pauseMacro1(){m1Paused=true;clearInterval(m1Interval)}
+function resetMacro1(){
+  clearInterval(m1Interval);m1Running=false;m1Paused=false;m1Layer=0;m1Log=[];
+  document.getElementById('m1-layer').textContent='0';
+  document.getElementById('m1-zval').textContent='--- mm';
+  document.getElementById('m1-nozzle').style.bottom='38%';
+  document.getElementById('m1-probe').classList.remove('warning');
+  document.getElementById('m1-stop').classList.remove('show');
+  document.getElementById('m1-log').innerHTML='';
+}
+function stepMacro1(){
+  m1Layer++;
+  document.getElementById('m1-layer').textContent=m1Layer;
+  if(m1Layer>=m1MaxLayer){clearInterval(m1Interval);m1Running=false;return}
+  if(m1Layer%10===0&&m1Layer>0){
+    document.getElementById('m1-nozzle').style.bottom='20%';
+    var z=Math.random()*0.07+0.025;
+    var zFixed=z.toFixed(3);
+    document.getElementById('m1-zval').textContent=zFixed+' mm';
+    var logEntry={layer:m1Layer,z:zFixed,alert:z>0.05};
+    m1Log.push(logEntry);
+    var logEl=document.getElementById('m1-log');
+    var div=document.createElement('div');
+    div.className='entry'+(z>0.05?' alert':'');
+    div.textContent='Layer '+m1Layer+': Z='+zFixed+'mm'+(z>0.05?' ⚠️ ALERT':'');
+    logEl.appendChild(div);
+    logEl.scrollTop=logEl.scrollHeight;
+    if(z>0.05){
+      document.getElementById('m1-probe').classList.add('warning');
+      document.getElementById('m1-stop').classList.add('show');
+      setTimeout(()=>{document.getElementById('m1-nozzle').style.bottom='38%'},800);
+    }else{
+      setTimeout(()=>{document.getElementById('m1-nozzle').style.bottom='38%'},1000);
+    }
+  }
+}
+
+// Macro 2 - FBG
+var m2Interval=null,m2Running=false,m2Paused=false,m2Layer=0,m2MaxLayer=160;
+function startMacro2(){
+  if(m2Running&&!m2Paused)return;
+  m2Running=true;m2Paused=false;
+  m2Interval=setInterval(stepMacro2,80/speeds[2]);
+}
+function pauseMacro2(){m2Paused=true;clearInterval(m2Interval)}
+function resetMacro2(){
+  clearInterval(m2Interval);m2Running=false;m2Paused=false;m2Layer=0;
+  document.getElementById('m2-layer').textContent='0';
+  document.getElementById('m2-fiber').classList.remove('glow');
+  document.getElementById('m2-spectrum').classList.remove('active');
+  document.getElementById('m2-wl').textContent='1550.00 nm';
+  document.getElementById('m2-wavelength').textContent='λ: 1550.00 nm';
+  document.getElementById('m2-strain').textContent='0.00 με';
+  document.getElementById('m2-temp').textContent='25.0 °C';
+  ['m50','m100','m150'].forEach(id=>document.getElementById('m2-'+id).classList.remove('active'));
+}
+function stepMacro2(){
+  m2Layer++;
+  document.getElementById('m2-layer').textContent=m2Layer;
+  if(m2Layer>=m2MaxLayer){clearInterval(m2Interval);m2Running=false;return}
+  [50,100,150].forEach(l=>{
+    var el=document.getElementById('m2-m'+l);
+    if(m2Layer===l){
+      document.getElementById('m2-fiber').classList.add('glow');
+      document.getElementById('m2-spectrum').classList.add('active');
+      el.classList.add('active');
+      var wl=1550+(Math.random()-0.5)*2;
+      var strain=(Math.random()*20-10).toFixed(2);
+      var temp=(25+Math.random()*5).toFixed(1);
+      document.getElementById('m2-wl').textContent=wl.toFixed(2)+' nm';
+      document.getElementById('m2-wavelength').textContent='λ: '+wl.toFixed(2)+' nm';
+      document.getElementById('m2-strain').textContent=strain+' με';
+      document.getElementById('m2-temp').textContent=temp+' °C';
+    }
+    if(m2Layer>l+8){
+      el.classList.remove('active');
+      document.getElementById('m2-fiber').classList.remove('glow');
+      document.getElementById('m2-spectrum').classList.remove('active');
+    }
+  });
+}
+
+// Macro 3 - CT Markers
+var m3Interval=null,m3Running=false,m3Paused=false,m3Layer=0,m3MaxLayer=200,m3MarkerCount=0;
+function initLayers(){
+  var stack=document.getElementById('m3-stack');
+  stack.innerHTML='';
+  for(var i=0;i<50;i++){
+    var l=document.createElement('div');
+    l.className='layer';
+    l.id='m3-layer'+i;
+    stack.appendChild(l);
+  }
+}
+initLayers();
+function startMacro3(){
+  if(m3Running&&!m3Paused)return;
+  m3Running=true;m3Paused=false;
+  m3Interval=setInterval(stepMacro3,50/speeds[3]);
+}
+function pauseMacro3(){m3Paused=true;clearInterval(m3Interval)}
+function resetMacro3(){
+  clearInterval(m3Interval);m3Running=false;m3Paused=false;m3Layer=0;m3MarkerCount=0;
+  document.getElementById('m3-layer').textContent='0';
+  document.getElementById('m3-ct').classList.remove('active');
+  document.getElementById('m3-ct-layer').textContent='-';
+  document.getElementById('m3-ct-marker').textContent='-';
+  initLayers();
+}
+function stepMacro3(){
+  m3Layer++;
+  document.getElementById('m3-layer').textContent=m3Layer;
+  if(m3Layer>=m3MaxLayer){clearInterval(m3Interval);m3Running=false;return}
+  var li=Math.floor(m3Layer/4);
+  var el=document.getElementById('m3-layer'+li);
+  if(el){
+    el.classList.add('printing');
+    setTimeout(()=>el.classList.remove('printing'),200);
+  }
+  if(m3Layer%50===0&&m3Layer>0){
+    m3MarkerCount++;
+    var le=document.getElementById('m3-layer'+li);
+    if(le)le.classList.add('has-marker');
+    document.getElementById('m3-ct').classList.add('active');
+    document.getElementById('m3-ct-layer').textContent=m3Layer;
+    document.getElementById('m3-ct-marker').textContent='#'+m3MarkerCount;
+    setTimeout(()=>{document.getElementById('m3-ct').classList.remove('active')},400);
+  }
+}
+
+// Scroll animations
+var observer=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')})
+},{threshold:0.1});
+document.querySelectorAll('.section,.fade-in').forEach(s=>observer.observe(s));
+
+// Initialize first roadmap open
+setTimeout(()=>toggleRoadmap(1),500);
+</script>
+</body>
+</html>
