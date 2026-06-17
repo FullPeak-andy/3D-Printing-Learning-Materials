@@ -1,9 +1,9 @@
 # 3D Printing Learning Materials
 
-> Andy 哥 3D 打印学习资料合集 — 51 个 HTML 互动教程  
-> 全是单文件 HTML（零依赖双击即开），覆盖 KLP1 / K1 Max / Voron / ERCF / F360 / 调平校准 / 耗材工艺全链路（2026-06-17 新增 5 个 KLP1 调试系列）
+> Andy 哥 3D 打印学习资料合集 — 52 个 HTML 互动教程  
+> 全是单文件 HTML（零依赖双击即开），覆盖 KLP1 / K1 Max / Voron / ERCF / F360 / 调平校准 / 耗材工艺全链路（2026-06-18 新增 K 表方案 + cfg + Python 脚本）
 
-## 📚 目录索引（42 个文件，按主题分组）
+## 📚 目录索引（47 个文件，按主题分组）
 
 ### 🖨️ KLP1 专题（Andy 哥教学，17 个）
 
@@ -27,7 +27,7 @@
 | 16 | [KLP1陶瓷加热棒+热敏淘宝搜索.html](./KLP1陶瓷加热棒+热敏淘宝搜索.html) | 配件淘宝选购 |
 | 17 | [KLP1_vs_拓竹A1热端对比.html](./KLP1_vs_拓竹A1热端对比.html) | KLP1 vs A1 热端 |
 
-### 🧩 KLP1 调试系列（2026-06-17，5 个）
+### 🧩 KLP1 调试系列（2026-06-18，6 个）⭐ NEW
 
 | # | 文件 | 主题 |
 |---|---|---|
@@ -36,6 +36,7 @@
 | 49 | [KLP1_擦拭塔13参数全解.html](./KLP1_擦拭塔13参数全解.html) | 擦拭塔 13 参数全解（单色机为何不需要） |
 | 50 | [KLP1_智能监控3档方案.html](./KLP1_智能监控3档方案.html) | 智能监控 3 档方案（拓竹 A1 LiDAR 同款） |
 | 51 | [KLP1_Root权限与安全加固.html](./KLP1_Root权限与安全加固.html) | Root 权限与安全加固（3 种拿 Root 方法） |
+| 54 | [KLP1_K表方案_温度速度动态补偿.html](./KLP1_K表方案_温度速度动态补偿.html) | K 表方案：4 耗材温度 × 速度复合 K + cfg + Python 脚本 |
 
 ### 🔧 K1 / K1 Max 改造（6 个）
 
@@ -105,6 +106,13 @@
 | 45 | [3D打印校准件_观察清单.html](./3D打印校准件_观察清单.html) | 6 大校准件 + 5 大故障对照 + 拉丝模拟器 + 记录表 |
 | 46 | [3D打印调平方式_对比.html](./3D打印调平方式_对比.html) | 4 大类调平原理 + Canvas 动画 + 4 方式对比表 + KLP1 升级路径 |
 
+### ⚙️ Klipper 配置与脚本（2 个）⭐ NEW
+
+| # | 文件 | 主题 |
+|---|---|---|
+| - | [KLP1_FLOW_K_TABLE.cfg](./KLP1_FLOW_K_TABLE.cfg) | K 表方案 Klipper 配置（含 4 耗材温度 K 表 + 速度 K 表宏） |
+| - | [flow_compensator.py](./flow_compensator.py) | 动态流量补偿 Python 脚本（Moonraker API 实时调 K 值） |
+
 ## 🚀 使用方法
 
 **所有文件都是单文件 HTML，零依赖**：
@@ -124,7 +132,9 @@ cd 3D-Printing-Learning-Materials
 
 - **作者**：FullPeak andy
 - **创建日期**：2026-06-16
-- **文件数**：44 个 HTML 互动教程
+- **更新日期**：2026-06-18
+- **文件数**：49 个（47 个 HTML + 2 个配置文件）
+- **累计 HTML 教程**：52 个（#1-52, #54）
 - **适配机器**：KLP1 V2.2 / K1 Max / K1 SE / Voron 2.4 / Anycubic Kobra 2 Max / 大鱼 SPA
 - **适配材料**：PLA / PETG / ABS / TPU
 - **风格**：单文件 HTML 互动动画 + 图表可视化 + 实战 SOP
