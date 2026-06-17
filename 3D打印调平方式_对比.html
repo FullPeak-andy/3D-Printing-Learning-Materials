@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D打印调平方式对比 · Andy 学习站</title>
+<style>
+:root{
+  --bg:#0e1117;
+  --panel:#161b22;
+  --panel2:#1c2128;
+  --border:#30363d;
+  --text:#c9d1d9;
+  --text2:#8b949e;
+  --accent:#58a6ff;
+  --green:#3fb950;
+  --yellow:#d29922;
+  --red:#f85149;
+  --orange:#ff7b00;
+  --purple:#bc8cff;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif; line-height:1.6; padding:20px;}
+.container{max-width:1200px; margin:0 auto;}
+h1{color:var(--accent); text-align:center; margin:20px 0; font-size:2.2em;}
+.subtitle{text-align:center; color:var(--text2); margin-bottom:30px; font-size:1em;}
+
+.overview{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:15px; margin-bottom:30px;}
+.ov-card{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px; text-align:center; cursor:pointer; transition:all 0.2s; position:relative;}
+.ov-card:hover{transform:translateY(-3px); border-color:var(--accent);}
+.ov-card.active{border-color:var(--accent); background:var(--panel2); box-shadow:0 0 20px rgba(88,166,255,0.25);}
+.ov-icon{font-size:2.8em; margin-bottom:10px;}
+.ov-name{color:var(--accent); font-weight:bold; margin-bottom:8px; font-size:1.1em;}
+.ov-price{color:var(--green); font-size:0.9em;}
+.ov-best{color:var(--yellow); font-size:0.85em; margin-top:5px; min-height:1.2em;}
+.ov-tag{position:absolute; top:8px; right:8px; background:var(--accent); color:white; font-size:0.7em; padding:2px 8px; border-radius:10px;}
+
+.tabs{display:flex; gap:5px; margin-bottom:20px; flex-wrap:wrap; border-bottom:1px solid var(--border); padding-bottom:10px;}
+.tab{background:var(--panel); border:1px solid var(--border); border-radius:6px 6px 0 0; padding:10px 20px; cursor:pointer; transition:all 0.2s; color:var(--text); font-size:0.95em;}
+.tab:hover{background:var(--panel2);}
+.tab.active{background:var(--accent); color:white; border-color:var(--accent);}
+
+.detail{background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:25px; margin-bottom:20px; display:none;}
+.detail.active{display:block;}
+.detail h2{color:var(--accent); margin-bottom:15px; font-size:1.5em;}
+.detail h3{color:var(--green); margin:18px 0 10px; font-size:1.1em;}
+.detail p{color:var(--text2); margin-bottom:10px;}
+
+.anim-section{background:var(--panel2); border-radius:10px; padding:20px; margin:20px 0;}
+.anim-canvas{background:#0a0d12; border:1px solid var(--border); border-radius:8px; display:block; margin:0 auto; max-width:100%;}
+.anim-controls{text-align:center; margin-top:15px;}
+.btn{background:var(--accent); color:white; border:none; padding:8px 18px; border-radius:6px; cursor:pointer; margin:0 5px; transition:all 0.2s; font-size:0.9em;}
+.btn:hover{background:#4090ee; transform:translateY(-1px);}
+.btn:disabled{background:var(--text2); cursor:not-allowed;}
+.btn.green{background:var(--green);}
+.btn.green:hover{background:#2ea043;}
+.btn.yellow{background:var(--yellow);}
+.btn.yellow:hover{background:#b67d18;}
+
+.procon{display:grid; grid-template-columns:1fr 1fr; gap:15px; margin:15px 0;}
+@media(max-width:768px){.procon{grid-template-columns:1fr;}}
+.pro, .con{background:var(--panel2); border-radius:8px; padding:15px; border-left:4px solid;}
+.pro{border-color:var(--green);}
+.con{border-color:var(--red);}
+.pro h4, .con h4{margin-bottom:8px; color:var(--text); font-size:1em;}
+.pro li, .con li{color:var(--text2); margin-left:20px; margin-bottom:5px; font-size:0.95em;}
+
+.models{background:var(--panel2); border-radius:8px; padding:15px; margin:15px 0;}
+.model-tag{display:inline-block; background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:3px 10px; margin:3px; font-size:0.85em; color:var(--text2);}
+
+.compare{background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:20px; margin:20px 0; overflow-x:auto;}
+table{width:100%; border-collapse:collapse; min-width:750px;}
+th,td{padding:10px 8px; text-align:center; border-bottom:1px solid var(--border); font-size:0.9em;}
+th{background:var(--panel2); color:var(--accent); font-weight:bold; position:sticky; top:0;}
+td.method{color:var(--text); font-weight:bold; text-align:left; background:var(--panel2);}
+.star-green{color:var(--green);}
+.star-yellow{color:var(--yellow);}
+.star-red{color:var(--red);}
+.star-blue{color:var(--accent);}
+.badge{display:inline-block; padding:2px 6px; border-radius:4px; font-size:0.8em; font-weight:bold;}
+.badge-ok{background:rgba(63,185,80,0.2); color:var(--green);}
+.badge-mid{background:rgba(210,153,34,0.2); color:var(--yellow);}
+.badge-bad{background:rgba(248,81,73,0.2); color:var(--red);}
+
+.upgrade{background:linear-gradient(135deg,var(--panel),var(--panel2)); border:2px solid var(--accent); border-radius:12px; padding:25px; margin:30px 0;}
+.upgrade h2{color:var(--accent); margin-bottom:15px;}
+.upgrade .step{background:var(--bg); border-left:3px solid var(--accent); padding:15px; margin:10px 0; border-radius:6px;}
+.upgrade .step strong{color:var(--green);}
+.upgrade .step.yellow{border-color:var(--yellow);}
+.upgrade .step.yellow strong{color:var(--yellow);}
+.upgrade .step.red{border-color:var(--red);}
+.upgrade .step.red strong{color:var(--red);}
+.upgrade .step .cost{float:right; background:var(--accent); color:white; padding:2px 10px; border-radius:10px; font-size:0.85em;}
+
+.note{background:var(--panel2); border-left:4px solid var(--yellow); border-radius:4px; padding:12px 15px; margin:15px 0; font-size:0.95em; color:var(--text2);}
+.note strong{color:var(--yellow);}
+
+.footer{text-align:center; color:var(--text2); margin-top:40px; padding:20px; border-top:1px solid var(--border); font-size:0.9em;}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🔧 3D 打印调平方式对比</h1>
+<p class="subtitle">从机械探针到涡流感应 · 4 大类调平原理 + 动画演示 + 升级路径</p>
+
+<!-- 顶部总览卡 -->
+<div class="overview">
+  <div class="ov-card active" data-tab="bltouch">
+    <div class="ov-tag">你正在用</div>
+    <div class="ov-icon">🔘</div>
+    <div class="ov-name">机械探针</div>
+    <div class="ov-price">¥30-80</div>
+    <div class="ov-best">BLTouch / CR-Touch</div>
+  </div>
+  <div class="ov-card" data-tab="capacitive">
+    <div class="ov-icon">🟠</div>
+    <div class="ov-name">电容接近开关</div>
+    <div class="ov-price">¥15-30</div>
+    <div class="ov-best">Kobra 2 / Ender S1</div>
+  </div>
+  <div class="ov-card" data-tab="strain">
+    <div class="ov-icon">📐</div>
+    <div class="ov-name">应变片</div>
+    <div class="ov-price">内置 ¥0</div>
+    <div class="ov-best">拓竹 P2S / X1E / K1</div>
+  </div>
+  <div class="ov-card" data-tab="eddy">
+    <div class="ov-icon">🌀</div>
+    <div class="ov-name">涡流探针</div>
+    <div class="ov-price">¥150-400</div>
+    <div class="ov-best">BTT Eddy / Beacon</div>
+  </div>
+</div>
+
+<!-- Tab 切换 -->
+<div class="tabs">
+  <div class="tab active" data-tab="bltouch">🔘 机械探针 (BLTouch/CR-Touch)</div>
+  <div class="tab" data-tab="capacitive">🟠 电容接近开关</div>
+  <div class="tab" data-tab="strain">📐 应变片 (Strain Gauge)</div>
+  <div class="tab" data-tab="eddy">🌀 涡流 (Eddy/Beacon)</div>
+</div>
+
+<!-- BLTouch 详情 -->
+<div class="detail active" id="bltouch">
+  <h2>🔘 机械探针 · BLTouch / CR-Touch</h2>
+  <p><strong>原理</strong>：探针内部有弹簧+磁铁+霍尔传感器。下垂时探针从吸起位置下落，碰到床后被推开触发霍尔，向上吸起。Klipper 看到探针触发 → 记录当前 Z 高度 = "床到这个点的高度"。</p>
+  
+  <div class="anim-section">
+    <h3>🎬 动画演示：探针下落 → 触发 → 收回</h3>
+    <canvas class="anim-canvas" id="cv-bltouch" width="700" height="280"></canvas>
+    <div class="anim-controls">
+      <button class="btn green" onclick="playBLTouch()">▶ 播放动画</button>
+      <button class="btn" onclick="resetBLTouch()">↻ 重置</button>
+    </div>
+  </div>
+
+  <h3>📌 关键参数</h3>
+  <ul style="color:var(--text2); margin-left:20px; margin-bottom:15px;">
+    <li>测量精度：<strong style="color:var(--green);">±0.005 mm</strong>（触发式测量）</li>
+    <li>单点测量时间：<strong style="color:var(--yellow);">~1.5 秒</strong>（下降+触发+上升）</li>
+    <li>常见测点数：<strong>16-49 点</strong>（5×5 网格 25 点）</li>
+    <li>价格：<strong style="color:var(--green);">¥30-80</strong>（BLTouch） / ¥50-100（CR-Touch）</li>
+    <li>寿命：约 <strong>1-3 年</strong>（机械部件多，易磨损）</li>
+  </ul>
+
+  <h3>✅❌ 优缺点</h3>
+  <div class="procon">
+    <div class="pro">
+      <h4>优点</h4>
+      <li>精度高，触发测量准</li>
+      <li>不挑喷嘴/床材质</li>
+      <li>价格便宜，30 元起</li>
+      <li>改装难度低（替换原 Z 限位）</li>
+      <li>开源生态成熟（Klipper 原生支持）</li>
+    </div>
+    <div class="con">
+      <h4>缺点</h4>
+      <li>有机械动作 → 易磨损/卡死</li>
+      <li>速度慢（每个点 1.5 秒）</li>
+      <li>展开/收回易撞打印件</li>
+      <li>探针偏移 / 撞坏要重新校准</li>
+      <li>非接触场景下不工作</li>
+    </div>
+  </div>
+
+  <h3>🎯 适用机型</h3>
+  <div class="models">
+    <span class="model-tag">KLP1 (你的)</span>
+    <span class="model-tag">Voron 2.4</span>
+    <span class="model-tag">Ender 3</span>
+    <span class="model-tag">Prusa MK4</span>
+    <span class="model-tag">Bambu A1 mini</span>
+    <span class="model-tag">Bambu P1S</span>
+  </div>
+
+  <div class="note">
+    <strong>💡 Andy 你的 KLP1 v3 修复版</strong>：用 MKS_THR.cfg 里的 [probe] 段配置（pin: !MKS_THR:gpio21, x_offset: 12.85），实际生效 z_offset 在 SAVE_CONFIG 段（当前 1.780）。
+  </div>
+</div>
+
+<!-- 电容接近开关 详情 -->
+<div class="detail" id="capacitive">
+  <h2>🟠 电容接近开关</h2>
+  <p><strong>原理</strong>：金属圆柱体作为感应面，靠近金属/电容物体时电容值变化 → 内部电路识别后输出开关信号。装在挤出机上（不在打印头上方）→ Z 接近时触发。Kobra 2 / Ender S1 / K1 SE 等用这个方案。</p>
+
+  <div class="anim-section">
+    <h3>🎬 动画演示：探针下降 → 电容变化 → 触发</h3>
+    <canvas class="anim-canvas" id="cv-cap" width="700" height="280"></canvas>
+    <div class="anim-controls">
+      <button class="btn green" onclick="playCap()">▶ 播放动画</button>
+      <button class="btn" onclick="resetCap()">↻ 重置</button>
+    </div>
+  </div>
+
+  <h3>📌 关键参数</h3>
+  <ul style="color:var(--text2); margin-left:20px; margin-bottom:15px;">
+    <li>测量精度：<strong style="color:var(--yellow);">±0.02 mm</strong>（模拟信号）</li>
+    <li>单点测量时间：<strong style="color:var(--green);">~0.5 秒</strong>（无机械动作）</li>
+    <li>感应距离：<strong>1-4 mm</strong>（可调）</li>
+    <li>价格：<strong style="color:var(--green);">¥15-30</strong>（FYSETC 套件 ¥15.3）</li>
+    <li>触发条件：<strong>必须用金属喷嘴</strong>，不能全塑料</li>
+  </ul>
+
+  <h3>✅❌ 优缺点</h3>
+  <div class="procon">
+    <div class="pro">
+      <h4>优点</h4>
+      <li>无机械动作 → 不易坏</li>
+      <li>速度快 3 倍（vs BLTouch）</li>
+      <li>价格便宜（15 元起）</li>
+      <li>免维护（不展开/收回）</li>
+      <li>可以做到非接触调平</li>
+    </div>
+    <div class="con">
+      <h4>缺点</h4>
+      <li>必须金属喷嘴（塑料喷嘴失效）</li>
+      <li>受温度影响（喷嘴冷热变化 → 探针偏移）</li>
+      <li>不同热床材料（PEI/玻璃/磁铁）探测距离不同</li>
+      <li>装在挤出机上 → 离热源近 → 易受热形变</li>
+      <li>精度比 BLTouch 低 4 倍</li>
+    </div>
+  </div>
+
+  <h3>🎯 适用机型</h3>
+  <div class="models">
+    <span class="model-tag">Anycubic Kobra 2</span>
+    <span class="model-tag">Ender 3 S1</span>
+    <span class="model-tag">Creality K1 SE</span>
+    <span class="model-tag">Voron 改装</span>
+    <span class="model-tag">FYSETC 通用套件</span>
+  </div>
+
+  <div class="note">
+    <strong>💡 FYSETC 这个套件</strong>：淘宝 ¥15.3，针对 Kobra 2 设计的挤出机自动调平。KLP1 也可以改装（替换 BLTouch），但注意 KLP1 已经用 BLTouch 测得挺好，没必要为这个省钱。
+  </div>
+</div>
+
+<!-- 应变片 详情 -->
+<div class="detail" id="strain">
+  <h2>📐 应变片 (Strain Gauge)</h2>
+  <p><strong>原理</strong>：应变片贴在热床和 Z 轴支架之间。热床微微受 Z 压力 → 应变片电阻变化 → 主控检测到变化 → 记录 Z 高度。**测的是物理形变**，所以不挑喷嘴/床材质。拓竹 P2S 用了 36 点应变片（覆盖整个床面）。</p>
+
+  <div class="anim-section">
+    <h3>🎬 动画演示：喷嘴接近 → 热床形变 → 应变片触发</h3>
+    <canvas class="anim-canvas" id="cv-strain" width="700" height="280"></canvas>
+    <div class="anim-controls">
+      <button class="btn green" onclick="playStrain()">▶ 播放动画</button>
+      <button class="btn" onclick="resetStrain()">↻ 重置</button>
+    </div>
+  </div>
+
+  <h3>📌 关键参数</h3>
+  <ul style="color:var(--text2); margin-left:20px; margin-bottom:15px;">
+    <li>测量精度：<strong style="color:var(--green);">±0.001 mm</strong>（物理测量）</li>
+    <li>单点测量时间：<strong style="color:var(--green);">~0.3 秒</strong>（无展开）</li>
+    <li>常见测点数：<strong>4 点 / 9 点 / 36 点</strong></li>
+    <li>价格：<strong style="color:var(--green);">内置</strong>（机器自带）</li>
+    <li>寿命：与机器同寿（无机械动作）</li>
+  </ul>
+
+  <h3>✅❌ 优缺点</h3>
+  <div class="procon">
+    <div class="pro">
+      <h4>优点</h4>
+      <li>测的是物理形变，最直接</li>
+      <li>不挑喷嘴/床材质（金属/塑料都行）</li>
+      <li>速度极快（0.3 秒/点）</li>
+      <li>无展开/收回动作</li>
+      <li>36 点全覆盖（拓竹 P2S 旗舰方案）</li>
+      <li>不占喷嘴附近空间</li>
+    </div>
+    <div class="con">
+      <h4>缺点</h4>
+      <li>内置方案，不便后期改装</li>
+      <li>需要重新设计 Z 支架（拓竹/创想新机用）</li>
+      <li>受温度影响（金属热胀冷缩）</li>
+      <li>点少时（4 点）精度反而不如 BLTouch</li>
+      <li>校准算法复杂（需要学习材料弹性模量）</li>
+    </div>
+  </div>
+
+  <h3>🎯 适用机型</h3>
+  <div class="models">
+    <span class="model-tag">Bambu X1E</span>
+    <span class="model-tag">Bambu P2S (36点)</span>
+    <span class="model-tag">Creality K1 Max</span>
+    <span class="model-tag">Creality K1</span>
+    <span class="model-tag">Snapmaker 2</span>
+  </div>
+
+  <div class="note">
+    <strong>💡 拓竹 P2S 36 点应变片</strong> = 2025 年消费机最高调平方案。K1 Max 你那台也是应变片（4 点），所以你 K1 Max 的"Z 校准"按钮其实就是应变片调平。
+  </div>
+</div>
+
+<!-- 涡流 详情 -->
+<div class="detail" id="eddy">
+  <h2>🌀 涡流探针 · BTT Eddy / Beacon</h2>
+  <p><strong>原理</strong>：探头发出高频交变磁场 → 金属（喷嘴/热床）产生涡流 → 反过来影响探头线圈 → 检测线圈参数变化 → 算出**精确距离**。和 BLTouch 不同，**完全不接触**，而且可以连续测距（不只是 0/1 触发）。Voron 改装圈的"调平之王"。</p>
+
+  <div class="anim-section">
+    <h3>🎬 动画演示：涡流感应 → 距离变化 → 连续测距</h3>
+    <canvas class="anim-canvas" id="cv-eddy" width="700" height="280"></canvas>
+    <div class="anim-controls">
+      <button class="btn green" onclick="playEddy()">▶ 播放动画</button>
+      <button class="btn" onclick="resetEddy()">↻ 重置</button>
+    </div>
+  </div>
+
+  <h3>📌 关键参数</h3>
+  <ul style="color:var(--text2); margin-left:20px; margin-bottom:15px;">
+    <li>测量精度：<strong style="color:var(--green);">±0.001 mm</strong>（模拟测距）</li>
+    <li>单点测量时间：<strong style="color:var(--green);">~0.1 秒</strong>（连续扫描）</li>
+    <li>感应距离：<strong>0-4 mm</strong>（连续可调）</li>
+    <li>价格：<strong style="color:var(--yellow);">¥150-400</strong>（BTT Eddy ¥150 / Beacon ¥350）</li>
+    <li>寿命：与机器同寿（无机械）</li>
+  </ul>
+
+  <h3>✅❌ 优缺点</h3>
+  <div class="procon">
+    <div class="pro">
+      <h4>优点</h4>
+      <li>不接触 → 永远不会撞坏</li>
+      <li>测距不是 0/1 → 可连续扫描</li>
+      <li>Z 不用下来 → 速度极快</li>
+      <li>改装潜力大（Voron 改装主流）</li>
+      <li>Klipper 原生支持（scan_mesh）</li>
+      <li>可以测热床平整度 + 落差</li>
+    </div>
+    <div class="con">
+      <h4>缺点</h4>
+      <li>价格贵（150+）</li>
+      <li>需要金属喷嘴（不能全塑料）</li>
+      <li>受温度影响（线圈电阻变）</li>
+      <li>需要预热稳定（冷热差 0.05mm）</li>
+      <li>改装难度中等（要重新接线）</li>
+    </div>
+  </div>
+
+  <h3>🎯 适用机型</h3>
+  <div class="models">
+    <span class="model-tag">Voron 2.4 标配</span>
+    <span class="model-tag">Voron Trident</span>
+    <span class="model-tag">K1 Max 改装</span>
+    <span class="model-tag">Ender 3 改装</span>
+    <span class="model-tag">KLP1 改装可行</span>
+  </div>
+
+  <div class="note">
+    <strong>💡 拓竹 Beacon 同原理</strong>：Beacon 是 Voron 团队自己设计的涡流探针（¥350）。BTT Eddy 是大厂克隆版（¥150），Klipper 兼容。**Voron 2.4R2 必装 Beacon**。
+  </div>
+</div>
+
+<!-- 4 大类对比表 -->
+<div class="compare">
+  <h2 style="color:var(--accent); margin-bottom:15px;">📊 4 大类调平方式全面对比</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>对比项</th>
+        <th>🔘 机械探针<br><small>BLTouch</small></th>
+        <th>🟠 电容开关<br><small>Kobra 2</small></th>
+        <th>📐 应变片<br><small>P2S/K1</small></th>
+        <th>🌀 涡流探针<br><small>Eddy/Beacon</small></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="method">原理</td>
+        <td>机械触发</td>
+        <td>电容感应</td>
+        <td>物理形变</td>
+        <td>电磁涡流</td>
+      </tr>
+      <tr>
+        <td class="method">接触测距</td>
+        <td>接触（触发）</td>
+        <td>非接触</td>
+        <td>接触（形变）</td>
+        <td>非接触（连续）</td>
+      </tr>
+      <tr>
+        <td class="method">精度</td>
+        <td><span class="badge badge-ok">±0.005 mm</span></td>
+        <td><span class="badge badge-mid">±0.02 mm</span></td>
+        <td><span class="badge badge-ok">±0.001 mm</span></td>
+        <td><span class="badge badge-ok">±0.001 mm</span></td>
+      </tr>
+      <tr>
+        <td class="method">单点速度</td>
+        <td>~1.5 s（慢）</td>
+        <td>~0.5 s（中）</td>
+        <td>~0.3 s（快）</td>
+        <td>~0.1 s（极快）</td>
+      </tr>
+      <tr>
+        <td class="method">价格</td>
+        <td><span class="badge badge-ok">¥30-80</span></td>
+        <td><span class="badge badge-ok">¥15-30</span></td>
+        <td><span class="badge badge-ok">内置</span></td>
+        <td><span class="badge badge-mid">¥150-400</span></td>
+      </tr>
+      <tr>
+        <td class="method">易损性</td>
+        <td>❌ 高（机械）</td>
+        <td>✅ 低</td>
+        <td>✅ 低</td>
+        <td>✅ 极低</td>
+      </tr>
+      <tr>
+        <td class="method">喷嘴限制</td>
+        <td>无</td>
+        <td>金属</td>
+        <td>无</td>
+        <td>金属</td>
+      </tr>
+      <tr>
+        <td class="method">改装难度</td>
+        <td>⭐ 简单</td>
+        <td>⭐⭐ 中</td>
+        <td>⭐⭐⭐ 难（内置）</td>
+        <td>⭐⭐ 中</td>
+      </tr>
+      <tr>
+        <td class="method">拓竹机使用</td>
+        <td>无</td>
+        <td>Kobra 2</td>
+        <td>P2S 36点 / K1</td>
+        <td>X1E 选配</td>
+      </tr>
+      <tr>
+        <td class="method">Voron 改装</td>
+        <td>✅ 主流</td>
+        <td>✅ 可用</td>
+        <td>不适用</td>
+        <td>✅ 标配 Beacon</td>
+      </tr>
+      <tr>
+        <td class="method">首次层检测</td>
+        <td>无</td>
+        <td>无</td>
+        <td>无</td>
+        <td><span class="badge badge-ok">✅ 可 LiDAR</span></td>
+      </tr>
+      <tr>
+        <td class="method">Klipper 支持</td>
+        <td>原生 [bltouch]</td>
+        <td>[probe] 段</td>
+        <td>需扩展</td>
+        <td>原生 [eddy]</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Andy 升级路径 -->
+<div class="upgrade">
+  <h2>🎯 Andy KLP1 升级路径建议</h2>
+  <p style="color:var(--text2); margin-bottom:15px;">你 KLP1 v3 修复版现在用 BLTouch，已经能跑出不错的效果。如果要"再上一档"，按成本/收益排序：</p>
+
+  <div class="step">
+    <strong>① 现状先用好</strong>（不动硬件）
+    <span class="cost">¥0</span>
+    <p style="color:var(--text2); margin-top:8px;">把 BLTouch 调到极致：z_offset PROBE_CALIBRATE 准 + 输入整形配 ADXL345 + 6×6 mesh + KAMP 算法。质量能到拓竹 A1 水平。</p>
+  </div>
+
+  <div class="step yellow">
+    <strong>② 改装 BTT Eddy 涡流探针</strong>
+    <span class="cost">¥150</span>
+    <p style="color:var(--text2); margin-top:8px;">**最推荐改装路线**。替换 BLTouch，Klipper 原生支持，精度提升 5 倍，速度提升 15 倍。Voron 改装主流方案。</p>
+    <p style="color:var(--yellow); margin-top:5px; font-size:0.9em;">⚠ 注意：Eddy 需要金属喷嘴（KLP1 标配就是金属），改装需要重新接线。</p>
+  </div>
+
+  <div class="step yellow">
+    <strong>③ 改装 Voron Beacon 涡流</strong>
+    <span class="cost">¥350</span>
+    <p style="color:var(--text2); margin-top:8px;">Beacon 比 Eddy 贵 2 倍但**算法更优**（Voron 团队自研，scan_mesh 算法比 Klipper 原生更精细）。Voron 2.4R2 标配。</p>
+    <p style="color:var(--yellow); margin-top:5px; font-size:0.9em;">⚠ KLP1 装 Beacon 需要重新设计打印头支架（3D 打印一个），改装工程量比 Eddy 大。</p>
+  </div>
+
+  <div class="step red">
+    <strong>❌ 不推荐：改装电容接近开关</strong>
+    <span class="cost">¥15</span>
+    <p style="color:var(--text2); margin-top:8px;">便宜但**升级意义不大**：精度比 BLTouch 差 4 倍，受温度影响大，需要金属喷嘴。你已经有 BLTouch 了，没必要换这个。</p>
+    <p style="color:var(--red); margin-top:5px; font-size:0.9em;">⚠ 除非是 Kobra 2 那种**原装没调平**的机器，否则用不到。</p>
+  </div>
+
+  <div class="step red">
+    <strong>❌ 不推荐：改装应变片</strong>
+    <span class="cost">¥500+</span>
+    <p style="color:var(--text2); margin-top:8px;">应变片要重新设计 Z 支架（拓竹/创想新机自带），KLP1 改造工程量巨大。**机器架构不匹配**，不现实。</p>
+  </div>
+
+  <h3 style="color:var(--green); margin-top:25px;">🚀 最佳策略</h3>
+  <p style="color:var(--text); margin-top:10px;">
+    <strong style="color:var(--accent);">短期</strong>：把 BLTouch + PA + z_offset 调到极限<br>
+    <strong style="color:var(--accent);">中期</strong>：改装 BTT Eddy 涡流（Klipper 原生支持最稳）<br>
+    <strong style="color:var(--accent);">长期</strong>：上 Voron 2.4R2 + Beacon 涡流（终极方案）
+  </p>
+</div>
+
+<!-- 调平方式决策树 -->
+<div class="detail active" style="margin-top:30px;">
+  <h2>🌳 调平方式决策树</h2>
+  <p>不知道选哪种？按场景回答问题：</p>
+  <div style="background:var(--panel2); padding:20px; border-radius:8px; margin:15px 0;">
+    <p style="color:var(--accent);">Q1: 机器是新机还是改装？</p>
+    <ul style="color:var(--text2); margin:8px 0 8px 20px;">
+      <li>新机 → 看 Q2</li>
+      <li>改装 → 看 Q3</li>
+    </ul>
+    <p style="color:var(--accent);">Q2: 新机是消费级还是 DIY 级？</p>
+    <ul style="color:var(--text2); margin:8px 0 8px 20px;">
+      <li>消费级（拓竹 A1 / P1S / 创想 K1）→ 机器自带什么用什么</li>
+      <li>DIY 级（自己攒机）→ BLTouch（最稳）或 Eddy（最先进）</li>
+    </ul>
+    <p style="color:var(--accent);">Q3: 改装预算？</p>
+    <ul style="color:var(--text2); margin:8px 0 8px 20px;">
+      <li>≤¥50 → 电容开关（但 KLP1 没必要）</li>
+      <li>¥50-200 → BLTouch（成熟稳定）</li>
+      <li>¥200+ → BTT Eddy（Voron 改装首选）</li>
+      <li>¥300+ → Voron Beacon（终极方案）</li>
+    </ul>
+  </div>
+</div>
+
+<div class="footer">
+  📚 收录于 <strong>依德 · 钢铁城义体医生</strong> 3D 打印学习资料站<br>
+  数据截至 2026-06-17 · 来源：OrcaSlicer Wiki / Klipper Docs / 拓竹官网 / Voron 改装文档<br>
+  📦 GitHub: <code style="color:var(--green);">github.com/FullPeak-andy/3D-Printing-Learning-Materials</code>
+</div>
+
+</div>
+
+<script>
+// ===== 动画 1: BLTouch 机械探针 =====
+let bltAnim = null;
+function drawBLTouch(step) {
+  const cv = document.getElementById('cv-bltouch');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  ctx.clearRect(0, 0, W, H);
+  
+  // 背景
+  ctx.fillStyle = '#0a0d12';
+  ctx.fillRect(0, 0, W, H);
+  
+  // 热床（底部）
+  ctx.fillStyle = '#30363d';
+  ctx.fillRect(100, 220, 500, 30);
+  ctx.fillStyle = '#8b949e';
+  ctx.font = '14px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('热床', 350, 245);
+  
+  // 探针主体
+  const probeX = 350, probeTopY = 50;
+  ctx.fillStyle = '#58a6ff';
+  ctx.fillRect(probeX - 30, probeTopY, 60, 30);
+  ctx.fillStyle = '#0a0d12';
+  ctx.font = '12px sans-serif';
+  ctx.fillText('BLTouch', probeX, probeTopY + 20);
+  
+  // 探针
+  const probeLen = 80;
+  const probeY = probeTopY + 30 + (step * 1.5);
+  if (probeY < 220) {
+    ctx.fillStyle = '#d29922';
+    ctx.fillRect(probeX - 3, probeY, 6, probeLen);
+    ctx.fillStyle = '#3fb950';
+    ctx.beginPath();
+    ctx.arc(probeX, probeY + probeLen, 8, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    // 探针收回
+    const retractY = 220 - 15;
+    ctx.fillStyle = '#d29922';
+    ctx.fillRect(probeX - 3, retractY, 6, 15);
+    ctx.fillStyle = '#3fb950';
+    ctx.beginPath();
+    ctx.arc(probeX, retractY, 8, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  
+  // 状态文字
+  ctx.fillStyle = '#c9d1d9';
+  ctx.font = '14px sans-serif';
+  ctx.textAlign = 'left';
+  if (step < 30) ctx.fillText('① 探针下降中...', 20, 30);
+  else if (step < 60) ctx.fillText('② 接触床面,触发霍尔传感器!', 20, 30);
+  else if (step < 90) ctx.fillText('③ 记录当前 Z 高度 = 0.05mm', 20, 30);
+  else ctx.fillText('④ 探针吸起,准备下一测点', 20, 30);
+  
+  // 信号线
+  ctx.strokeStyle = step >= 30 && step <= 80 ? '#3fb950' : '#30363d';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(probeX + 30, probeTopY + 15);
+  ctx.lineTo(probeX + 100, probeTopY + 15);
+  ctx.stroke();
+  ctx.fillStyle = step >= 30 && step <= 80 ? '#3fb950' : '#30363d';
+  ctx.beginPath();
+  ctx.arc(probeX + 110, probeTopY + 15, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#8b949e';
+  ctx.fillText('Trigger', probeX + 145, probeTopY + 20);
+}
+
+function playBLTouch() {
+  if (bltAnim) return;
+  let step = 0;
+  bltAnim = setInterval(() => {
+    drawBLTouch(step);
+    step++;
+    if (step > 100) { clearInterval(bltAnim); bltAnim = null; }
+  }, 50);
+}
+function resetBLTouch() {
+  if (bltAnim) { clearInterval(bltAnim); bltAnim = null; }
+  drawBLTouch(0);
+}
+
+// ===== 动画 2: 电容接近开关 =====
+let capAnim = null;
+function drawCap(step) {
+  const cv = document.getElementById('cv-cap');
+  const ctx = cv.getContext('2d');
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  ctx.fillStyle = '#0a0d12';
+  ctx.fillRect(0, 0, cv.width, cv.height);
+  
+  // 热床
+  ctx.fillStyle = '#30363d';
+  ctx.fillRect(100, 220, 500, 30);
+  ctx.fillStyle = '#8b949e';
+  ctx.font = '14px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('热床 (PEI/玻璃/磁铁)', 350, 245);
+  
+  // 电容探针（金属圆柱）
+  const sensorX = 350;
+  const sensorY = 80 + step * 1.2;
+  ctx.fillStyle = '#ff7b00';
+  ctx.fillRect(sensorX - 12, sensorY, 24, 50);
+  ctx.fillStyle = '#8b949e';
+  ctx.font = '12px sans-serif';
+  ctx.fillText('电容', sensorX, sensorY + 30);
+  
+  // 引线
+  ctx.strokeStyle = '#58a6ff';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(sensorX + 12, sensorY + 25);
+  ctx.lineTo(sensorX + 80, sensorY + 25);
+  ctx.stroke();
+  ctx.fillStyle = '#58a6ff';
+  ctx.beginPath();
+  ctx.arc(sensorX + 90, sensorY + 25, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#8b949e';
+  ctx.fillText('Signal', sensorX + 125, sensorY + 30);
+  
+  // 电场（虚线圆）
+  if (sensorY > 130 && sensorY < 200) {
+    const dist = 220 - (sensorY + 50);
+    ctx.strokeStyle = `rgba(255,123,0,${Math.max(0, 1 - dist/30)})`;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([3, 3]);
+    for (let r = 15; r < dist; r += 5) {
+      ctx.beginPath();
+      ctx.arc(sensorX, sensorY + 50, r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    
+    // 电容值变化
+    const capVal = (1 - dist/30 * 0.8).toFixed(2);
+    ctx.fillStyle = '#ff7b00';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(`电容值: ${capVal}pF`, 20, 30);
+    
+    // 触发判断
+    if (dist < 5) {
+      ctx.fillStyle = '#3fb950';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillText('✓ 触发!', 20, 55);
+    }
+  }
+  
+  // 状态文字
+  ctx.fillStyle = '#c9d1d9';
+  ctx.font = '14px sans-serif';
+  ctx.textAlign = 'left';
+  if (step < 30) ctx.fillText('① 探针下移,接近热床', 20, 80);
+  else if (sensorY + 50 < 218) ctx.fillText('② 电容值随距离变化', 20, 80);
+  else ctx.fillText('③ 距离<5mm 时触发信号', 20, 80);
+}
+
+function playCap() {
+  if (capAnim) return;
+  let step = 0;
+  capAnim = setInterval(() => {
+    drawCap(step);
+    step++;
+    if (step > 100) { clearInterval(capAnim); capAnim = null; }
+  }, 50);
+}
+function resetCap() {
+  if (capAnim) { clearInterval(capAnim); capAnim = null; }
+  drawCap(0);
+}
+
+// ===== 动画 3: 应变片 =====
+let strainAnim = null;
+function drawStrain(step) {
+  const cv = document.getElementById('cv-strain');
+  const ctx = cv.getContext('2d');
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  ctx.fillStyle = '#0a0d12';
+  ctx.fillRect(0, 0, cv.width, cv.height);
+  
+  // Z 支架
+  ctx.fillStyle = '#58a6ff';
+  ctx.fillRect(340, 30, 20, 30);
+  ctx.fillStyle = '#8b949e';
+  ctx.font = '12px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Z支架', 350, 50);
+  
+  // 应变片（4 个角）
+  const strainY = 200 + Math.sin(step * 0.1) * 0.5;
+  for (const [x, y] of [[150, 220], [550, 220], [150, 250], [550, 250]]) {
+    ctx.fillStyle = '#bc8cff';
+    ctx.fillRect(x - 15, strainY + y - 220, 30, 8);
+  }
+  
+  // 热床
+  ctx.fillStyle = '#30363d';
+  ctx.fillRect(100, strainY, 500, 25);
+  ctx.fillStyle = '#8b949e';
+  ctx.font = '12px sans-serif';
+  ctx.fillText('热床 (受 Z 压力微形变)', 350, strainY + 15);
+  
+  // 喷嘴
+  const nozzleY = 100 + step * 1.0;
+  if (nozzleY < strainY - 10) {
+    ctx.fillStyle = '#d29922';
+    ctx.fillRect(345, nozzleY, 10, 30);
+    ctx.beginPath();
+    ctx.moveTo(335, nozzleY + 30);
+    ctx.lineTo(365, nozzleY + 30);
+    ctx.lineTo(355, nozzleY + 45);
+    ctx.lineTo(345, nozzleY + 45);
+    ctx.closePath();
+    ctx.fill();
+  }
+  
+  // 应变值
+  const strainVal = Math.sin(step * 0.1) * 0.5;
+  ctx.fillStyle = '#bc8cff';
+  ctx.font = 'bold 14px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText(`形变: ${strainVal.toFixed(4)} mm`, 20, 30);
+  ctx.fillText(`应变: ${(strainVal * 1000).toFixed(2)} μm/m`, 20, 50);
+  
+  // 状态
+  ctx.fillStyle = '#c9d1d9';
+  ctx.font = '14px sans-serif';
+  if (step < 30) ctx.fillText('① 喷嘴下移', 20, 80);
+  else if (step < 80) ctx.fillText('② 热床微形变 → 应变片电阻变化', 20, 80);
+  else ctx.fillText('③ 记录形变量 = 床到喷嘴距离', 20, 80);
+  
+  // 信号线
+  ctx.strokeStyle = step > 30 ? '#bc8cff' : '#30363d';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(550, strainY + 254);
+  ctx.lineTo(620, strainY + 254);
+  ctx.stroke();
+}
+
+function playStrain() {
+  if (strainAnim) return;
+  let step = 0;
+  strainAnim = setInterval(() => {
+    drawStrain(step);
+    step++;
+    if (step > 100) { clearInterval(strainAnim); strainAnim = null; }
+  }, 50);
+}
+function resetStrain() {
+  if (strainAnim) { clearInterval(strainAnim); strainAnim = null; }
+  drawStrain(0);
+}
+
+// ===== 动画 4: 涡流探针 =====
+let eddyAnim = null;
+function drawEddy(step) {
+  const cv = document.getElementById('cv-eddy');
+  const ctx = cv.getContext('2d');
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  ctx.fillStyle = '#0a0d12';
+  ctx.fillRect(0, 0, cv.width, cv.height);
+  
+  // 热床
+  ctx.fillStyle = '#30363d';
+  ctx.fillRect(100, 220, 500, 30);
+  ctx.fillStyle = '#8b949e';
+  ctx.font = '14px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('热床 (金属喷嘴产生涡流)', 350, 245);
+  
+  // 涡流探针头（线圈）
+  const probeX = 350;
+  const probeY = 60 + step * 1.3;
+  
+  // 探针外壳
+  ctx.fillStyle = '#bc8cff';
+  ctx.fillRect(probeX - 15, probeY, 30, 40);
+  ctx.fillStyle = '#0a0d12';
+  ctx.font = '11px sans-serif';
+  ctx.fillText('Eddy', probeX, probeY + 25);
+  
+  // 探针感应面（底部）
+  const senseY = probeY + 40;
+  ctx.fillStyle = '#ff7b00';
+  ctx.beginPath();
+  ctx.arc(probeX, senseY, 12, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // 涡流磁场（圆波纹）
+  const dist = 220 - senseY;
+  if (dist > 0 && dist < 100) {
+    ctx.strokeStyle = `rgba(188,140,255,${Math.max(0, 1 - dist/80)})`;
+    ctx.lineWidth = 1.5;
+    for (let r = 8; r < dist; r += 6) {
+      ctx.beginPath();
+      ctx.arc(probeX, senseY, r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    
+    // 距离数值
+    ctx.fillStyle = '#bc8cff';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(`距离: ${dist.toFixed(2)} mm`, 20, 30);
+    ctx.fillText(`精度: ±0.001 mm`, 20, 50);
+    
+    // 距离 vs 信号强度曲线
+    if (dist < 30) {
+      const sig = (1 - dist/30).toFixed(2);
+      ctx.fillText(`信号强度: ${sig}`, 20, 70);
+    }
+  }
+  
+  // 信号线
+  ctx.strokeStyle = '#bc8cff';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(probeX + 15, probeY + 20);
+  ctx.lineTo(probeX + 80, probeY + 20);
+  ctx.stroke();
+  ctx.fillStyle = '#bc8cff';
+  ctx.beginPath();
+  ctx.arc(probeX + 90, probeY + 20, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#8b949e';
+  ctx.fillText('连续距离信号', probeX + 100, probeY + 24);
+  
+  // 状态
+  ctx.fillStyle = '#c9d1d9';
+  ctx.font = '14px sans-serif';
+  ctx.textAlign = 'left';
+  if (step < 25) ctx.fillText('① Eddy 探针下移', 20, 100);
+  else if (step < 80) ctx.fillText('② 涡流感应连续测距 (不是 0/1 触发)', 20, 100);
+  else ctx.fillText('③ 距离<4mm 时精确记录,不用接触', 20, 100);
+}
+
+function playEddy() {
+  if (eddyAnim) return;
+  let step = 0;
+  eddyAnim = setInterval(() => {
+    drawEddy(step);
+    step++;
+    if (step > 100) { clearInterval(eddyAnim); eddyAnim = null; }
+  }, 50);
+}
+function resetEddy() {
+  if (eddyAnim) { clearInterval(eddyAnim); eddyAnim = null; }
+  drawEddy(0);
+}
+
+// ===== Tab 切换 =====
+document.querySelectorAll('.ov-card, .tab').forEach(el => {
+  el.addEventListener('click', () => {
+    const tab = el.dataset.tab;
+    document.querySelectorAll('.ov-card').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.detail').forEach(d => d.classList.remove('active'));
+    document.querySelectorAll(`[data-tab="${tab}"]`).forEach(e => e.classList.add('active'));
+    document.getElementById(tab).classList.add('active');
+    // 初始绘制
+    setTimeout(() => {
+      if (tab === 'bltouch') drawBLTouch(0);
+      if (tab === 'capacitive') drawCap(0);
+      if (tab === 'strain') drawStrain(0);
+      if (tab === 'eddy') drawEddy(0);
+    }, 100);
+  });
+});
+
+// 初始绘制 BLTouch
+window.addEventListener('load', () => drawBLTouch(0));
+</script>
+</body>
+</html>
