@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D 打印校准件观察清单</title>
+<style>
+:root {
+  --bg: #0e1117;
+  --panel: #161b22;
+  --panel2: #0d1117;
+  --border: #30363d;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --accent: #58a6ff;
+  --green: #3fb950;
+  --yellow: #d29922;
+  --red: #f85149;
+  --orange: #db6d28;
+  --purple: #bc8cff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  padding: 20px;
+  min-height: 100vh;
+}
+.container { max-width: 1200px; margin: 0 auto; }
+header {
+  text-align: center;
+  padding: 30px 20px;
+  background: linear-gradient(135deg, #1f6feb 0%, #8957e5 100%);
+  border-radius: 12px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 16px rgba(31, 111, 235, 0.3);
+}
+header h1 { font-size: 28px; margin-bottom: 8px; font-weight: 600; }
+header .subtitle { color: rgba(255,255,255,0.85); font-size: 14px; }
+header .badges { margin-top: 12px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+header .badge {
+  background: rgba(0,0,0,0.3);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  color: white;
+}
+.section {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.section h2 {
+  color: var(--accent);
+  font-size: 20px;
+  margin-bottom: 6px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section h2 .num {
+  background: var(--accent);
+  color: var(--bg);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+}
+.section .desc { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+
+.test-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-top: 12px;
+}
+.test-card {
+  background: var(--panel2);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.test-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.test-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.test-card:hover::before { opacity: 1; }
+.test-card.active {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, #0d1117 0%, #0a1929 100%);
+}
+.test-card.active::before { opacity: 1; }
+.test-card h3 {
+  color: var(--text);
+  font-size: 16px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.test-card .icon { font-size: 22px; }
+.test-card p { color: var(--muted); font-size: 12px; line-height: 1.5; }
+.test-card .arrow {
+  color: var(--accent);
+  font-size: 12px;
+  margin-top: 8px;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+.test-card:hover .arrow { opacity: 1; }
+
+.detail-panel {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  margin-top: 16px;
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+.detail-panel.show { display: block; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.detail-panel h3 {
+  color: var(--accent);
+  font-size: 20px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.detail-panel .panel-desc {
+  color: var(--muted);
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.detail-panel .howto {
+  background: rgba(63, 185, 80, 0.05);
+  padding: 16px 20px;
+  border-radius: 6px;
+  border-left: 3px solid var(--green);
+  margin-bottom: 14px;
+}
+.detail-panel .howto h4 {
+  color: var(--green);
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+.detail-panel .howto ol { padding-left: 20px; line-height: 1.8; font-size: 14px; }
+.detail-panel .target {
+  background: rgba(88, 166, 255, 0.05);
+  padding: 12px 16px;
+  border-radius: 6px;
+  border-left: 3px solid var(--accent);
+  font-size: 13px;
+}
+.detail-panel .target b { color: var(--accent); }
+.detail-panel .target .preset-val {
+  display: inline-block;
+  background: var(--bg);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: monospace;
+  color: var(--green);
+  margin: 0 4px;
+}
+
+.flowchart {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+  padding: 20px;
+  background: var(--panel2);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.flow-step {
+  background: var(--panel);
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: var(--muted);
+  font-size: 18px;
+  transition: all 0.3s;
+  position: relative;
+}
+.flow-step.completed {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+  transform: scale(1.05);
+}
+.flow-step.current {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(88, 166, 255, 0.2);
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(88, 166, 255, 0.2); }
+  50% { box-shadow: 0 0 0 8px rgba(88, 166, 255, 0.05); }
+}
+.flow-arrow { color: var(--muted); font-size: 20px; }
+
+.issue-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+.issue-item {
+  background: var(--panel2);
+  border-left: 3px solid var(--yellow);
+  padding: 12px 16px;
+  border-radius: 4px;
+  cursor: default;
+}
+.issue-item.red { border-left-color: var(--red); }
+.issue-item.green { border-left-color: var(--green); }
+.issue-item h4 {
+  color: var(--text);
+  margin-bottom: 4px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.issue-item .cause {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.issue-item .cause b { color: var(--accent); }
+
+.canvas-wrap {
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 16px;
+  margin: 12px 0;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+canvas { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.tab {
+  padding: 10px 16px;
+  cursor: pointer;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+.tab:hover { color: var(--text); }
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: rgba(88, 166, 255, 0.05);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 13px;
+}
+th, td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+th {
+  color: var(--accent);
+  background: var(--panel2);
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+}
+tr:hover { background: rgba(88, 166, 255, 0.03); }
+td.effect-good { color: var(--green); font-weight: 500; }
+td.effect-bad { color: var(--red); font-weight: 500; }
+td.effect-mid { color: var(--yellow); }
+
+.param-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+.param-control {
+  background: var(--panel2);
+  padding: 16px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+.param-control label {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.param-control input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+.param-control .value {
+  color: var(--accent);
+  font-weight: bold;
+  font-size: 18px;
+  margin-top: 6px;
+  font-family: monospace;
+}
+.param-control .hint { color: var(--muted); font-size: 11px; margin-top: 4px; }
+
+.btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  margin: 4px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+.btn:hover { background: #4493f8; transform: translateY(-1px); }
+.btn.secondary { background: var(--border); color: var(--text); }
+.btn.secondary:hover { background: #444c56; }
+.btn.danger { background: var(--red); }
+.btn.danger:hover { background: #da3633; }
+.btn.green { background: var(--green); }
+.btn.green:hover { background: #2ea043; }
+
+.note {
+  background: rgba(210, 153, 34, 0.08);
+  border-left: 3px solid var(--yellow);
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin: 12px 0;
+  font-size: 13px;
+  color: var(--text);
+}
+.note b { color: var(--yellow); }
+.note.tip { border-left-color: var(--accent); background: rgba(88, 166, 255, 0.05); }
+.note.tip b { color: var(--accent); }
+.note.danger { border-left-color: var(--red); background: rgba(248, 81, 73, 0.05); }
+.note.danger b { color: var(--red); }
+
+#diagnosis-log {
+  margin-top: 16px;
+}
+.diag-step {
+  background: var(--panel2);
+  padding: 14px 18px;
+  border-radius: 6px;
+  border-left: 3px solid var(--accent);
+  margin-bottom: 10px;
+  animation: slideIn 0.3s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.diag-step h4 { color: var(--accent); margin-bottom: 4px; }
+.diag-step p { color: var(--text); margin: 4px 0; font-size: 13px; }
+.diag-step .action { color: var(--green); }
+.diag-step .check { color: var(--muted); }
+.diag-complete {
+  text-align: center;
+  color: var(--green);
+  padding: 16px;
+  background: rgba(63, 185, 80, 0.05);
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 16px;
+  margin-top: 12px;
+}
+
+footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 24px;
+  margin-top: 20px;
+  border-top: 1px solid var(--border);
+}
+footer a { color: var(--accent); text-decoration: none; }
+
+@media (max-width: 600px) {
+  body { padding: 10px; }
+  header h1 { font-size: 22px; }
+  .test-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🧪 3D 打印校准件观察清单</h1>
+    <p class="subtitle">打测试件 → 对照清单 → 30 分钟定位问题</p>
+    <div class="badges">
+      <span class="badge">单文件零依赖</span>
+      <span class="badge">深色护眼</span>
+      <span class="badge">含 6 大测试件 + 5 大故障</span>
+      <span class="badge">含拉丝模拟器</span>
+    </div>
+  </header>
+
+  <!-- 1. 测试件类型选择 -->
+  <section class="section">
+    <h2><span class="num">1</span>选择你打印的测试件类型</h2>
+    <p class="desc">点选后展开详细使用步骤和参考值</p>
+    <div class="test-grid">
+      <div class="test-card" data-test="flow" onclick="showTest('flow')">
+        <h3><span class="icon">📏</span>流量校准</h3>
+        <p>看挤出量是否准确，调流量倍率</p>
+        <div class="arrow">→ 查看步骤</div>
+      </div>
+      <div class="test-card" data-test="pa" onclick="showTest('pa')">
+        <h3><span class="icon">⚡</span>压力超前 (PA)</h3>
+        <p>看尖角/转角锐利度，调 PA 值</p>
+        <div class="arrow">→ 查看步骤</div>
+      </div>
+      <div class="test-card" data-test="temp" onclick="showTest('temp')">
+        <h3><span class="icon">🌡️</span>温度塔</h3>
+        <p>不同温度对比，找最佳打印温度</p>
+        <div class="arrow">→ 查看步骤</div>
+      </div>
+      <div class="test-card" data-test="retract" onclick="showTest('retract')">
+        <h3><span class="icon">🔙</span>回抽测试</h3>
+        <p>看拉丝程度，调回抽距离/速度</p>
+        <div class="arrow">→ 查看步骤</div>
+      </div>
+      <div class="test-card" data-test="bridge" onclick="showTest('bridge')">
+        <h3><span class="icon">🌉</span>悬空/桥接</h3>
+        <p>不同角度悬空能下挂多少</p>
+        <div class="arrow">→ 查看步骤</div>
+      </div>
+      <div class="test-card" data-test="all" onclick="showTest('all')">
+        <h3><span class="icon">🧩</span>综合测试件</h3>
+        <p>多合一（Ellis/Klippain/5-Grid）</p>
+        <div class="arrow">→ 查看步骤</div>
+      </div>
+    </div>
+
+    <div id="test-detail" class="detail-panel"></div>
+  </section>
+
+  <!-- 2. 快速诊断流程 -->
+  <section class="section">
+    <h2><span class="num">2</span>快速诊断 5 步法（30 分钟定位）</h2>
+    <p class="desc">按顺序检查，不漏项</p>
+    <div class="flowchart" id="flowchart">
+      <div class="flow-step current">1</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">2</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">3</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">4</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">5</div>
+    </div>
+    <div style="text-align:center; margin-top:16px;">
+      <button class="btn" onclick="startDiagnosis()">▶ 开始诊断</button>
+      <button class="btn secondary" onclick="resetDiagnosis()">↻ 重置</button>
+    </div>
+    <div id="diagnosis-log">
+      <p style="color:var(--muted); text-align:center; padding:16px;">点击"开始诊断"开始 5 步排查</p>
+    </div>
+  </section>
+
+  <!-- 3. 常见问题图示对照 -->
+  <section class="section">
+    <h2><span class="num">3</span>常见问题图示对照</h2>
+    <p class="desc">点选问题类型，看可能原因和怎么调</p>
+    <div class="tabs">
+      <div class="tab active" data-tab="string" onclick="switchTab('string')">🕸️ 拉丝</div>
+      <div class="tab" data-tab="blob" onclick="switchTab('blob')">🟤 料堆</div>
+      <div class="tab" data-tab="corner" onclick="switchTab('corner')">🔺 尖角圆</div>
+      <div class="tab" data-tab="layer" onclick="switchTab('layer')">↔️ 层错位</div>
+      <div class="tab" data-tab="rough" onclick="switchTab('rough')">🏔️ 表面粗糙</div>
+    </div>
+    <div id="tab-content"></div>
+  </section>
+
+  <!-- 4. 互动模拟器：拉丝 -->
+  <section class="section">
+    <h2><span class="num">4</span>拉丝模拟器（拖动看效果）</h2>
+    <p class="desc">直观看到回抽距离/速度对拉丝的影响</p>
+    <div class="param-controls">
+      <div class="param-control">
+        <label>回抽距离 (mm)</label>
+        <input type="range" id="ret-dist" min="0" max="5" step="0.1" value="1" oninput="updateSim()">
+        <div class="value"><span id="ret-dist-v">1.0</span> mm</div>
+        <div class="hint">直驱建议 0.5-1.5mm，齿轮减速 1.5-3mm</div>
+      </div>
+      <div class="param-control">
+        <label>回抽速度 (mm/s)</label>
+        <input type="range" id="ret-spd" min="20" max="60" step="1" value="35" oninput="updateSim()">
+        <div class="value"><span id="ret-spd-v">35</span> mm/s</div>
+        <div class="hint">直驱 30-40，Bowden 40-50</div>
+      </div>
+      <div class="param-control">
+        <label>打印温度 (℃)</label>
+        <input type="range" id="sim-temp" min="180" max="240" step="5" value="210" oninput="updateSim()">
+        <div class="value"><span id="sim-temp-v">210</span> ℃</div>
+        <div class="hint">PLA 200-220，PETG 230-250</div>
+      </div>
+    </div>
+    <div class="canvas-wrap">
+      <canvas id="sim-canvas" width="900" height="240"></canvas>
+    </div>
+    <div id="sim-eval" class="note tip"></div>
+  </section>
+
+  <!-- 5. 参数记录表 -->
+  <section class="section">
+    <h2><span class="num">5</span>校准参数记录表</h2>
+    <p class="desc">把每次调参结果记下来，方便对比 + 导出 CSV</p>
+    <table>
+      <thead>
+        <tr>
+          <th>日期</th>
+          <th>测试件</th>
+          <th>调整参数</th>
+          <th>旧值</th>
+          <th>新值</th>
+          <th>效果</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="record-body">
+        <tr><td colspan="7" style="text-align:center; color:var(--muted); padding:20px;">暂无记录（点击下方添加）</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:12px;">
+      <button class="btn green" onclick="addRecord()">+ 添加记录</button>
+      <button class="btn secondary" onclick="exportRecords()">📥 导出 CSV</button>
+      <button class="btn danger" onclick="clearRecords()">🗑️ 清空</button>
+    </div>
+    <div class="note tip" style="margin-top:16px;">
+      💡 <b>调参黄金法则</b>：一次只改一个变量！改 → 打 → 记录 → 对比，<b>不要同时改 2 个参数</b>，否则不知道哪个生效。
+    </div>
+  </section>
+
+  <footer>
+    适配 GitHub Pages / Netlify / Vercel 单文件部署 &nbsp;·&nbsp; 零依赖双击即开 &nbsp;·&nbsp; 数据存浏览器 localStorage
+  </footer>
+</div>
+
+<script>
+// ========== 1. 测试件详情数据 ==========
+const testData = {
+  flow: {
+    icon: '📏',
+    title: '流量校准',
+    desc: '一组相同形状用不同流量倍率打印，看哪条线宽最接近喷嘴直径（0.4mm）',
+    howto: [
+      '<b>切片设置</b>：单壁立方体（4 圈描边 + 实心填充关闭），流量倍率 90%-110% 分 5 段（步进 5%）',
+      '<b>打印</b>：打印这一个测试件',
+      '<b>测量</b>：用<b>游标卡尺</b>量每段顶部线宽（量外壁）',
+      '<b>判断</b>：最接近 <b>0.40mm</b> 的那一段 = 你的最佳流量值',
+      '<b>应用</b>：OrcaSlicer → 耗材设置 → 流量倍率 → 填入'
+    ],
+    target: '<b>PLA</b> 常见 95-100%&nbsp;&nbsp;<b>PETG</b> 95-105%&nbsp;&nbsp;<b>TPU</b> 105-115%'
+  },
+  pa: {
+    icon: '⚡',
+    title: '压力超前 (PA / Linear Advance)',
+    desc: '尖角测试件，看转角处是否锐利/有圆角',
+    howto: [
+      '<b>切片</b>：切 4-5 个相同角落在不同 PA 值（0、0.02、0.04、0.06、0.08）',
+      '<b>打印</b>：打印这一个测试件',
+      '<b>观察</b>：对比角尖锐利度 + 是否有溢出/缺料',
+      '<b>判断</b>：边角最锐 + 没有溢出 + 没有缺料的那段 = 你的 PA 值',
+      '<b>应用 (Klipper)</b>：printer.cfg → <span class="preset-val">[pressure_advance]</span> → 填入 PA 值'
+    ],
+    target: '<b>KLP1</b> 当前 0.02 偏低，建议试 <b>0.04-0.06</b>（K1 Max 范围 0.025-0.05）'
+  },
+  temp: {
+    icon: '🌡️',
+    title: '温度塔',
+    desc: '从下到上每几层降/升 5℃，看哪个温度成型质量最好',
+    howto: [
+      '<b>切片</b>：OrcaSlicer 内置 "温度塔" 插件（右键耗材 → 温度塔）',
+      '<b>范围</b>：PLA 190-220℃ 每层 -5℃ / PETG 220-250℃ / ABS 230-260℃',
+      '<b>打印</b>：打印这一个测试件',
+      '<b>观察</b>：看哪个高度：<b>表面光滑</b> + <b>桥接好</b> + <b>无渗料</b> + <b>无拉丝</b>',
+      '<b>判断</b>：最佳高度对应的温度 = 你的打印温度'
+    ],
+    target: '<b>PLA</b> 实测 205-210℃ 多为最佳（KLP1 / K1 Max）&nbsp;&nbsp;<b>PETG</b> 235-240℃'
+  },
+  retract: {
+    icon: '🔙',
+    title: '回抽测试',
+    desc: '打印多个回抽距离（0.5/1.0/1.5/2.0/2.5/3.0mm）下的空驶路径',
+    howto: [
+      '<b>切片</b>：单塔从底到顶，回抽距离逐层递增（OrcaSlicer → 起层塔）',
+      '<b>打印</b>：打印这一个测试件',
+      '<b>观察</b>：看拉丝量（拉丝最少的那层 = 最佳）',
+      '<b>注意</b>：也看"回抽过快"导致的开头缺料',
+      '<b>应用</b>：OrcaSlicer → 耗材设置 → 回抽距离/速度 → 填入'
+    ],
+    target: '<b>KLP1 直驱</b>：0.5-1.0mm @ 35mm/s 通常够用&nbsp;&nbsp;<b>Bowden 管</b>：3-5mm @ 40-50mm/s'
+  },
+  bridge: {
+    icon: '🌉',
+    title: '悬空 / 桥接',
+    desc: '不同角度（30°/45°/60°）的悬空 + 不同长度（5/10/20/30mm）的桥接',
+    howto: [
+      '<b>切片</b>：搜 "overhang test" 或 "bridge test"，OrcaSlicer 也有内置',
+      '<b>打印</b>：打印这一个测试件',
+      '<b>观察</b>：',
+      '&nbsp;&nbsp;• 哪个角度开始下垂 → 你的悬空极限',
+      '&nbsp;&nbsp;• 桥接下垂量（用卡尺量）→ 你的桥接质量',
+      '<b>调整</b>：',
+      '&nbsp;&nbsp;• 桥接流量（默认 0.85-0.95）',
+      '&nbsp;&nbsp;• 桥接风扇速度（PLA 100%）',
+      '&nbsp;&nbsp;• 桥接速度（比常规慢 30-50%）'
+    ],
+    target: '<b>KLP1 PLA</b>：55° 内不塌 / 10mm 桥接下垂 <b>< 0.3mm</b>'
+  },
+  all: {
+    icon: '🧩',
+    title: '综合测试件（推荐日常用）',
+    desc: 'Ellis / Klippain / 5-Grid 风格，一个模型包含流量+PA+温度+回抽+桥接',
+    howto: [
+      '<b>下载</b>：搜 "Ellis print test" / "5 grid test" / "Klippain calibration"',
+      '<b>切片</b>：按默认参数切片（不要改耗材设置）',
+      '<b>打印</b>：打印这一个测试件',
+      '<b>观察</b>：各模块分区看',
+      '<b>复测</b>：哪个模块有问题，就单独再打那个模块的专项件'
+    ],
+    target: '<b>推荐 KLP1 每月打 1 次</b>综合件（5-15 分钟出结果）'
+  }
+};
+
+// ========== 2. 诊断流程 ==========
+const diagSteps = [
+  { name: '拉丝检查', check: '看空驶路径上有没有丝（细丝/蛛网）', action: '降 5℃ + 加 0.5mm 回抽 + 35mm/s 速度' },
+  { name: '料堆检查', check: '看开始处/转角有没有鼓包', action: 'z_offset +0.005 + 流量倍率 -2%' },
+  { name: '尖角检查', check: '看尖角是否锐利（无圆钝/缺料）', action: 'PA +0.02（KLP1 当前 0.02 → 试 0.04）' },
+  { name: '层错检查', check: '看层与层有没有错位/接缝', action: '检查皮带张力 + 电流 +5%（2209 默认 0.8A）' },
+  { name: '表面检查', check: '看表面有没有规则波纹/颗粒', action: '跑 ADXL345 input_shaper 测 X/Y 共振' }
+];
+let diagIdx = 0;
+
+function startDiagnosis() {
+  diagIdx = 0;
+  const log = document.getElementById('diagnosis-log');
+  log.innerHTML = '';
+  showDiagStep();
+}
+
+function resetDiagnosis() {
+  diagIdx = 0;
+  document.getElementById('diagnosis-log').innerHTML = '<p style="color:var(--muted); text-align:center; padding:16px;">点击"开始诊断"开始 5 步排查</p>';
+  document.querySelectorAll('.flow-step').forEach(s => {
+    s.classList.remove('completed', 'current');
+  });
+  document.querySelectorAll('.flow-step')[0].classList.add('current');
+}
+
+function showDiagStep() {
+  // 更新流程图
+  document.querySelectorAll('.flow-step').forEach((s, i) => {
+    s.classList.remove('completed', 'current');
+    if (i < diagIdx) s.classList.add('completed');
+    else if (i === diagIdx) s.classList.add('current');
+  });
+
+  if (diagIdx >= diagSteps.length) {
+    document.getElementById('diagnosis-log').innerHTML += '<div class="diag-complete">✅ 诊断完成！按上面"动作"建议改参数后重打一次对比</div>';
+    return;
+  }
+
+  const step = diagSteps[diagIdx];
+  const html = `
+    <div class="diag-step">
+      <h4>步骤 ${diagIdx+1}/5：${step.name}</h4>
+      <p class="check">🔍 <b>检查</b>：${step.check}</p>
+      <p class="action">🛠️ <b>如果异常 → 动作</b>：${step.action}</p>
+    </div>
+    <div style="margin-bottom:12px;">
+      <button class="btn" onclick="nextDiag()">${diagIdx < diagSteps.length - 1 ? '下一项 →' : '完成 ✅'}</button>
+      <button class="btn secondary" onclick="skipDiag()">跳过</button>
+    </div>
+  `;
+  const log = document.getElementById('diagnosis-log');
+  log.innerHTML = html;
+}
+
+function nextDiag() {
+  diagIdx++;
+  showDiagStep();
+}
+
+function skipDiag() {
+  diagIdx++;
+  showDiagStep();
+}
+
+// ========== 3. 问题图示 ==========
+const issueData = {
+  string: {
+    title: '🕸️ 拉丝 / 丝状物',
+    desc: '在空驶路径上留下细丝（蛛网状），常见于 PLA/PLA+',
+    causes: [
+      { name: '温度太高', check: '温度塔降 5℃ 看拉丝是否减少' },
+      { name: '回抽距离不够', check: 'KLP1 直驱：1.0 → 1.5 → 2.0mm 试' },
+      { name: '回抽速度太慢', check: '30 → 35 → 40 mm/s 试' },
+      { name: '湿度过高（料受潮）', check: '料盘 50℃ 烤箱 4 小时烘干' }
+    ]
+  },
+  blob: {
+    title: '🟤 料堆 / 鼓包',
+    desc: '某处突然堆出多余塑料（特别是起始处、转角）',
+    causes: [
+      { name: 'Z 离板太近（开始处）', check: 'z_offset 加 0.005-0.01mm 重测' },
+      { name: '流量过大', check: '流量倍率 -2% 看是否消失' },
+      { name: '挤出机齿轮打滑', check: '检查喷头堵 / 料弯折 / 齿轮磨损' },
+      { name: '回抽后没回抽够', check: 'OrcaSlicer → 耗材设置 → 额外回抽距离 +0.5mm' }
+    ]
+  },
+  corner: {
+    title: '🔺 尖角圆 / 缺料',
+    desc: '转角处圆钝或缺失（小圆角、内陷）',
+    causes: [
+      { name: 'PA（压力超前）太小', check: 'KLP1：0.02 → 0.04 → 0.06 试（每次 +0.02）' },
+      { name: '加减速太激进', check: '加速度 -500 mm/s²（默认 1500 → 1000）' },
+      { name: '挤出机惯量大', check: '直驱正常；齿轮减速需重新测 PA（0.04-0.10）' },
+      { name: '打印速度太快', check: '外壁速度 -10mm/s（默认 40 → 30）' }
+    ]
+  },
+  layer: {
+    title: '↔️ 层错位 / 接缝',
+    desc: '层与层之间错开，或 Z 缝明显',
+    causes: [
+      { name: 'X/Y 皮带太松', check: '用手按皮带中点 <b>形变 < 5mm</b>' },
+      { name: '步进电机丢步', check: '电流 +5%（2209 默认 0.8A → 0.84A）' },
+      { name: '打印速度太快', check: '外壁速度 -10mm/s / 移动速度 -20%' },
+      { name: '共振未补偿', check: '跑 ADXL345 测 X/Y 共振，填 input_shaper' }
+    ]
+  },
+  rough: {
+    title: '🏔️ 表面粗糙 / 振纹',
+    desc: '表面有规律波纹或颗粒感',
+    causes: [
+      { name: 'X/Y 共振未补偿', check: '跑 ADXL345 测共振，填 input_shaper（KLP1 已配置 rot=21.85）' },
+      { name: '温度太低', check: '温度塔升 5℃ 看表面是否变光' },
+      { name: '层高太大', check: '0.2 → 0.16 → 0.12 试' },
+      { name: '冷却不足', check: 'PLA 风扇 100%，PETG 50%，TPU 0%' }
+    ]
+  }
+};
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  const d = issueData[tab];
+  const html = `
+    <h3 style="color:var(--accent); margin-bottom:8px;">${d.title}</h3>
+    <p style="color:var(--muted); margin-bottom:16px;">${d.desc}</p>
+    <div class="canvas-wrap">
+      <canvas id="canvas-${tab}" width="900" height="200"></canvas>
+    </div>
+    <h4 style="color:var(--text); margin:16px 0 8px;">可能原因 + 怎么调：</h4>
+    <div class="issue-list">
+      ${d.causes.map(c => `
+        <div class="issue-item">
+          <h4>🔸 ${c.name}</h4>
+          <div class="cause">${c.check}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  document.getElementById('tab-content').innerHTML = html;
+  setTimeout(() => drawIssue(tab), 50);
+}
+
+function drawIssue(type) {
+  const canvas = document.getElementById(`canvas-${type}`);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#0d1117';
+  ctx.fillRect(0, 0, 900, 200);
+
+  // 网格
+  ctx.strokeStyle = 'rgba(48, 54, 61, 0.5)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= 900; x += 50) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 200); ctx.stroke();
+  }
+  for (let y = 0; y <= 200; y += 50) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(900, y); ctx.stroke();
+  }
+
+  if (type === 'string') {
+    // 拉丝图示
+    ctx.strokeStyle = '#58a6ff';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(150, 80); ctx.lineTo(350, 80);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(550, 80); ctx.lineTo(750, 80);
+    ctx.stroke();
+    // 拉丝
+    ctx.strokeStyle = '#8b949e';
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 15; i++) {
+      ctx.beginPath();
+      const x = 350 + i * 27;
+      const drop = 15 + Math.random() * 30;
+      ctx.moveTo(x, 80);
+      ctx.quadraticCurveTo(x + 4, 80 + drop, x + 6, 80);
+      ctx.stroke();
+    }
+    ctx.fillStyle = '#f85149';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText('← 拉丝（蛛网）→', 360, 50);
+    ctx.fillStyle = '#58a6ff';
+    ctx.fillText('打印线', 200, 75);
+  } else if (type === 'blob') {
+    // 料堆
+    ctx.strokeStyle = '#58a6ff';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(150, 50); ctx.lineTo(150, 150);
+    ctx.lineTo(750, 150); ctx.lineTo(750, 50);
+    ctx.stroke();
+    // 料堆
+    ctx.fillStyle = '#d29922';
+    ctx.beginPath();
+    ctx.arc(450, 100, 22, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#0d1117';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('堆', 450, 106);
+    ctx.fillStyle = '#f85149';
+    ctx.textAlign = 'left';
+    ctx.fillText('← 料堆 / 鼓包', 380, 60);
+  } else if (type === 'corner') {
+    // 尖角圆
+    ctx.strokeStyle = '#58a6ff';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(150, 50);
+    ctx.lineTo(380, 50);
+    ctx.arc(450, 50, 70, Math.PI, Math.PI*1.5, false);
+    ctx.lineTo(450, 150);
+    ctx.lineTo(750, 150);
+    ctx.stroke();
+    ctx.fillStyle = '#f85149';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText('圆角 →', 540, 100);
+    ctx.fillStyle = '#3fb950';
+    ctx.fillText('锐角 ✓', 220, 100);
+  } else if (type === 'layer') {
+    // 层错位
+    for (let i = 0; i < 7; i++) {
+      const offset = (i % 2 === 0) ? 0 : 12;
+      ctx.fillStyle = i % 2 ? '#1f6feb' : '#388bfd';
+      ctx.fillRect(200 + offset, 30 + i * 22, 500, 18);
+      ctx.strokeStyle = '#0d1117';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(200 + offset, 30 + i * 22, 500, 18);
+    }
+    ctx.fillStyle = '#f85149';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText('← 层错位 →', 400, 175);
+  } else if (type === 'rough') {
+    // 表面波纹
+    ctx.strokeStyle = '#58a6ff';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    for (let x = 100; x <= 800; x += 2) {
+      const y = 100 + Math.sin(x * 0.06) * 15;
+      if (x === 100) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.fillStyle = '#f85149';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText('规则波纹（共振）', 360, 40);
+  }
+}
+
+// ========== 4. 拉丝模拟器 ==========
+function updateSim() {
+  const dist = parseFloat(document.getElementById('ret-dist').value);
+  const spd = parseFloat(document.getElementById('ret-spd').value);
+  const temp = parseFloat(document.getElementById('sim-temp').value);
+  document.getElementById('ret-dist-v').textContent = dist.toFixed(1);
+  document.getElementById('ret-spd-v').textContent = spd;
+  document.getElementById('sim-temp-v').textContent = temp;
+
+  const canvas = document.getElementById('sim-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#1a1f26';
+  ctx.fillRect(0, 0, 900, 240);
+
+  // 网格
+  ctx.strokeStyle = 'rgba(48, 54, 61, 0.3)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= 900; x += 50) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 240); ctx.stroke();
+  }
+
+  // 打印物（左右两块）
+  ctx.fillStyle = '#3fb950';
+  ctx.fillRect(100, 180, 180, 12);
+  ctx.fillRect(620, 180, 180, 12);
+  ctx.fillStyle = '#2ea043';
+  ctx.fillRect(100, 192, 180, 4);
+  ctx.fillRect(620, 192, 180, 4);
+
+  // 标签
+  ctx.fillStyle = '#8b949e';
+  ctx.font = '12px sans-serif';
+  ctx.fillText('打印物 A', 100, 175);
+  ctx.fillText('打印物 B', 620, 175);
+
+  // 喷嘴在中间上方
+  const nozzleX = 450;
+  const nozzleY = 60;
+  ctx.fillStyle = '#58a6ff';
+  ctx.fillRect(nozzleX - 25, nozzleY, 50, 40);
+  ctx.fillStyle = '#0d1117';
+  ctx.font = 'bold 12px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('喷嘴', nozzleX, nozzleY + 25);
+  ctx.textAlign = 'left';
+
+  // 进料方向箭头
+  ctx.strokeStyle = '#8b949e';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(nozzleX, nozzleY - 10); ctx.lineTo(nozzleX, nozzleY - 30);
+  ctx.moveTo(nozzleX - 5, nozzleY - 25); ctx.lineTo(nozzleX, nozzleY - 30);
+  ctx.lineTo(nozzleX + 5, nozzleY - 25);
+  ctx.stroke();
+  ctx.fillStyle = '#8b949e';
+  ctx.font = '11px sans-serif';
+  ctx.fillText('料进入方向', nozzleX - 45, nozzleY - 35);
+
+  // 拉丝强度（基于参数）
+  const stringIntensity = Math.max(0, 2.5 - dist * 0.7) * Math.max(0.3, (temp - 190) / 30);
+  const stringColor = `rgba(248, 81, 73, ${Math.min(1, stringIntensity)})`;
+
+  if (stringIntensity > 0.1) {
+    ctx.strokeStyle = stringColor;
+    ctx.lineWidth = 1 + stringIntensity;
+    ctx.beginPath();
+    ctx.moveTo(nozzleX, nozzleY + 40);
+    // 不规则下坠
+    for (let y = nozzleY + 40; y < 180; y += 5) {
+      const wave = Math.sin(y * 0.3) * (3 + stringIntensity * 2);
+      ctx.lineTo(nozzleX + wave, y);
+    }
+    ctx.stroke();
+
+    // 拉丝标签
+    ctx.fillStyle = '#f85149';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillText(`拉丝强度: ${stringIntensity.toFixed(1)}`, nozzleX - 50, 150);
+  }
+
+  // 评估
+  let evalText = '';
+  let evalClass = 'tip';
+
+  if (stringIntensity > 1.5) {
+    evalText = '❌ <b>拉丝严重</b>：温度高 + 回抽少。建议降 5℃ + 加 0.5mm 回抽';
+    evalClass = 'danger';
+  } else if (stringIntensity > 0.8) {
+    evalText = '⚠️ <b>拉丝可见</b>：可微调回抽距离到 ' + ((dist + 0.5).toFixed(1)) + 'mm，或温度降 5℃';
+    evalClass = '';
+  } else if (dist > 3.5) {
+    evalText = '⚠️ <b>回抽过多</b>：可能开头缺料，建议回到 ' + ((dist - 0.5).toFixed(1)) + 'mm';
+    evalClass = '';
+  } else if (stringIntensity < 0.1) {
+    evalText = '✅ <b>拉丝基本消除</b>：当前参数合适，打印质量应该有保证';
+    evalClass = 'tip';
+  } else {
+    evalText = '⚠️ <b>轻微拉丝</b>：可接受范围。追求极致可再降 3℃';
+    evalClass = 'tip';
+  }
+
+  if (spd < 25) evalText += ' &nbsp;| ⚠️ 速度偏慢（>25）';
+  else if (spd > 50) evalText += ' &nbsp;| ⚠️ 速度偏快（可能磨料，<50）';
+  else evalText += ' &nbsp;| ✅ 速度合适';
+
+  const evalEl = document.getElementById('sim-eval');
+  evalEl.className = 'note ' + evalClass;
+  evalEl.innerHTML = '<b>评估</b>：' + evalText;
+}
+
+// ========== 5. 记录表（localStorage） ==========
+const STORAGE_KEY = 'klp1_calibration_records_v1';
+let records = [];
+
+try {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) records = JSON.parse(saved);
+} catch (e) { records = []; }
+
+function saveRecords() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+  } catch (e) { alert('保存失败：' + e.message); }
+}
+
+function renderRecords() {
+  const tbody = document.getElementById('record-body');
+  if (records.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--muted); padding:20px;">暂无记录（点击下方"添加记录"开始）</td></tr>';
+    return;
+  }
+  tbody.innerHTML = records.map((r, i) => {
+    const effClass = r.effect === '变好' ? 'effect-good' : (r.effect === '变差' ? 'effect-bad' : 'effect-mid');
+    return `
+      <tr>
+        <td>${r.date}</td>
+        <td>${r.test}</td>
+        <td>${r.param}</td>
+        <td><s style="color:var(--muted);">${r.oldV}</s></td>
+        <td style="color:var(--accent); font-weight:500;">${r.newV}</td>
+        <td class="${effClass}">${r.effect}</td>
+        <td><button class="btn danger" style="padding:4px 10px; font-size:12px;" onclick="delRecord(${i})">删</button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function addRecord() {
+  const date = prompt('日期（YYYY-MM-DD）：', new Date().toISOString().slice(0,10));
+  if (!date) return;
+  const test = prompt('测试件类型（流量/PA/温度/回抽/桥接/综合）：', 'PA');
+  if (!test) return;
+  const param = prompt('调整的参数（如：流量倍率 / PA 值 / 温度）：', 'PA 值');
+  if (!param) return;
+  const oldV = prompt('旧值：', '0.02');
+  if (!oldV) return;
+  const newV = prompt('新值：', '0.04');
+  if (!newV) return;
+  const effect = prompt('效果（变好/变差/差不多）：', '变好');
+  if (!effect) return;
+  records.push({date, test, param, oldV, newV, effect});
+  saveRecords();
+  renderRecords();
+}
+
+function delRecord(i) {
+  if (confirm('删除这条记录？')) {
+    records.splice(i, 1);
+    saveRecords();
+    renderRecords();
+  }
+}
+
+function exportRecords() {
+  if (records.length === 0) { alert('暂无记录可导出'); return; }
+  const csv = '日期,测试件,调整参数,旧值,新值,效果\n' + records.map(r => `${r.date},${r.test},${r.param},${r.oldV},${r.newV},${r.effect}`).join('\n');
+  const blob = new Blob(['\ufeff' + csv], {type: 'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `校准记录_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function clearRecords() {
+  if (records.length === 0) { alert('暂无记录'); return; }
+  if (confirm(`清空全部 ${records.length} 条记录？此操作不可恢复！`)) {
+    records = [];
+    saveRecords();
+    renderRecords();
+  }
+}
+
+// ========== 1. 测试件详情显示 ==========
+function showTest(test) {
+  document.querySelectorAll('.test-card').forEach(c => c.classList.remove('active'));
+  document.querySelector(`[data-test="${test}"]`).classList.add('active');
+  const d = testData[test];
+  const html = `
+    <h3>${d.icon} ${d.title}</h3>
+    <p class="panel-desc">${d.desc}</p>
+    <div class="howto">
+      <h4>📋 打印步骤</h4>
+      <ol>
+        ${d.howto.map(h => `<li>${h}</li>`).join('')}
+      </ol>
+    </div>
+    <div class="target">
+      <b>🎯 KLP1 参考值</b>：${d.target}
+    </div>
+  `;
+  document.getElementById('test-detail').innerHTML = html;
+  document.getElementById('test-detail').classList.add('show');
+}
+
+// ========== 初始化 ==========
+showTest('all');
+switchTab('string');
+updateSim();
+renderRecords();
+</script>
+</body>
+</html>
