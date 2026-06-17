@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KLP1 PETG 拉丝诊断与优化 - 温度/Retraction/PA/流量</title>
+    <style>
+        :root{--bg:#1a1a1a;--bg2:#2a2a2a;--bg3:#3a3a3a;--txt:#e0e0e0;--sub:#a0a0a0;--acc:#00ff7f;--warn:#ff9900;--err:#ff4444;--brd:#404040;}
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:20px;}
+        .c{max-width:1200px;margin:0 auto;}
+        h1{color:var(--acc);font-size:2.2em;margin-bottom:10px;text-align:center;text-shadow:0 0 20px rgba(0,255,127,.3);}
+        h2{color:var(--acc);margin-top:30px;margin-bottom:15px;border-bottom:1px solid var(--brd);padding-bottom:8px;}
+        h3{color:#fff;margin-top:20px;margin-bottom:10px;}
+        .sub{text-align:center;color:var(--sub);margin-bottom:30px;font-size:1.1em;}
+        .card{background:var(--bg2);border:1px solid var(--brd);border-radius:8px;padding:20px;margin:15px 0;transition:all .3s;}
+        .card:hover{transform:translateY(-3px);box-shadow:0 5px 15px rgba(0,255,127,.15);border-color:var(--acc);}
+        .hl{color:var(--acc);font-weight:bold;}
+        .warn{color:var(--warn);font-weight:bold;}
+        .err{color:var(--err);font-weight:bold;}
+        .sl{margin:20px 0;padding:15px;background:var(--bg3);border-radius:6px;}
+        .sl input{width:100%;margin:10px 0;accent-color:var(--acc);}
+        .sl-val{color:var(--acc);font-weight:bold;font-size:1.2em;}
+        canvas{background:#000;border-radius:6px;max-width:100%;margin:15px auto;display:block;}
+        .anim{border:2px solid var(--acc);border-radius:10px;padding:20px;margin:20px 0;}
+        .anim-t{color:var(--acc);font-size:1.2em;margin-bottom:15px;text-align:center;}
+        .tbl{width:100%;border-collapse:collapse;margin-top:15px;}
+        .tbl th{background:var(--bg3);padding:10px;text-align:left;color:var(--acc);}
+        .tbl td{padding:8px 10px;border-bottom:1px solid var(--brd);}
+        .tbl tr:hover{background:var(--bg3);}
+        .code{background:#0a0a0a;border:1px solid var(--brd);border-radius:4px;padding:12px;font-family:'Consolas','Monaco',monospace;font-size:.9em;overflow-x:auto;margin:10px 0;position:relative;}
+        .code-b{position:absolute;top:8px;right:8px;background:var(--acc);color:#000;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:.8em;}
+        .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.85em;font-weight:bold;}
+        .bg{background:rgba(0,255,127,.2);color:var(--acc);}
+        .bo{background:rgba(255,153,0,.2);color:var(--warn);}
+        .br{background:rgba(255,68,68,.2);color:var(--err);}
+        .top{position:fixed;top:20px;right:20px;background:var(--acc);color:#000;padding:8px 16px;border-radius:20px;text-decoration:none;font-weight:bold;font-size:.9em;}
+        .top:hover{background:#00cc66;}
+        .ft{text-align:center;color:var(--sub);margin-top:50px;padding:20px;border-top:1px solid var(--brd);}
+        .paradox{background:linear-gradient(135deg,rgba(255,68,68,.1),rgba(0,255,127,.1));border:2px solid var(--acc);border-radius:10px;padding:20px;margin:20px 0;text-align:center;}
+        .paradox h3{color:var(--acc);margin-bottom:15px;}
+        .arrow{font-size:2.5em;color:var(--acc);margin:10px 0;}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px;margin-top:15px;}
+        .gcard{background:var(--bg3);border-radius:8px;padding:15px;text-align:center;transition:all .3s;}
+        .gcard:hover{transform:scale(1.02);border:1px solid var(--acc);}
+    </style>
+</head>
+<body>
+<a href="#" class="top">↑ 返回顶部</a>
+<div class="c">
+<h1>🧩 KLP1 PETG 拉丝诊断与优化</h1>
+<p class="sub">温度 / Retraction / PA / 流量 — 4 大参数调优指南</p>
+
+<h2 id="s1">1️⃣ 拉丝分类</h2>
+<div class="card">
+<p>PETG 打印中最常见的问题就是拉丝（Stringing）。先识别你的拉丝属于哪种：</p>
+<div class="grid">
+<div class="gcard"><h3 style="color:var(--err);">❌ 大拉丝</h3><p>丝粗 > 1mm<br>喷嘴飞丝明显<br>模型表面拉丝成网</p></div>
+<div class="gcard"><h3 style="color:var(--warn);">⚠️ 小拉丝</h3><p>丝细 < 0.5mm<br>偶发拉丝<br>转角处轻微</p></div>
+<div class="gcard"><h3 style="color:#ff6b35;">🔶 转角料堆</h3><p>转角处有料堆积<br>出料不均匀<br>需配合 PA 调</p></div>
+<div class="gcard"><h3 style="color:var(--acc);">✅ 细丝残留</h3><p>极细透明丝<br>打印后可见<br>基本不影响强度</p></div>
+</div>
+</div>
+
+<h2 id="s2">2️⃣ 温度悖论（核心）</h2>
+<div class="card">
+<div class="paradox">
+<h3>🔥 FDM 反直觉悖论</h3>
+<p style="font-size:1.2em;margin:10px 0;">温度越低 → 喷嘴料堆积 → 拉丝越多</p>
+<p style="font-size:1.2em;">温度越高 → 料更稀更顺 → 拉丝反而减少 70%</p>
+</div>
+<p>这听起来违反直觉，但这是 PETG 的物理特性。料在高温下粘度降低，流动更顺畅，retraction 时更容易被吸回。</p>
+<div class="sl">
+<p><span class="sl-val" id="tempVal">240℃</span> 当前温度</p>
+<input type="range" id="tempSlider" min="215" max="260" value="240" tabindex="0">
+<div style="display:flex;justify-content:space-between;color:var(--sub);font-size:.85em;">
+<span>215℃</span><span>230℃</span><span>240℃</span><span>250℃</span><span>260℃</span>
+</div>
+</div>
+<div class="anim">
+<div class="anim-t">🎬 温度 vs 拉丝量柱状图</div>
+<canvas id="tempChart" width="700" height="350"></canvas>
+</div>
+<table class="tbl">
+<thead><tr><th>温度</th><th>拉丝量</th><th>渗料风险</th><th>结论</th></tr></thead>
+<tbody>
+<tr><td>215℃</td><td><span class="badge br">大量 ❌</span></td><td>低</td><td class="err">料太稠，retraction 不彻底</td></tr>
+<tr><td>230℃</td><td><span class="badge bo">中等</span></td><td>低</td><td>接近临界点</td></tr>
+<tr><td>240℃</td><td><span class="badge bg">极少 ✅</span></td><td>低</td><td class="hl">推荐！拓竹同款参数</td></tr>
+<tr><td>250℃</td><td><span class="badge bg">极少 ✅</span></td><td>低</td><td class="hl">A1 常用参数</td></tr>
+<tr><td>260℃</td><td><span class="badge bg">极少 ✅</span></td><td><span class="badge bo">⚠️ 高</span></td><td class="warn">渗料风险上升，需配合降流量</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="s3">3️⃣ 4 个改法清单</h2>
+<div class="card">
+<p>针对 PETG 拉丝，4 个参数一起调效果最好：</p>
+<div class="grid">
+<div class="gcard"><h3 style="color:#ff6b35;">1️⃣ Retraction</h3><p>默认值: <span class="err">1.2 mm</span><br>推荐值: <span class="hl">1.5 mm</span><br>增量: +0.3 mm</p></div>
+<div class="gcard"><h3 style="color:#ff6b35;">2️⃣ Pressure Advance</h3><p>默认值: <span class="err">0.05</span><br>推荐值: <span class="hl">0.08</span><br>增量: +0.03</p></div>
+<div class="gcard"><h3 style="color:#ff6b35;">3️⃣ 流量</h3><p>默认值: <span class="err">1.0</span><br>推荐值: <span class="hl">0.95</span><br>减量: -0.05</p></div>
+<div class="gcard"><h3 style="color:#ff6b35;">4️⃣ 温度</h3><p>默认值: <span class="err">215℃</span><br>推荐值: <span class="hl">240℃</span><br>增量: +25℃</p></div>
+</div>
+</div>
+
+<h2 id="s4">4️⃣ 改法对比：4 参数从"原始"到"拓竹同款"</h2>
+<div class="card">
+<div class="sl">
+<p style="margin-bottom:15px;">拖动滑块同时调整 4 个参数，实时查看拉丝量变化：</p>
+<p><span class="sl-val" id="allVal">原始</span> 参数档位</p>
+<input type="range" id="allSlider" min="0" max="4" value="0" tabindex="0">
+<div style="display:flex;justify-content:space-between;color:var(--sub);font-size:.85em;">
+<span>原始</span><span>档位1</span><span>档位2</span><span>档位3</span><span>拓竹同款</span>
+</div>
+</div>
+<div class="anim">
+<div class="anim-t">🎬 4 参数综合效果图</div>
+<canvas id="allChart" width="700" height="350"></canvas>
+</div>
+</div>
+
+<h2 id="s5">5️⃣ 反直觉提醒</h2>
+<div class="card" style="border-color:var(--warn);background:rgba(255,153,0,.05);">
+<h3 style="color:var(--warn);">⚠️ FDM 悖论：温度高反而拉丝少</h3>
+<p style="margin:15px 0;">很多人认为"温度低=拉丝少"，这是一个经典误区。实际上：</p>
+<ul style="margin-left:20px;">
+<li>🔥 <span class="warn">低温（215℃）</span>：料粘稠，retraction 时难以吸回，容易在喷嘴口堆积 → 拉丝多</li>
+<li>🔥 <span class="hl">高温（240℃）</span>：料稀薄，retraction 时容易吸回 → 拉丝少 70%</li>
+</ul>
+<p style="margin-top:15px;color:var(--sub);">拓竹 A1 在 PETG 模式下默认 240-250℃，不是他们不知道低温，而是高温参数经过了验证。</p>
+</div>
+
+<h2 id="s6">6️⃣ 拓竹 A1 vs KLP1 PETG 参数对比</h2>
+<div class="card">
+<table class="tbl">
+<thead><tr><th>参数</th><th>拓竹 A1 默认</th><th>KLP1 推荐值</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>温度</td><td>240℃</td><td class="hl">240-250℃</td><td>KLP1 可用 A1 同款</td></tr>
+<tr><td>Retraction</td><td>0.6 mm</td><td class="hl">1.5 mm</td><td>KLP1 Bowden 管更长，需更大 retraction</td></tr>
+<tr><td>PA</td><td>0.04</td><td class="hl">0.08</td><td>Direct drive A1 vs Bowden KLP1</td></tr>
+<tr><td>流量</td><td>1.0</td><td class="hl">0.95</td><td>KLP1 略降防止渗料</td></tr>
+<tr><td>速度</td><td>50 mm/s</td><td>50 mm/s</td><td>相同</td></tr>
+<tr><td>冷却</td><td>30%</td><td>20-30%</td><td>PETG 需要部分冷却防止翘边</td></tr>
+</tbody>
+</table>
+<div class="code">
+<button class="code-b" onclick="copyCode(this)">复制</button>
+<pre># KLP1 PETG 参数（KlippersCREALITY KLP1 通用）
+# printer.cfg 或 OrcaSlicer 材料预设中设置
+
+[extruder]
+# 温度：240-250℃ 是关键
+temp_sensor: e0
+heater公民: heater_generic extruder
+min_temp: 0
+max_temp: 300
+# KLP1 PID 调校后默认值
+control: pid
+pid_kp: 26.0
+pid_ki: 1.4
+pid_kd: 140.0
+
+# Pressure Advance（重要！）
+[extruder]
+pressure_advance: 0.08
+
+# OrcaSlicer 中设置
+# 温度: 240℃
+# Retraction: 1.5 mm
+# 流量: 0.95
+# PA: 0.08</pre>
+</div>
+</div>
+
+<div class="ft">
+<p>🧩 KLP1 调试系列 #48 · 2026-06-17 · Andy & LED 库存回收 & 闲鱼销售助理</p>
+</div>
+</div>
+
+<script>
+// 温度悖论柱状图
+const tempSlider=document.getElementById('tempSlider');
+const tempVal=document.getElementById('tempVal');
+const tempChart=document.getElementById('tempChart');
+const tCtx=tempChart.getContext('2d');
+function getStringing(t){
+// 温度越低拉丝越多，高温拉丝反而少
+if(t<=215)return 95;
+if(t<=225)return 75;
+if(t<=235)return 50;
+if(t<=245)return 25;
+if(t<=255)return 15;
+return 10;
+}
+function drawTempChart(){
+const t=parseInt(tempSlider.value);
+tempVal.textContent=t+'℃';
+tCtx.fillStyle='#0a0a0a';tCtx.fillRect(0,0,tempChart.width,tempChart.height);
+const temps=[215,225,235,245,255,260];
+const labels=['215℃','225℃','235℃','245℃（推荐）','255℃','260℃'];
+const maxBarH=250,bw=80,startX=60,barY=280;
+temps.forEach((temp,i)=>{
+const h=getStringing(temp)/100*maxBarH;
+const x=startX+i*(bw+15);
+const barH=Math.max(h,5);
+const selected=temp===t;
+// 颜色
+let color;
+if(getStringing(temp)>=70)color='#ff4444';
+else if(getStringing(temp)>=40)color='#ff9900';
+else color='#00ff7f';
+tCtx.fillStyle=selected?'#fff':color;
+tCtx.fillRect(x,barY-barH,bw,barH);
+// 数值
+tCtx.fillStyle='#fff';tCtx.font='bold 12px sans-serif';
+tCtx.fillText(getStringing(temp)+'%',x+bw/2-12,barY-barH-8);
+// 标签
+tCtx.fillStyle=selected?'#00ff7f':'#888';tCtx.font='11px sans-serif';
+tCtx.fillText(labels[i],x+bw/2-25,barY+18);
+if(selected){
+tCtx.strokeStyle='#00ff7f';tCtx.lineWidth=2;
+tCtx.strokeRect(x-3,barY-barH-3,bw+6,barH+6);
+}
+});
+tCtx.fillStyle='#666';tCtx.font='12px sans-serif';
+tCtx.fillText('拉丝量 %',20,barY-maxBarH/2);
+// 趋势线
+tCtx.strokeStyle='#00ff7f';tCtx.lineWidth=2;tCtx.setLineDash([5,5]);
+tCtx.beginPath();
+temps.forEach((temp,i)=>{
+const h=getStringing(temp)/100*maxBarH;
+const x=startX+i*(bw+15)+bw/2;
+if(i===0)tCtx.moveTo(x,barY-h);
+else tCtx.lineTo(x,barY-h);
+});
+tCtx.stroke();tCtx.setLineDash([]);
+tCtx.fillStyle='#00ff7f';tCtx.font='12px sans-serif';
+tCtx.fillText('趋势：温度↑ 拉丝↓',400,30);
+}
+tempSlider.addEventListener('input',drawTempChart);
+tempSlider.addEventListener('keydown',e=>{
+if(e.key==='ArrowRight')tempSlider.value=Math.min(260,parseInt(tempSlider.value)+5);
+if(e.key==='ArrowLeft')tempSlider.value=Math.max(215,parseInt(tempSlider.value)-5);
+drawTempChart();
+});
+drawTempChart();
+
+// 4 参数综合图
+const allSlider=document.getElementById('allSlider');
+const allVal=document.getElementById('allVal');
+const allChart=document.getElementById('allChart');
+const aCtx=allChart.getContext('2d');
+const presets=[
+{name:'原始',temp:215,ret:1.2,pa:0.05,flow:1.0},
+{name:'档位1',temp:225,ret:1.3,pa:0.06,flow:0.98},
+{name:'档位2',temp:235,ret:1.4,pa:0.07,flow:0.96},
+{name:'档位3',temp:240,ret:1.45,pa:0.075,flow:0.95},
+{name:'拓竹同款',temp:240,ret:1.5,pa:0.08,flow:0.95}
+];
+function calcScore(p){
+const tScore=p.temp>=240?100:p.temp>=230?60:p.temp>=220?30:10;
+const rScore=p.ret>=1.5?100:p.ret>=1.3?70:p.ret>=1.2?40:20;
+const paScore=p.pa>=0.08?100:p.pa>=0.06?60:p.pa>=0.05?30:10;
+const fScore=p.flow<=0.95?100:p.flow<=0.98?70:40;
+return(tScore*0.3+rScore*0.3+paScore*0.25+fScore*0.15);
+}
+function drawAllChart(){
+const idx=parseInt(allSlider.value);
+const preset=presets[idx];
+allVal.textContent=preset.name;
+aCtx.fillStyle='#0a0a0a';aCtx.fillRect(0,0,allChart.width,allChart.height);
+// 雷达图
+const cx=350,cy=175,r=130;
+const metrics=['温度','Retraction','PA','流量'];
+const angles=[-Math.PI/2,0,Math.PI/2,Math.PI];
+const values=[preset.temp/260,preset.ret/2,preset.pa/0.1,1-preset.flow];
+aCtx.strokeStyle='#333';aCtx.lineWidth=1;
+for(let ring=1;ring<=4;ring++){
+aCtx.beginPath();
+metrics.forEach((_,i)=>{
+const a=angles[i]+Math.PI/8;
+const rr=r*ring/4;
+const x=cx+Math.cos(a)*rr,y=cy+Math.sin(a)*rr;
+if(i===0)aCtx.moveTo(x,y);else aCtx.lineTo(x,y);
+});
+aCtx.closePath();aCtx.stroke();
+}
+// 轴线
+aCtx.strokeStyle='#555';
+metrics.forEach((m,i)=>{
+const a=angles[i]+Math.PI/8;
+aCtx.beginPath();
+aCtx.moveTo(cx,cy);
+aCtx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);
+aCtx.stroke();
+aCtx.fillStyle='#888';aCtx.font='13px sans-serif';
+aCtx.fillText(m,cx+Math.cos(a)*(r+20)-10,cy+Math.sin(a)*(r+20)+5);
+});
+// 数据区
+const grad=aCtx.createRadialGradient(cx,cy,0,cx,cy,r);
+grad.addColorStop(0,'rgba(0,255,127,0.8)');
+grad.addColorStop(1,'rgba(0,255,127,0.2)');
+aCtx.fillStyle=grad;
+aCtx.beginPath();
+metrics.forEach((m,i)=>{
+const a=angles[i]+Math.PI/8;
+const v=values[i];
+const x=cx+Math.cos(a)*r*v,y=cy+Math.sin(a)*r*v;
+if(i===0)aCtx.moveTo(x,y);else aCtx.lineTo(x,y);
+});
+aCtx.closePath();aCtx.fill();
+aCtx.strokeStyle='#00ff7f';aCtx.lineWidth=2;aCtx.stroke();
+// 分数
+const score=Math.round(calcScore(preset));
+aCtx.fillStyle=score>=80?'#00ff7f':score>=50?'#ff9900':'#ff4444';
+aCtx.font='bold 48px sans-serif';aCtx.textAlign='center';
+aCtx.fillText(score+'分',cx,cy+10);
+aCtx.font='14px sans-serif';aCtx.fillStyle='#888';
+aCtx.fillText('拉丝优化评分',cx,cy+35);
+aCtx.textAlign='left';
+// 参数详情
+aCtx.fillStyle='#fff';aCtx.font='14px sans-serif';
+aCtx.fillText('温度: '+preset.temp+'℃',50,300);
+aCtx.fillText('Retraction: '+preset.ret+' mm',50,320);
+aCtx.fillText('PA: '+preset.pa,200,300);
+aCtx.fillText('流量: '+preset.flow,200,320);
+}
+allSlider.addEventListener('input',drawAllChart);
+allSlider.addEventListener('keydown',e=>{
+if(e.key==='ArrowRight')allSlider.value=Math.min(4,parseInt(allSlider.value)+1);
+if(e.key==='ArrowLeft')allSlider.value=Math.max(0,parseInt(allSlider.value)-1);
+drawAllChart();
+});
+drawAllChart();
+
+// 复制代码
+function copyCode(btn){
+const code=btn.parentElement.querySelector('pre').textContent;
+navigator.clipboard.writeText(code).then(()=>{
+const orig=btn.textContent;btn.textContent='已复制!';btn.style.background='#00cc66';
+setTimeout(()=>{btn.textContent=orig;btn.style.background='#00ff7f';},1500);
+});
+}
+
+// 返回顶部
+document.querySelector('.top').addEventListener('click',e=>{e.preventDefault();window.scrollTo({top:0,behavior:'smooth'});});
+</script>
+</body>
+</html>

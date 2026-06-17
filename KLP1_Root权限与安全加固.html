@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KLP1 Root 权限与安全加固 - 3 种拿 Root 方法</title>
+    <style>
+        :root{--bg:#1a1a1a;--bg2:#2a2a2a;--bg3:#3a3a3a;--txt:#e0e0e0;--sub:#a0a0a0;--acc:#00ff7f;--warn:#ff9900;--err:#ff4444;--brd:#404040;}
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:20px;}
+        .c{max-width:1200px;margin:0 auto;}
+        h1{color:var(--acc);font-size:2.2em;margin-bottom:10px;text-align:center;text-shadow:0 0 20px rgba(0,255,127,.3);}
+        h2{color:var(--acc);margin-top:30px;margin-bottom:15px;border-bottom:1px solid var(--brd);padding-bottom:8px;}
+        h3{color:#fff;margin-top:20px;margin-bottom:10px;}
+        .sub{text-align:center;color:var(--sub);margin-bottom:30px;font-size:1.1em;}
+        .card{background:var(--bg2);border:1px solid var(--brd);border-radius:8px;padding:20px;margin:15px 0;transition:all .3s;}
+        .card:hover{transform:translateY(-3px);box-shadow:0 5px 15px rgba(0,255,127,.15);border-color:var(--acc);}
+        .hl{color:var(--acc);font-weight:bold;}
+        .warn{color:var(--warn);font-weight:bold;}
+        .err{color:var(--err);font-weight:bold;}
+        .tbl{width:100%;border-collapse:collapse;margin-top:15px;}
+        .tbl th{background:var(--bg3);padding:10px;text-align:left;color:var(--acc);}
+        .tbl td{padding:8px 10px;border-bottom:1px solid var(--brd);}
+        .tbl tr:hover{background:var(--bg3);}
+        .top{position:fixed;top:20px;right:20px;background:var(--acc);color:#000;padding:8px 16px;border-radius:20px;text-decoration:none;font-weight:bold;font-size:.9em;}
+        .top:hover{background:#00cc66;}
+        .ft{text-align:center;color:var(--sub);margin-top:50px;padding:20px;border-top:1px solid var(--brd);}
+        .method{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:15px;}
+        @media(max-width:900px){.method{grid-template-columns:1fr;}}
+        .m-card{background:var(--bg3);border-radius:10px;padding:20px;border:2px solid transparent;transition:all .3s;cursor:pointer;}
+        .m-card:hover{border-color:var(--acc);}
+        .m-card.selected{border-color:var(--acc);background:rgba(0,255,127,.1);}
+        .m-icon{font-size:2.5em;margin-bottom:10px;}
+        .m-title{color:var(--acc);font-size:1.1em;font-weight:bold;margin-bottom:8px;}
+        .m-desc{color:var(--sub);font-size:.9em;margin-bottom:10px;}
+        .m-cmd{background:#0a0a0a;border:1px solid var(--brd);border-radius:4px;padding:10px;font-family:'Consolas',monospace;font-size:.85em;margin:8px 0;position:relative;}
+        .m-cmd-b{position:absolute;top:6px;right:6px;background:var(--acc);color:#000;border:none;padding:2px 8px;border-radius:3px;cursor:pointer;font-size:.75em;}
+        .decision{background:var(--bg2);border:2px solid var(--acc);border-radius:10px;padding:20px;margin:20px 0;}
+        .decision h3{color:var(--acc);text-align:center;}
+        .step{display:flex;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--brd);}
+        .step:last-child{border-bottom:none;}
+        .step-n{background:var(--acc);color:#000;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;margin-right:12px;flex-shrink:0;}
+        .step-c{color:var(--txt);}
+        .code{background:#0a0a0a;border:1px solid var(--brd);border-radius:4px;padding:12px;font-family:'Consolas','Monaco',monospace;font-size:.85em;overflow-x:auto;margin:10px 0;position:relative;}
+        .code-b{position:absolute;top:8px;right:8px;background:var(--acc);color:#000;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:.8em;}
+        .status-tag{display:inline-block;padding:3px 10px;border-radius:4px;font-size:.85em;font-weight:bold;margin-left:8px;}
+        .st-yes{background:rgba(0,255,127,.2);color:var(--acc);}
+        .st-no{background:rgba(255,68,68,.2);color:var(--err);}
+        .checklist{list-style:none;margin-top:15px;}
+        .checklist li{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid var(--brd);cursor:pointer;transition:all .2s;}
+        .checklist li:last-child{border-bottom:none;}
+        .checklist li:hover{background:rgba(0,255,127,.05);}
+        .checklist li.checked .ck-icon{background:var(--acc);border-color:var(--acc);}
+        .checklist li.checked .ck-icon::after{content:'✓';color:#000;font-weight:bold;}
+        .checklist li.checked .ck-text{color:var(--acc);text-decoration:line-through;}
+        .ck-icon{width:22px;height:22px;border:2px solid var(--brd);border-radius:4px;margin-right:12px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+        .ck-text{flex:1;color:var(--txt);}
+        .ck-tag{margin-left:auto;flex-shrink:0;}
+        .tree{background:var(--bg3);border-radius:8px;padding:15px;margin:10px 0;}
+        .tree-node{padding:5px 0 5px 20px;border-left:2px solid var(--brd);margin-left:10px;position:relative;}
+        .tree-node::before{content:'';position:absolute;left:-12px;top:12px;width:10px;height:2px;background:var(--brd);}
+        .tree-q{color:var(--acc);cursor:pointer;padding:5px 0;}
+        .tree-q:hover{color:#fff;}
+    </style>
+</head>
+<body>
+<a href="#" class="top">↑ 返回顶部</a>
+<div class="c">
+<h1>🔐 KLP1 Root 权限与安全加固</h1>
+<p class="sub">3 种拿 Root 方法 — 安全加固指南</p>
+
+<h2 id="s1">1️⃣ KLP1 Root 现状</h2>
+<div class="card">
+<p>了解 KLP1 出厂时的权限状态：</p>
+<table class="tbl">
+<thead><tr><th>项目</th><th>状态</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>默认用户</td><td><span class="hl">mks（sudoer）✅</span></td><td>mks 用户可以用 sudo</td></tr>
+<tr><td>Root 账户</td><td><span class="err">🔒 锁定（无密码）</span></td><td>无法直接 su - root</td></tr>
+<tr><td>SSH 端口</td><td><span class="warn">⚠️ 22 开放</span></td><td>默认开启 SSH</td></tr>
+<tr><td>系统</td><td><span class="hl">Armbian-based ✅</span></td><td>KINGROON 定制版</td></tr>
+<tr><td>SSH 密钥</td><td>默认无</td><td>建议添加 SSH 密钥</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="s2">2️⃣ 3 种拿 Root 方法对比卡片</h2>
+<div class="card">
+<p style="margin-bottom:15px;">点击卡片查看详情：</p>
+<div class="method">
+<div class="m-card selected" onclick="selectMethod(0,this)">
+<div class="m-icon">🟢</div>
+<div class="m-title">方法 1：推荐</div>
+<div class="m-desc">给 root 设密码，一行命令</div>
+<div class="m-cmd">
+mks@KLP1:~$ <strong>sudo passwd root</strong>
+<button class="m-cmd-b" onclick="copyCmd(this)">复制</button>
+</div>
+<p style="color:var(--sub);font-size:.85em;">设完后可以用 <code>su -</code> 进入 root</p>
+</div>
+<div class="m-card" onclick="selectMethod(1,this)">
+<div class="m-icon">🟡</div>
+<div class="m-title">方法 2：临时</div>
+<div class="m-desc">不设密码，直接以 root 跑命令</div>
+<div class="m-cmd">
+mks@KLP1:~$ <strong>sudo su -</strong>
+<button class="m-cmd-b" onclick="copyCmd(this)">复制</button>
+</div>
+<p style="color:var(--sub);font-size:.85em;">退出：<code>exit</code> 或 <code>Ctrl+D</code></p>
+</div>
+<div class="m-card" onclick="selectMethod(2,this)">
+<div class="m-icon">🔴</div>
+<div class="m-title">方法 3：彻底</div>
+<div class="m-desc">刷开源 Armbian，失去触屏 + KLP1 适配</div>
+<div class="m-cmd">
+# 下载 Armbian 镜像<br>
+# 用 Balena Etcher 刷入 SD 卡<br>
+# 从 SD 卡启动
+<button class="m-cmd-b" onclick="copyCmd(this)">复制</button>
+</div>
+<p style="color:var(--err);font-size:.85em;">⚠️ 风险：失去 KINGROON 触屏和官方适配</p>
+</div>
+</div>
+<div class="card" id="methodDetail" style="margin-top:20px;">
+<p style="color:var(--sub);">点击上方卡片查看详情 ↓</p>
+</div>
+</div>
+
+<h2 id="s3">3️⃣ 8 操作是否需要 Root 判断表</h2>
+<div class="card">
+<p style="margin-bottom:15px;">点击操作查看是否需要 Root：</p>
+<ul class="checklist">
+<li onclick="toggleCheck(this)">
+<div class="ck-icon"></div>
+<div class="ck-text">改 printer.cfg / MKS_THR.cfg</div>
+<div class="ck-tag"><span class="st-no">❌ 不需要</span></div>
+</li>
+<li onclick="toggleCheck(this)">
+<div class="ck-icon"></div>
+<div class="ck-text">跑 apt install 装包</div>
+<div class="ck-tag"><span class="st-no">❌ 不需要</span></div>
+</li>
+<li onclick="toggleCheck(this)">
+<div class="ck-icon"></div>
+<div class="ck-text">改 /etc/network/interfaces</div>
+<div class="ck-tag"><span class="st-no">❌ 不需要</span></div>
+</li>
+<li onclick="toggleCheck(this)">
+<div class="ck-icon"></div>
+<div class="ck-text">改 /etc/sudoers</div>
+<div class="ck-tag"><span class="st-yes">✅ 必须</span></div>
+</li>
+<li onclick="toggleCheck(this)">
+<div class="ck-icon"></div>
+<div class="ck-text">装 systemd 服务</div>
+<div class="ck-tag"><span class="st-yes">✅ 必须</span></div>
+</li>
+<li onclick="toggleCheck(this)">
+<div class="ck-icon"></div>
+<div class="ck-text">改 /usr/share/klipper/ 源码</div>
+<div class="ck-tag"><span class="st-yes">✅ 必须</span></div>
+</li>
+<li onclick="toggleCheck(this)">
+<div class="ck-icon"></div>
+<div class="ck-text">装 Docker / Samba</div>
+<div class="ck-tag"><span class="st-yes">✅ 必须</span></div>
+</li>
+<li onclick="toggleCheck(this)">
+<div class="ck-icon"></div>
+<div class="ck-text">调试系统级问题</div>
+<div class="ck-tag"><span class="st-yes">✅ 必须</span></div>
+</li>
+</ul>
+</div>
+
+<h2 id="s4">4️⃣ 安全加固（拿 Root 后必做）</h2>
+<div class="card">
+<h3>🔒 安全加固清单</h3>
+<p style="margin:15px 0;">拿到 Root 权限后，以下安全措施<span class="hl">强烈建议</span>执行：</p>
+<div class="code">
+<button class="code-b" onclick="copyCode(this)">复制全部</button>
+<pre># === KLP1 安全加固脚本 ===
+
+# 1. 禁止 SSH 远程 Root 登录（推荐！）
+sudo sed -i 's/^PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+sudo systemctl restart sshd
+
+# 2. 添加 SSH 密钥（如果没有的话）
+ssh-copy-id mks@KLP1_IP
+
+# 3. 改 SSH 端口（可选，security through obscurity）
+sudo sed -i 's/^Port 22/Port 2222/' /etc/ssh/sshd_config
+sudo systemctl restart sshd
+
+# 4. 安装 fail2ban 防暴力破解
+sudo apt update && sudo apt install -y fail2ban
+sudo systemctl enable fail2ban
+
+# 5. 设置防火墙（只开必需端口）
+sudo apt install -y ufw
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow 80    # HTTP
+sudo ufw allow 443   # HTTPS
+sudo ufw allow 2222  # SSH（新端口）
+sudo ufw enable
+
+# 6. 定期检查登录日志
+sudo tail -f /var/log/auth.log | grep -i sshd</pre>
+</div>
+<div class="card" style="background:rgba(255,68,68,.05);border-color:var(--err);margin-top:15px;">
+<p><span class="err">⚠️ 警告：</span>改 SSH 端口后，新端口必须记住！否则无法 SSH 登录。建议同时保留一个 USB 串口连接作为备用。</p>
+</div>
+</div>
+
+<h2 id="s5">5️⃣ 决策树：现在要不要拿 Root？</h2>
+<div class="card">
+<div class="decision">
+<h3>🌲 Root 权限决策树</h3>
+<div class="tree">
+<div class="tree-q" onclick="this.classList.toggle('open')">▼ 你现在需要 Root 吗？</div>
+<div class="tree" style="margin-left:20px;display:none;">
+<div class="tree-node"><span class="warn">否 → 暂时不需要</span></div>
+<div class="tree-node">
+<span class="hl">是 → 你要做什么？</span>
+<div class="tree" style="margin-left:20px;">
+<div class="tree-node"><span>装 Obico / 第三方插件？</span><br><span class="hl">→ 用方法 1，设密码</span></div>
+<div class="tree-node"><span>临时调试系统问题？</span><br><span class="warn">→ 用方法 2，sudo su -</span></div>
+<div class="tree-node"><span>想完全脱离 KINGROON？</span><br><span class="err">→ 用方法 3，刷 Armbian</span></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="card" style="background:rgba(0,255,127,.1);border-color:var(--acc);margin-top:15px;">
+<p><span class="hl">💡 实用建议：</span></p>
+<ul style="margin:10px 0 0 20px;">
+<li>大多数 KLP1 用户<span class="hl">不需要 Root</span>：改 printer.cfg / 装 Moonraker 插件都不需要</li>
+<li>只有装 Docker / 改系统服务 / 刷固件时才需要</li>
+<li>建议先试方法 2（sudo su -），用完 exit 退出，不留持久化 Root</li>
+</ul>
+</div>
+</div>
+
+<div class="ft">
+<p>🔐 KLP1 调试系列 #51 · 2026-06-17 · Andy & LED 库存回收 & 闲鱼销售助理</p>
+</div>
+</div>
+
+<script>
+const methodDetails=[
+`<h3>🟢 方法 1 详解：设 Root 密码</h3>
+<p><strong>优点：</strong>简单、一劳永逸、可远程 su -</p>
+<p><strong>缺点：</strong>如果密码太弱有被暴力破解风险</p>
+<p><strong>操作：</strong></p>
+<div class="code">
+<pre># SSH 登录 KLP1
+ssh mks@KLP1_IP
+
+# 设 Root 密码
+mks@KLP1:~$ sudo passwd root
+Enter new UNIX password: [输入密码]
+Retype new UNIX password: [确认密码]
+passwd: password updated successfully
+
+# 验证
+mks@KLP1:~$ su -
+Password: [输入刚才设的密码]
+root@KLP1:~#</pre>
+</div>
+<p style="margin-top:10px;"><strong>建议密码：</strong>至少 12 位，含大小写字母、数字、特殊字符</p>`,
+`<h3>🟡 方法 2 详解：临时 sudo su -</h3>
+<p><strong>优点：</strong>不改变系统配置，用完退出后不留隐患</p>
+<p><strong>缺点：</strong>每次需要 sudo 权限，用完必须 exit</p>
+<p><strong>操作：</strong></p>
+<div class="code">
+<pre># SSH 登录 KLP1
+ssh mks@KLP1_IP
+
+# 临时切换到 root
+mks@KLP1:~$ sudo su -
+root@KLP1:~# [在这里执行需要 root 的命令]
+
+# 用完退出
+root@KLP1:~# exit
+logout
+mks@KLP1:~$</pre>
+</div>
+<p style="margin-top:10px;"><span class="warn">⚠️ 注意：</span>必须记得 exit 退出，否则一直以 root 运行，误操作风险高。</p>`,
+`<h3>🔴 方法 3 详解：刷开源 Armbian</h3>
+<p><strong>优点：</strong>完全开源、可定制、无 KINGROON 限制</p>
+<p><strong>缺点：</strong>失去触屏支持、失去 KLP1 特定适配、风险高</p>
+<p><strong>操作：</strong></p>
+<div class="code">
+<pre># 1. 下载 Armbian 镜像（需找 KLP1 兼容版本）
+# https://www.armbian.com/download/
+
+# 2. 用 Balena Etcher 刷入 SD 卡
+
+# 3. 从 SD 卡启动 KLP1
+
+# 4. 复制数据
+sudo dd if=/dev/mmcblk0p1 of=/dev/mmcblk0p2 bs=4M status=progress
+
+# 5. 启动到新系统
+sudo reboot</pre>
+</div>
+<p style="margin-top:10px;"><span class="err">⚠️ 高风险：</span>刷机有变砖风险，失去保修。建议有 Linux 经验者操作。</p>`];
+
+function selectMethod(idx,el){
+document.querySelectorAll('.m-card').forEach(c=>c.classList.remove('selected'));
+el.classList.add('selected');
+const detail=document.getElementById('methodDetail');
+detail.style.background='var(--bg3)';
+detail.style.borderRadius='8px';
+detail.style.padding='20px';
+detail.innerHTML=methodDetails[idx];
+window.scrollTo({top:detail.offsetTop-100,behavior:'smooth'});
+}
+
+function toggleCheck(li){
+li.classList.toggle('checked');
+}
+
+function copyCmd(btn){
+const text=btn.parentElement.textContent.replace('复制','').trim();
+navigator.clipboard.writeText(text.split('$')[1]||text).then(()=>{
+const orig=btn.textContent;btn.textContent='已复制!';btn.style.background='#00cc66';
+setTimeout(()=>{btn.textContent='复制';btn.style.background='#00ff7f';},1500);
+});
+}
+
+function copyCode(btn){
+const code=btn.parentElement.querySelector('pre').textContent;
+navigator.clipboard.writeText(code).then(()=>{
+const orig=btn.textContent;btn.textContent='已复制!';btn.style.background='#00cc66';
+setTimeout(()=>{btn.textContent='复制全部';btn.style.background='#00ff7f';},1500);
+});
+}
+
+document.querySelector('.tree-q').addEventListener('click',function(){
+const child=this.parentElement.querySelector('.tree');
+if(child)child.style.display=child.style.display==='none'?'block':'none';
+this.textContent=child&&child.style.display==='block'?'▲ 你现在需要 Root 吗？':'▼ 你现在需要 Root 吗？';
+});
+
+document.querySelector('.top').addEventListener('click',e=>{e.preventDefault();window.scrollTo({top:0,behavior:'smooth'});});
+</script>
+</body>
+</html>

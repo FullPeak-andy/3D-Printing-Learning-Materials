@@ -1,7 +1,7 @@
 # 3D Printing Learning Materials
 
-> Andy 哥 3D 打印学习资料合集 — 46 个 HTML 互动教程  
-> 全是单文件 HTML（零依赖双击即开），覆盖 KLP1 / K1 Max / Voron / ERCF / F360 / 调平校准 / 耗材工艺全链路
+> Andy 哥 3D 打印学习资料合集 — 51 个 HTML 互动教程  
+> 全是单文件 HTML（零依赖双击即开），覆盖 KLP1 / K1 Max / Voron / ERCF / F360 / 调平校准 / 耗材工艺全链路（2026-06-17 新增 5 个 KLP1 调试系列）
 
 ## 📚 目录索引（42 个文件，按主题分组）
 
@@ -26,6 +26,16 @@
 | 15 | [KLP1调平吃透+通用3D打印机调试SOP_Andy哥专题.html](./KLP1调平吃透+通用3D打印机调试SOP_Andy哥专题.html) | 通用调平 SOP |
 | 16 | [KLP1陶瓷加热棒+热敏淘宝搜索.html](./KLP1陶瓷加热棒+热敏淘宝搜索.html) | 配件淘宝选购 |
 | 17 | [KLP1_vs_拓竹A1热端对比.html](./KLP1_vs_拓竹A1热端对比.html) | KLP1 vs A1 热端 |
+
+### 🧩 KLP1 调试系列（2026-06-17，5 个）
+
+| # | 文件 | 主题 |
+|---|---|---|
+| 47 | [KLP1_Skirt裙边6参数改法.html](./KLP1_Skirt裙边6参数改法.html) | 裙边 6 参数改法（提前冲刷喷嘴 + 测流量） |
+| 48 | [KLP1_PETG拉丝诊断与优化.html](./KLP1_PETG拉丝诊断与优化.html) | 拉丝诊断（温度/Retraction/PA/流量） |
+| 49 | [KLP1_擦拭塔13参数全解.html](./KLP1_擦拭塔13参数全解.html) | 擦拭塔 13 参数全解（单色机为何不需要） |
+| 50 | [KLP1_智能监控3档方案.html](./KLP1_智能监控3档方案.html) | 智能监控 3 档方案（拓竹 A1 LiDAR 同款） |
+| 51 | [KLP1_Root权限与安全加固.html](./KLP1_Root权限与安全加固.html) | Root 权限与安全加固（3 种拿 Root 方法） |
 
 ### 🔧 K1 / K1 Max 改造（6 个）
 

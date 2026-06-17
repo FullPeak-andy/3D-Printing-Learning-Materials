@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KLP1 擦拭塔 13 参数全解 - 单色机为何不需要</title>
+    <style>
+        :root{--bg:#1a1a1a;--bg2:#2a2a2a;--bg3:#3a3a3a;--txt:#e0e0e0;--sub:#a0a0a0;--acc:#00ff7f;--warn:#ff9900;--err:#ff4444;--brd:#404040;}
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:20px;}
+        .c{max-width:1200px;margin:0 auto;}
+        h1{color:var(--acc);font-size:2.2em;margin-bottom:10px;text-align:center;text-shadow:0 0 20px rgba(0,255,127,.3);}
+        h2{color:var(--acc);margin-top:30px;margin-bottom:15px;border-bottom:1px solid var(--brd);padding-bottom:8px;}
+        h3{color:#fff;margin-top:20px;margin-bottom:10px;}
+        .sub{text-align:center;color:var(--sub);margin-bottom:30px;font-size:1.1em;}
+        .card{background:var(--bg2);border:1px solid var(--brd);border-radius:8px;padding:20px;margin:15px 0;transition:all .3s;}
+        .card:hover{transform:translateY(-3px);box-shadow:0 5px 15px rgba(0,255,127,.15);border-color:var(--acc);}
+        .hl{color:var(--acc);font-weight:bold;}
+        .warn{color:var(--warn);font-weight:bold;}
+        .err{color:var(--err);font-weight:bold;}
+        canvas{background:#000;border-radius:6px;max-width:100%;margin:15px auto;display:block;}
+        .anim{border:2px solid var(--acc);border-radius:10px;padding:20px;margin:20px 0;}
+        .anim-t{color:var(--acc);font-size:1.2em;margin-bottom:15px;text-align:center;}
+        .tbl{width:100%;border-collapse:collapse;margin-top:15px;}
+        .tbl th{background:var(--bg3);padding:10px;text-align:left;color:var(--acc);}
+        .tbl td{padding:8px 10px;border-bottom:1px solid var(--brd);}
+        .tbl tr:hover{background:var(--bg3);}
+        .top{position:fixed;top:20px;right:20px;background:var(--acc);color:#000;padding:8px 16px;border-radius:20px;text-decoration:none;font-weight:bold;font-size:.9em;}
+        .top:hover{background:#00cc66;}
+        .ft{text-align:center;color:var(--sub);margin-top:50px;padding:20px;border-top:1px solid var(--brd);}
+        .param-card{background:var(--bg3);border-radius:8px;padding:15px;margin:10px 0;border:1px solid transparent;transition:all .3s;}
+        .param-card.open{border-color:var(--acc);background:rgba(0,255,127,.1);}
+        .param-h{color:#fff;cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:5px 0;}
+        .param-h:hover{color:var(--acc);}
+        .param-b{display:none;padding:10px 0 0;color:var(--sub);font-size:.95em;}
+        .param-card.open .param-b{display:block;}
+        .param-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.8em;margin-left:8px;}
+        .pt-red{background:rgba(255,68,68,.2);color:var(--err);}
+        .pt-orange{background:rgba(255,153,0,.2);color:var(--warn);}
+        .pt-green{background:rgba(0,255,127,.2);color:var(--acc);}
+        .decision{background:var(--bg2);border:2px solid var(--acc);border-radius:10px;padding:20px;margin:20px 0;}
+        .decision h3{color:var(--acc);text-align:center;}
+        .step{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--brd);}
+        .step:last-child{border-bottom:none;}
+        .step-num{background:var(--acc);color:#000;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;margin-right:15px;flex-shrink:0;}
+        .step-con{color:var(--txt);}
+        .compare-side{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:15px;}
+        @media(max-width:768px){.compare-side{grid-template-columns:1fr;}}
+        .side{background:var(--bg3);border-radius:8px;padding:15px;text-align:center;}
+        .side h4{color:var(--acc);margin-bottom:10px;}
+    </style>
+</head>
+<body>
+<a href="#" class="top">↑ 返回顶部</a>
+<div class="c">
+<h1>🧩 KLP1 擦拭塔 13 参数全解</h1>
+<p class="sub">单色机为何不需要 — 多色 ERCF V3 场景详解</p>
+
+<h2 id="s1">1️⃣ 擦拭塔 vs Skirt 区别</h2>
+<div class="card">
+<p>擦拭塔（Wipe Tower）和 Skirt（裙边）都是打印前的辅助结构，但用途完全不同：</p>
+<div class="compare-side">
+<div class="side">
+<h4>🟢 Skirt（裙边）</h4>
+<p>• 单色机必开<br>• 位置：模型外圈<br>• 作用：冲刷喷嘴 + 预热<br>• 圈数 3-5 圈<br>• 打印前跑一次</p>
+</div>
+<div class="side">
+<h4>🟡 擦拭塔（Wipe Tower）</h4>
+<p>• 仅多色机需要<br>• 位置：热床角落独立柱<br>• 作用：换色时擦拭喷嘴<br>• 高度 = 打印件高度<br>• 换色时反复跑</p>
+</div>
+</div>
+<div class="anim">
+<div class="anim-t">🎬 Skirt vs 擦拭塔俯视图对比</div>
+<canvas id="compareCanvas" width="700" height="300"></canvas>
+</div>
+</div>
+
+<h2 id="s2">2️⃣ 关键前提：KLP1 单色机即使勾"开启"也自动跳过</h2>
+<div class="card" style="border-color:var(--warn);background:rgba(255,153,0,.05);">
+<h3 style="color:var(--warn);">⚠️ KLP1 是单色机！</h3>
+<p style="margin:15px 0;">KLP1（KINGROON KLP1）只有单喷嘴、单进料口设计，属于<span class="hl">单色机</span>。</p>
+<p>在 OrcaSlicer 中：</p>
+<ul style="margin:10px 0 0 20px;">
+<li>✅ 擦拭塔选项存在，可以勾选"开启"</li>
+<li>❌ 但 OrcaSlicer 会<span class="err">自动检测</span>当前是单色机</li>
+<li>✅ 无论你是否勾选，擦拭塔<span class="hl">不会被生成</span></li>
+</ul>
+<p style="margin-top:15px;color:var(--sub);">这是 OrcaSlicer 的智能行为，不需要手动关闭擦拭塔。</p>
+</div>
+
+<h2 id="s3">3️⃣ 13 个参数卡片（点击展开）</h2>
+<div class="card">
+<p style="margin-bottom:15px;">擦拭塔的 13 个参数，每个都是关键设置。点击卡片查看详情：</p>
+
+<div class="param-card" onclick="toggleParam(this)">
+<div class="param-h">
+<span>1️⃣ 开启/跳过点</span>
+<span>▶</span>
+</div>
+<div class="param-b">
+<p><strong>开启：</strong>启用擦拭塔（多色机必须）</p>
+<p><strong>跳过点：</strong>在擦拭塔上跳过的特定位置，设为 0 即每层都经过擦拭塔</p>
+<p class="hl">单色机：不需要管这个参数</p>
+</div>
+</div>
+
+<div class="param-card" onclick="toggleParam(this)">
+<div class="param-h">
+<span>2️⃣ 接触层 / 接触层冷却</span>
+<span>▶</span>
+</div>
+<div class="param-b">
+<p><strong>接触层：</strong>擦拭塔与模型接触的层数，默认 1 层</p>
+<p><strong>接触层冷却：</strong>接触层使用的冷却风扇转速（0-100%）</p>
+<p class="hl">多色机推荐：接触层 1，配合冷却 30%</p>
+</div>
+</div>
+
+<div class="param-card" onclick="toggleParam(this)">
+<div class="param-h">
+<span>3️⃣ 内部加强筋</span>
+<span>▶</span>
+</div>
+<div class="param-b">
+<p><strong>作用：</strong>擦拭塔内部添加加强结构，防止打印过程中倒塌</p>
+<p><strong>推荐：</strong>多色机开启，单色机忽略</p>
+</div>
+</div>
+
+<div class="param-card" onclick="toggleParam(this)">
+<div class="param-h">
+<span>4️⃣ 宽度 60mm</span>
+<span>▶</span>
+</div>
+<div class="param-b">
+<p><strong>含义：</strong>擦拭塔的水平宽度</p>
+<p><strong>推荐：</strong>60mm（给喷嘴足够空间擦拭）</p>
+<p><strong>范围：</strong>一般 40-80mm 之间</p>
+</div>
+</div>
+
+<div class="param-card" onclick="toggleParam(this)">
+<div class="param-h">
+<span>5️⃣ Brim 3mm</span>
+<span>▶</span>
+</div>
+<div class="param-b">
+<p><strong>含义：</strong>擦拭塔底部外扩的边缘宽度</p>
+<p><strong>推荐：</strong>3mm（防止第一层剥离）</p>
+</div>
+</div>
+
+<div class="param-card" onclick="toggleParam(this)">
+<div class="param-h">
+<span>6️⃣ 填补空白 150%</span>
+<span>▶</span>
+</div>
+<div class="param-b">
+<p><strong>含义：</strong>擦拭塔空白区域填充密度</p>
+<p><strong>推荐：</strong>150%（比普通填充更密，更稳定）</p>
+</div>
+</div>
+
+<div class="param-card" onclick="toggleParam(this)">
+<div class="param-h">
+<span>7️⃣ 旋转角度 0°</span>
+<span>▶</span>
+</div>
+<div class="param-b">
+<p><strong>含义：</strong>擦拭塔的旋转角度（影响与模型的位置关系）</p>
+<p><strong>默认：</strong>0°，一般不需要改</p>
+</div>
+</div>
+
+<div class="param-card" onclick="toggleParam(this)">
+<div class="param-h">
+<span>8️⃣ 最大桥接距离 10mm</span>
+<span>▶</span>
+</div>
+<div class="param-b">
+<p><strong>含义：</strong>擦拭塔内允许桥接（悬空）的最大距离</p>
+<p><strong>推荐：</strong>10mm（超过就打印支撑）</p>
+</div>
+</div>
+
+<div class="param-card" onclick="toggleParam(this)">
+<div class="param-h">
+<span>9️⃣ 冲刷线间距 100%</span>
+<span>▶</span>
+</div>
+<div class="param-b">
+<p><strong>含义：</strong>相邻冲刷线之间的距离（% = 线宽的百分比）</p>
+<p><strong>推荐：</strong>100%（线挨线，不留缝）</p>
+</div>
+</div>
+
+<div class="param-card" onclick="toggleParam(this)">
+<div class="param-h">
+<span>🔟 额外冲刷量 100%</span>
+<span>▶</span>
+</div>
+<div class="param-b">
+<p><strong>含义：</strong>额外挤出的冲刷量（防止换色时断料）</p>
+<p><strong>推荐：</strong>100%（加倍冲刷）</p>
+</div>
+</div>
+
+<div class="param-card" onclick="toggleParam(this)">
+<div class="param-h">
+<span>1️⃣1️⃣ 最大速度 90mm/s</span>
+<span>▶</span>
+</div>
+<div class="param-b">
+<p><strong>含义：</strong>擦拭塔移动的最大速度</p>
+<p><strong>推荐：</strong>90mm/s（够快，不影响总打印时间）</p>
+</div>
+</div>
+
+<div class="param-card" onclick="toggleParam(this)">
+<div class="param-h">
+<span>1️⃣2️⃣ 墙类型 矩形</span>
+<span>▶</span>
+</div>
+<div class="param-b">
+<p><strong>含义：</strong>擦拭塔壁的结构类型</p>
+<p><strong>推荐：</strong>矩形（标准稳定）</p>
+</div>
+</div>
+
+<div class="param-card" onclick="toggleParam(this)">
+<div class="param-h">
+<span>1️⃣3️⃣ 无稀疏层 实验</span>
+<span>▶</span>
+</div>
+<div class="param-b">
+<p><strong>含义：</strong>擦拭塔是否跳过稀疏填充层</p>
+<p><strong>推荐：</strong>默认关闭（实验性功能）</p>
+</div>
+</div>
+</div>
+
+<h2 id="s4">4️⃣ 决策树：要不要开擦拭塔？</h2>
+<div class="card">
+<div class="decision">
+<h3>🌲 擦拭塔开关决策树</h3>
+<div class="step">
+<div class="step-num">1</div>
+<div class="step-con">你是单色机（KLP1 / K1 / Voron 单喷嘴）？<br>→ <span class="hl">是 → 直接跳过，不需要擦拭塔</span></div>
+</div>
+<div class="step">
+<div class="step-num">2</div>
+<div class="step-con">你是多色机（ERCF / AMS / 色环）？<br>→ <span class="warn">是 → 需要开启擦拭塔</span></div>
+</div>
+<div class="step">
+<div class="step-num">3</div>
+<div class="step-con">开启擦拭塔时，接触层设多少？<br>→ <span class="hl">推荐设 1</span></div>
+</div>
+<div class="step">
+<div class="step-num">4</div>
+<div class="step-con">擦拭塔宽度设多少？<br>→ <span class="hl">推荐 60mm</span></div>
+</div>
+</div>
+</div>
+
+<h2 id="s5">5️⃣ ERCF V3 多色场景：擦拭塔 4 步指南</h2>
+<div class="card">
+<p>如果你的 KLP1 将来升级了 ERCF V3（External Filament Changer），需要按以下步骤配置擦拭塔：</p>
+<div class="decision">
+<div class="step"><div class="step-num">①</div><div class="step-con">OrcaSlicer → 打印机设置 → 多色打印 → 开启"启用擦拭塔"</div></div>
+<div class="step"><div class="step-num">②</div><div class="step-con">接触层：设为 1，接触层冷却：30%</div></div>
+<div class="step"><div class="step-num">③</div><div class="step-con">擦拭塔宽度：60mm，Brim：3mm，额外冲刷量：100%</div></div>
+<div class="step"><div class="step-num">④</div><div class="step-con">切片后检查 GCode，确认换色点经过擦拭塔</div></div>
+</div>
+</div>
+
+<h2 id="s6">6️⃣ OrcaSlicer 参数位置提示</h2>
+<div class="card">
+<p>在 OrcaSlicer 中找到擦拭塔参数的路径：</p>
+<table class="tbl">
+<thead><tr><th>步骤</th><th>路径</th><th>参数</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>打印机设置 → 打印机模型</td><td>确认是 KLP1</td></tr>
+<tr><td>2</td><td>打印机设置 → 多色打印</td><td>擦除塔位置</td></tr>
+<tr><td>3</td><td>切片设置 → 擦除塔</td><td>全部 13 参数</td></tr>
+<tr><td>4</td><td>材料 → PETG</td><td>温度/Retraction 等</td></tr>
+</tbody>
+</table>
+<div class="card" style="background:rgba(0,255,127,.1);border-color:var(--acc);margin-top:15px;">
+<p><span class="hl">💡 快速记忆：</span>擦拭塔参数在 OrcaSlicer 的「切片设置 → 擦除塔」选项卡下，不需要在打印机配置里找。</p>
+</div>
+</div>
+
+<div class="ft">
+<p>🧩 KLP1 调试系列 #49 · 2026-06-17 · Andy & LED 库存回收 & 闲鱼销售助理</p>
+</div>
+</div>
+
+<script>
+// 擦拭塔 vs Skirt 对比动画
+const compareCanvas=document.getElementById('compareCanvas');
+const ctx=compareCanvas.getContext('2d');
+let frame=0;
+
+function drawCompare(){
+ctx.fillStyle='#0a0a0a';
+ctx.fillRect(0,0,compareCanvas.width,compareCanvas.height);
+
+// 左侧：Skirt
+ctx.strokeStyle='#444';ctx.lineWidth=2;
+ctx.strokeRect(30,30,280,240);
+
+// 模型
+ctx.fillStyle='#555';
+ctx.fillRect(120,110,100,80);
+
+// Skirt 线条
+ctx.strokeStyle='#00ff7f';ctx.lineWidth=2;ctx.setLineDash([5,3]);
+for(let i=0;i<3;i++){
+const off=10+i*8;
+ctx.beginPath();ctx.rect(120-off,110-off,100+off*2,80+off*2);ctx.stroke();
+}
+
+// 标签
+ctx.setLineDash([]);
+ctx.fillStyle='#00ff7f';ctx.font='14px sans-serif';
+ctx.fillText('Skirt 裙边（单色机）',50,20);
+
+// 右侧：擦拭塔
+ctx.strokeStyle='#444';ctx.lineWidth=2;
+ctx.strokeRect(370,30,300,240);
+
+// 模型
+ctx.fillStyle='#555';
+ctx.fillRect(450,120,80,60);
+
+// 擦拭塔（右上角）
+const towerX=620,towerY=60,towerW=40,towerH=180;
+ctx.fillStyle='#3a3a3a';
+ctx.fillRect(towerX,towerY,towerW,towerH);
+ctx.strokeStyle='#ff9900';ctx.lineWidth=2;
+ctx.strokeRect(towerX,towerY,towerW,towerH);
+
+// 换色路径
+ctx.strokeStyle='#ff6b35';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+ctx.beginPath();
+ctx.moveTo(490,120);
+ctx.lineTo(600,120);
+ctx.lineTo(600,60);
+ctx.lineTo(620,60);
+ctx.stroke();
+
+// 标注
+ctx.setLineDash([]);
+ctx.fillStyle='#ff9900';ctx.font='11px sans-serif';
+ctx.fillText('擦拭塔',towerX+5,towerY+towerH/2);
+ctx.fillStyle='#ff6b35';ctx.font='10px sans-serif';
+ctx.fillText('换色路径',560,80);
+
+// 动画效果
+const pulse=Math.sin(frame*0.05)*3;
+ctx.strokeStyle='rgba(255,153,0,0.5)';
+ctx.lineWidth=2;
+ctx.strokeRect(towerX-pulse,towerY-pulse,towerW+pulse*2,towerH+pulse*2);
+
+ctx.fillStyle='#888';ctx.font='13px sans-serif';
+ctx.fillText('位置：热床角落独立柱',390,20);
+ctx.fillStyle='#00ff7f';ctx.font='13px sans-serif';
+ctx.fillText('位置：模型外圈',50,280);
+ctx.fillStyle='#ff9900';ctx.font='13px sans-serif';
+ctx.fillText('作用：换色时擦拭喷嘴',390,280);
+
+frame++;
+requestAnimationFrame(drawCompare);
+}
+drawCompare();
+
+// 参数卡片展开/收起
+function toggleParam(card){
+card.classList.toggle('open');
+const arrow=card.querySelector('.param-h span:last-child');
+arrow.textContent=card.classList.contains('open')?'▼':'▶';
+}
+
+// 返回顶部
+document.querySelector('.top').addEventListener('click',e=>{e.preventDefault();window.scrollTo({top:0,behavior:'smooth'});});
+</script>
+</body>
+</html>
