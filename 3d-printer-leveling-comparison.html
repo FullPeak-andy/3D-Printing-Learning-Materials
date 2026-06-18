@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D 打印机调平方式完整对比 | 教程 #60</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    :root {
+      --bg-primary: #0a0e1a;
+      --bg-card: #1a1d2e;
+      --bg-accent: #252840;
+      --color-cyan: #00d4ff;
+      --color-orange: #ff6b35;
+      --color-gold: #ffd700;
+      --color-purple: #9b59b6;
+      --color-blue: #3498db;
+      --color-teal: #1abc9c;
+      --color-green: #2ecc71;
+      --text-primary: #e0e0e0;
+      --text-secondary: #a0a0a0;
+      --text-dim: #666;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 80px 20px;
+      background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-primary) 100%);
+      border-bottom: 1px solid var(--bg-accent);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(0,212,255,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--color-cyan), var(--color-orange));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+    }
+    .hero .subtitle {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      max-width: 800px;
+      margin: 0 auto 40px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      max-width: 900px;
+      margin: 40px auto 0;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-accent);
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(0,212,255,0.15);
+      border-color: var(--color-cyan);
+    }
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--color-cyan);
+    }
+    .stat-label {
+      color: var(--text-secondary);
+      margin-top: 8px;
+    }
+    /* Section Titles */
+    .section-title {
+      font-size: 2rem;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--bg-accent);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .section-title .num {
+      background: linear-gradient(135deg, var(--color-cyan), var(--color-teal));
+      color: var(--bg-primary);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+    section {
+      margin: 60px 0;
+      padding: 40px;
+      background: var(--bg-card);
+      border-radius: 16px;
+      border: 1px solid var(--bg-accent);
+    }
+    /* Tabs */
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--bg-accent);
+    }
+    .tab-btn {
+      padding: 12px 24px;
+      background: var(--bg-accent);
+      border: 1px solid transparent;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+    }
+    .tab-btn:hover {
+      background: var(--bg-primary);
+      border-color: var(--color-cyan);
+      color: var(--color-cyan);
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--color-cyan), var(--color-teal));
+      color: var(--bg-primary);
+      font-weight: 600;
+    }
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Method Cards */
+    .method-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin: 30px 0;
+    }
+    .method-card {
+      background: var(--bg-accent);
+      border-radius: 12px;
+      padding: 24px;
+      border-left: 4px solid var(--color-cyan);
+      transition: all 0.3s ease;
+    }
+    .method-card:hover {
+      transform: translateX(5px);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    }
+    .method-card h4 {
+      color: var(--color-cyan);
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+    }
+    .method-card .spec {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .method-card .spec:last-child {
+      border-bottom: none;
+    }
+    .method-card .spec-label {
+      color: var(--text-secondary);
+    }
+    .method-card .spec-value {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    /* Probe Cards */
+    .probe-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .probe-card {
+      background: var(--bg-primary);
+      border-radius: 10px;
+      padding: 20px;
+      border: 1px solid var(--bg-accent);
+      transition: all 0.3s ease;
+    }
+    .probe-card:hover {
+      border-color: var(--color-orange);
+      transform: scale(1.02);
+    }
+    .probe-card h5 {
+      color: var(--color-orange);
+      margin-bottom: 10px;
+    }
+    .probe-card .type {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-bottom: 5px;
+    }
+    /* Pros Cons */
+    .pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .pros, .cons {
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .pros {
+      background: rgba(46,204,113,0.1);
+      border: 1px solid rgba(46,204,113,0.3);
+    }
+    .cons {
+      background: rgba(231,76,60,0.1);
+      border: 1px solid rgba(231,76,60,0.3);
+    }
+    .pros h5, .cons h5 {
+      margin-bottom: 10px;
+      font-size: 1rem;
+    }
+    .pros h5 { color: var(--color-green); }
+    .cons h5 { color: #e74c3c; }
+    .pros li, .cons li {
+      margin: 5px 0 5px 20px;
+      color: var(--text-secondary);
+    }
+    /* 4-Piece Flow */
+    .flow-container {
+      position: relative;
+      padding: 40px 0;
+    }
+    .flow-diagram {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin: 30px 0;
+    }
+    .flow-step {
+      width: 200px;
+      padding: 25px 20px;
+      background: var(--bg-accent);
+      border-radius: 12px;
+      text-align: center;
+      position: relative;
+      opacity: 0.3;
+      transform: scale(0.9);
+      transition: all 0.5s ease;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+    .flow-step.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .flow-step:nth-child(1) { border-color: var(--color-purple); }
+    .flow-step:nth-child(3) { border-color: var(--color-blue); }
+    .flow-step:nth-child(5) { border-color: var(--color-teal); }
+    .flow-step:nth-child(7) { border-color: var(--color-green); }
+    .flow-step .step-num {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-card);
+      padding: 2px 12px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .flow-step:nth-child(1) .step-num { color: var(--color-purple); }
+    .flow-step:nth-child(3) .step-num { color: var(--color-blue); }
+    .flow-step:nth-child(5) .step-num { color: var(--color-teal); }
+    .flow-step:nth-child(7) .step-num { color: var(--color-green); }
+    .flow-step h5 {
+      margin: 10px 0 8px;
+      font-size: 0.95rem;
+    }
+    .flow-step p {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+    .flow-arrow {
+      font-size: 2rem;
+      color: var(--text-dim);
+    }
+    .flow-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 40px;
+    }
+    .detail-card {
+      background: var(--bg-primary);
+      border-radius: 10px;
+      padding: 20px;
+      border: 1px solid var(--bg-accent);
+      display: none;
+    }
+    .detail-card.show {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    .detail-card h5 {
+      color: var(--color-cyan);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .detail-card .badge {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--color-teal);
+      color: var(--bg-primary);
+    }
+    .replay-btn {
+      display: block;
+      margin: 20px auto;
+      padding: 12px 30px;
+      background: linear-gradient(135deg, var(--color-cyan), var(--color-teal));
+      border: none;
+      border-radius: 8px;
+      color: var(--bg-primary);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .replay-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 20px rgba(0,212,255,0.3);
+    }
+    /* Timeline */
+    .timeline {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin: 30px 0;
+      position: relative;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 30px;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--color-purple), var(--color-blue), var(--color-teal), var(--color-gold));
+      border-radius: 2px;
+    }
+    .timeline-item {
+      flex: 1;
+      min-width: 200px;
+      text-align: center;
+      position: relative;
+      padding-top: 50px;
+    }
+    .timeline-item .dot {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 4px solid var(--color-cyan);
+    }
+    .timeline-item:nth-child(1) .dot { border-color: var(--color-purple); }
+    .timeline-item:nth-child(2) .dot { border-color: var(--color-blue); }
+    .timeline-item:nth-child(3) .dot { border-color: var(--color-teal); }
+    .timeline-item:nth-child(4) .dot { border-color: var(--color-gold); }
+    .timeline-item .phase {
+      font-size: 0.8rem;
+      color: var(--color-cyan);
+      margin-bottom: 5px;
+    }
+    .timeline-item .cost {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--color-orange);
+      margin-bottom: 8px;
+    }
+    .timeline-item .result {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    .timeline-item .precision {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      margin: 10px 0;
+    }
+    /* Decision Tree */
+    .decision-tree {
+      background: var(--bg-primary);
+      border-radius: 12px;
+      padding: 30px;
+      border: 1px solid var(--bg-accent);
+    }
+    .tree-node {
+      margin: 15px 0;
+    }
+    .tree-question {
+      background: var(--bg-accent);
+      padding: 15px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+    }
+    .tree-question:hover {
+      border-color: var(--color-cyan);
+    }
+    .tree-question.active {
+      border-color: var(--color-cyan);
+      background: rgba(0,212,255,0.1);
+    }
+    .tree-toggle {
+      transition: transform 0.3s ease;
+    }
+    .tree-toggle.open {
+      transform: rotate(90deg);
+    }
+    .tree-branches {
+      display: none;
+      padding-left: 30px;
+      margin-top: 10px;
+      border-left: 2px solid var(--bg-accent);
+    }
+    .tree-branches.show {
+      display: block;
+    }
+    .tree-option {
+      padding: 12px 20px;
+      margin: 8px 0;
+      background: var(--bg-card);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+    }
+    .tree-option:hover {
+      border-color: var(--color-teal);
+      transform: translateX(5px);
+    }
+    .tree-option .option-title {
+      color: var(--color-teal);
+      font-weight: 600;
+    }
+    .tree-option .option-desc {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-top: 5px;
+    }
+    .route-detail {
+      display: none;
+      background: var(--bg-accent);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 10px 0;
+    }
+    .route-detail.show {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    .route-detail h5 {
+      color: var(--color-orange);
+      margin-bottom: 10px;
+    }
+    /* Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    .data-table th, .data-table td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--bg-accent);
+    }
+    .data-table th {
+      background: var(--bg-accent);
+      color: var(--color-cyan);
+      font-weight: 600;
+    }
+    .data-table tr:hover td {
+      background: rgba(0,212,255,0.05);
+    }
+    .highlight {
+      color: var(--color-gold);
+      font-weight: 600;
+    }
+    /* FAQ */
+    .faq-item {
+      background: var(--bg-accent);
+      border-radius: 10px;
+      margin: 15px 0;
+      overflow: hidden;
+      border: 1px solid transparent;
+      transition: all 0.3s ease;
+    }
+    .faq-item:hover {
+      border-color: var(--color-cyan);
+    }
+    .faq-question {
+      padding: 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+    }
+    .faq-answer {
+      display: none;
+      padding: 0 20px 20px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .faq-answer.show {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    .faq-toggle {
+      transition: transform 0.3s ease;
+      color: var(--color-cyan);
+    }
+    .faq-toggle.open {
+      transform: rotate(180deg);
+    }
+    /* Summary */
+    .summary-box {
+      background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(46,204,113,0.1));
+      border: 1px solid var(--color-cyan);
+      border-radius: 12px;
+      padding: 30px;
+      margin-top: 30px;
+    }
+    .summary-box h4 {
+      color: var(--color-cyan);
+      margin-bottom: 15px;
+    }
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+      border-top: 1px solid var(--bg-accent);
+      margin-top: 60px;
+    }
+    footer a {
+      color: var(--color-cyan);
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      section { padding: 20px; }
+      .pros-cons { grid-template-columns: 1fr; }
+      .flow-diagram { flex-direction: column; }
+      .flow-arrow { transform: rotate(90deg); }
+      .timeline { flex-direction: column; }
+      .timeline::before { display: none; }
+    }
+    /* SVG Diagrams */
+    .diagram-container {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    .diagram-container svg {
+      max-width: 100%;
+      height: auto;
+    }
+    /* K1 Max Current State */
+    .current-state {
+      background: linear-gradient(135deg, rgba(255,107,53,0.1), rgba(255,215,0,0.1));
+      border: 1px solid var(--color-orange);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .current-state h4 {
+      color: var(--color-orange);
+      margin-bottom: 10px;
+    }
+    /* Recommendation Box */
+    .recommendation {
+      background: linear-gradient(135deg, var(--color-green), var(--color-teal));
+      color: var(--bg-primary);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      font-weight: 600;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- 1️⃣ Hero Section -->
+  <header class="hero">
+    <h1>3D 打印机调平方式完整对比</h1>
+    <p class="subtitle">从机械调平到 Lidar AI 调平，5 种方式 + 4 件套组合 + KLP1/K1 Max 路径推荐</p>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number">5</div>
+        <div class="stat-label">种调平方式</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">4</div>
+        <div class="stat-label">件套组合</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">0.02</div>
+        <div class="stat-label">mm 最高精度</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">±0.05</div>
+        <div class="stat-label">mm 工业件目标</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- 2️⃣ 5 大调平方式 -->
+    <section id="methods">
+      <h2 class="section-title"><span class="num">1</span>5 大调平方式</h2>
+      
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="mechanical">机械调平</button>
+        <button class="tab-btn" data-tab="abl">ABL 自动调平</button>
+        <button class="tab-btn" data-tab="mesh">Mesh 网格补偿</button>
+        <button class="tab-btn" data-tab="screws">SCREWS_TILT</button>
+        <button class="tab-btn" data-tab="lidar">Lidar AI 调平</button>
+      </div>
+
+      <!-- Tab 1: 机械调平 -->
+      <div class="tab-content active" id="mechanical">
+        <div class="diagram-container">
+          <svg width="400" height="200" viewBox="0 0 400 200">
+            <rect x="50" y="120" width="300" height="20" fill="#3498db" rx="3"/>
+            <circle cx="70" cy="140" r="15" fill="#9b59b6"/>
+            <circle cx="330" cy="140" r="15" fill="#9b59b6"/>
+            <rect x="60" y="145" width="20" height="30" fill="#666"/>
+            <rect x="320" y="145" width="20" height="30" fill="#666"/>
+            <text x="200" y="80" fill="#00d4ff" text-anchor="middle" font-size="14" font-weight="bold">4角螺丝 + 弹簧</text>
+            <text x="70" y="190" fill="#a0a0a0" text-anchor="middle" font-size="12">螺丝A</text>
+            <text x="330" y="190" fill="#a0a0a0" text-anchor="middle" font-size="12">螺丝B</text>
+            <path d="M100 50 L70 100" stroke="#ff6b35" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+            <path d="M300 50 L330 100" stroke="#ff6b35" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+            <text x="200" y="40" fill="#ffd700" text-anchor="middle" font-size="11">人工调节</text>
+          </svg>
+        </div>
+        <div class="method-grid">
+          <div class="method-card">
+            <h4>基本信息</h4>
+            <div class="spec"><span class="spec-label">原理</span><span class="spec-value">人工拧螺丝 + 调弹簧压力</span></div>
+            <div class="spec"><span class="spec-label">精度</span><span class="spec-value">±0.5mm</span></div>
+            <div class="spec"><span class="spec-label">价格</span><span class="spec-value">¥0</span></div>
+          </div>
+          <div class="method-card">
+            <h4>适用场景</h4>
+            <p style="color: var(--text-secondary);">老式打印机入门校准 / 建立基准参考 / 4件套第1步</p>
+          </div>
+        </div>
+        <div class="pros-cons">
+          <div class="pros">
+            <h5>+ 优点</h5>
+            <ul>
+              <li>零成本，无需额外硬件</li>
+              <li>直观易懂，新手友好</li>
+              <li>所有调平方式的基准起点</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h5>- 缺点</h5>
+            <ul>
+              <li>速度慢，每次需10-15分钟</li>
+              <li>依赖主观手感判断</li>
+              <li>弹簧易疲劳，参数会漂移</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: ABL 自动调平 -->
+      <div class="tab-content" id="abl">
+        <div class="diagram-container">
+          <svg width="450" height="220" viewBox="0 0 450 220">
+            <rect x="100" y="150" width="250" height="15" fill="#3498db" rx="2"/>
+            <rect x="200" y="60" width="50" height="80" fill="#666"/>
+            <circle cx="225" cy="50" r="20" fill="#00d4ff"/>
+            <text x="225" y="55" fill="#0a0e1a" text-anchor="middle" font-size="10" font-weight="bold">探针</text>
+            <path d="M225 70 L225 150" stroke="#00d4ff" stroke-width="2" stroke-dasharray="5,3"/>
+            <circle cx="120" cy="155" r="8" fill="#ffd700"/>
+            <circle cx="330" cy="155" r="8" fill="#ffd700"/>
+            <text x="120" y="185" fill="#a0a0a0" text-anchor="middle" font-size="10">触发点</text>
+            <text x="225" y="200" fill="#00d4ff" text-anchor="middle" font-size="12">Z轴触发 → 自动补偿</text>
+            <rect x="10" y="20" width="80" height="60" fill="#1a1d2e" stroke="#ff6b35" rx="5"/>
+            <text x="50" y="45" fill="#ff6b35" text-anchor="middle" font-size="9">控制器</text>
+            <text x="50" y="60" fill="#a0a0a0" text-anchor="middle" font-size="8">计算补偿</text>
+            <path d="M90 50 L200 50" stroke="#ff6b35" stroke-width="1" fill="none"/>
+          </svg>
+        </div>
+        <div class="method-card" style="margin-bottom: 20px;">
+          <h4>ABL 自动调平原理</h4>
+          <p style="color: var(--text-secondary);">探针触发 → Z 触发点记录 → 自动计算补偿 → 打印层应用</p>
+          <div style="display: flex; gap: 20px; margin-top: 15px;">
+            <div><span class="spec-label">精度：</span><span class="spec-value">±0.05-0.1mm</span></div>
+            <div><span class="spec-label">价格：</span><span class="spec-value">¥30-300</span></div>
+          </div>
+        </div>
+        
+        <h4 style="color: var(--color-orange); margin: 20px 0;">3 种探针对比</h4>
+        <div class="probe-cards">
+          <div class="probe-card">
+            <h5>BLTouch</h5>
+            <div class="type">机械弹簧触发式</div>
+            <div class="spec" style="margin-top: 10px;"><span class="spec-label">触发精度</span><span class="spec-value">±0.005mm</span></div>
+            <div class="spec"><span class="spec-label">价格</span><span class="spec-value">¥30-80</span></div>
+            <div class="spec"><span class="spec-label">可靠性</span><span class="spec-value">高</span></div>
+          </div>
+          <div class="probe-card">
+            <h5>Eddy 涡流</h5>
+            <div class="type">电磁感应式</div>
+            <div class="spec" style="margin-top: 10px;"><span class="spec-label">触发精度</span><span class="spec-value">±0.001mm</span></div>
+            <div class="spec"><span class="spec-label">价格</span><span class="spec-value">¥200-300</span></div>
+            <div class="spec"><span class="spec-label">可靠性</span><span class="spec-value">极高</span></div>
+          </div>
+          <div class="probe-card">
+            <h5>微动开关</h5>
+            <div class="type">物理触发式</div>
+            <div class="spec" style="margin-top: 10px;"><span class="spec-label">触发精度</span><span class="spec-value">±0.05mm</span></div>
+            <div class="spec"><span class="spec-label">价格</span><span class="spec-value">¥10</span></div>
+            <div class="spec"><span class="spec-label">可靠性</span><span class="spec-value">一般</span></div>
+          </div>
+        </div>
+        
+        <div class="pros-cons" style="margin-top: 20px;">
+          <div class="pros">
+            <h5>+ 优点</h5>
+            <ul>
+              <li>自动化程度高</li>
+              <li>速度快（1-2分钟）</li>
+              <li>精度较高（探针决定）</li>
+              <li>可重复校准</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h5>- 缺点</h5>
+            <ul>
+              <li>需要额外硬件</li>
+              <li>需正确标定探针偏移</li>
+              <li>探针位置固定，无法100%覆盖</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Mesh 网格补偿 -->
+      <div class="tab-content" id="mesh">
+        <div class="diagram-container">
+          <svg width="400" height="250" viewBox="0 0 400 250">
+            <rect x="50" y="50" width="200" height="150" fill="#1a1d2e" stroke="#3498db" stroke-width="2"/>
+            <circle cx="75" cy="75" r="5" fill="#ffd700"/>
+            <circle cx="125" cy="75" r="5" fill="#00d4ff"/>
+            <circle cx="175" cy="75" r="5" fill="#ff6b35"/>
+            <circle cx="225" cy="75" r="5" fill="#9b59b6"/>
+            <circle cx="75" cy="125" r="5" fill="#ffd700"/>
+            <circle cx="125" cy="125" r="5" fill="#00d4ff"/>
+            <circle cx="175" cy="125" r="5" fill="#ff6b35"/>
+            <circle cx="225" cy="125" r="5" fill="#9b59b6"/>
+            <circle cx="75" cy="175" r="5" fill="#ffd700"/>
+            <circle cx="125" cy="175" r="5" fill="#00d4ff"/>
+            <circle cx="175" cy="175" r="5" fill="#ff6b35"/>
+            <circle cx="225" cy="175" r="5" fill="#9b59b6"/>
+            <text x="150" y="220" fill="#a0a0a0" text-anchor="middle" font-size="11">多点采样 → 高度图</text>
+            <rect x="270" y="80" width="120" height="100" fill="#252840" stroke="#2ecc71" stroke-width="2" rx="5"/>
+            <text x="330" y="70" fill="#2ecc71" text-anchor="middle" font-size="10">高度图热力图</text>
+            <rect x="280" y="90" width="20" height="70" fill="#2ecc71" opacity="0.3"/>
+            <rect x="300" y="95" width="20" height="65" fill="#2ecc71" opacity="0.5"/>
+            <rect x="320" y="100" width="20" height="60" fill="#ffd700" opacity="0.5"/>
+            <rect x="340" y="85" width="20" height="75" fill="#ff6b35" opacity="0.5"/>
+            <text x="330" y="200" fill="#00d4ff" text-anchor="middle" font-size="11">软件补偿算法</text>
+            <path d="M250 125 L270 130" stroke="#00d4ff" stroke-width="2" fill="none" marker-end="url(#arrow2)"/>
+          </svg>
+        </div>
+        <div class="method-grid">
+          <div class="method-card">
+            <h4>Mesh 补偿原理</h4>
+            <div class="spec"><span class="spec-label">原理</span><span class="spec-value">多点采样 → 高度图 → 软件补偿</span></div>
+            <div class="spec"><span class="spec-label">精度</span><span class="spec-value">±0.03-0.05mm</span></div>
+            <div class="spec"><span class="spec-label">价格</span><span class="spec-value">¥0（纯软件）</span></div>
+          </div>
+        </div>
+        <div class="pros-cons">
+          <div class="pros">
+            <h5>+ 优点</h5>
+            <ul>
+              <li>纯软件方案，无需额外硬件</li>
+              <li>精度高于 ABL 本身</li>
+              <li>全自动补偿床面不平</li>
+              <li>Klipper/Marlin 原生支持</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h5>- 缺点</h5>
+            <ul>
+              <li>依赖 ABL 探针作为基础</li>
+              <li>采样点多时耗时较长</li>
+              <li>弱性能主板可能报错</li>
+            </ul>
+          </div>
+        </div>
+        <div class="recommendation">
+          推荐配置：4x4 或 5x5 网格 + LAGGER 插值算法
+        </div>
+      </div>
+
+      <!-- Tab 4: SCREWS_TILT_CALCULATE -->
+      <div class="tab-content" id="screws">
+        <div class="diagram-container">
+          <svg width="400" height="200" viewBox="0 0 400 200">
+            <rect x="100" y="130" width="200" height="15" fill="#3498db" rx="2" transform="rotate(-2 200 137)"/>
+            <circle cx="110" cy="145" r="12" fill="#9b59b6"/>
+            <circle cx="290" cy="145" r="12" fill="#9b59b6"/>
+            <circle cx="110" cy="90" r="8" fill="#00d4ff"/>
+            <circle cx="290" cy="100" r="8" fill="#00d4ff"/>
+            <text x="110" y="60" fill="#a0a0a0" text-anchor="middle" font-size="10">Z=0.5mm</text>
+            <text x="290" y="70" fill="#a0a0a0" text-anchor="middle" font-size="10">Z=0.3mm</text>
+            <text x="200" y="30" fill="#ffd700" text-anchor="middle" font-size="12" font-weight="bold">计算倾斜角度</text>
+            <text x="200" y="50" fill="#a0a0a0" text-anchor="middle" font-size="10">螺丝A需拧紧 +0.2mm</text>
+            <rect x="300" y="40" width="90" height="100" fill="#1a1d2e" stroke="#ff6b35" rx="5"/>
+            <text x="345" y="65" fill="#ff6b35" text-anchor="middle" font-size="10">旋转量</text>
+            <text x="345" y="85" fill="#ffd700" text-anchor="middle" font-size="14">-90°</text>
+            <text x="345" y="105" fill="#a0a0a0" text-anchor="middle" font-size="9">逆时针</text>
+            <text x="345" y="125" fill="#a0a0a0" text-anchor="middle" font-size="9">手动调整</text>
+          </svg>
+        </div>
+        <div class="method-card" style="margin-bottom: 20px;">
+          <h4>SCREWS_TILT_CALCULATE 工作流程</h4>
+          <p style="color: var(--text-secondary); margin: 15px 0;">4角探针采样 → 计算螺丝旋转量 → 人工按指示拧螺丝 → 再次验证</p>
+          <div style="display: flex; gap: 30px;">
+            <div><span class="spec-label">精度：</span><span class="spec-value">±0.05mm</span></div>
+            <div><span class="spec-label">价格：</span><span class="spec-value">¥0</span></div>
+            <div><span class="spec-label">耗时：</span><span class="spec-value">5-10分钟</span></div>
+          </div>
+        </div>
+        <div class="pros-cons">
+          <div class="pros">
+            <h5>+ 优点</h5>
+            <ul>
+              <li>消除系统性倾斜误差</li>
+              <li>给出精确旋转量指示</li>
+              <li>工业件必备步骤</li>
+              <li>Klipper 原生支持</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h5>- 缺点</h5>
+            <ul>
+              <li>仍需人工拧螺丝</li>
+              <li>4角都要调，较繁琐</li>
+              <li>需配合 ABL 探针使用</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 5: Lidar AI 调平 -->
+      <div class="tab-content" id="lidar">
+        <div class="diagram-container">
+          <svg width="450" height="220" viewBox="0 0 450 220">
+            <rect x="150" y="150" width="200" height="12" fill="#3498db" rx="2"/>
+            <polygon points="225,30 215,70 235,70" fill="#00d4ff"/>
+            <line x1="225" y1="70" x2="225" y2="150" stroke="#00d4ff" stroke-width="2" stroke-dasharray="5,3"/>
+            <text x="225" y="20" fill="#00d4ff" text-anchor="middle" font-size="10">LiDAR</text>
+            <circle cx="225" cy="160" r="3" fill="#ffd700"/>
+            <rect x="280" y="80" width="150" height="80" fill="#1a1d2e" stroke="#ff6b35" rx="5"/>
+            <text x="355" y="105" fill="#ff6b35" text-anchor="middle" font-size="11">AI 算法</text>
+            <text x="355" y="125" fill="#a0a0a0" text-anchor="middle" font-size="10">流量补偿</text>
+            <text x="355" y="145" fill="#2ecc71" text-anchor="middle" font-size="10">实时校准</text>
+            <path d="M235 80 L280 120" stroke="#ff6b35" stroke-width="1" fill="none"/>
+            <text x="400" y="190" fill="#ffd700" text-anchor="middle" font-size="11">精度 ±0.02mm</text>
+            <text x="400" y="205" fill="#a0a0a0" text-anchor="middle" font-size="9">流量精度 &lt; ±1.5%</text>
+          </svg>
+        </div>
+        <div class="method-card" style="border-color: var(--color-gold);">
+          <h4 style="color: var(--color-gold);">拓朴专有技术</h4>
+          <div class="spec"><span class="spec-label">原理</span><span class="spec-value">LiDAR 激光测距 + AI 流量补偿 + 实时校准</span></div>
+          <div class="spec"><span class="spec-label">精度</span><span class="spec-value">±0.02mm</span></div>
+          <div class="spec"><span class="spec-label">价格</span><span class="spec-value">¥2500+（拓竹专有）</span></div>
+          <div class="spec"><span class="spec-label">代表机型</span><span class="spec-value">A1 / X1 / K1 Max 出厂标配</span></div>
+        </div>
+        <div class="pros-cons">
+          <div class="pros">
+            <h5>+ 优点</h5>
+            <ul>
+              <li>全自动化，零人工干预</li>
+              <li>实时校准打印过程</li>
+              <li>最高精度水平</li>
+              <li>AI 算法持续优化</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <h5>- 缺点</h5>
+            <ul>
+              <li>拓竹品牌专有</li>
+              <li>不可改装到其他机器</li>
+              <li>价格较高</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3️⃣ 调平 4 件套组合 -->
+    <section id="four-piece">
+      <h2 class="section-title"><span class="num">2</span>调平 4 件套组合</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 20px;">工业级精度的标准组合缺一不可，点击方块查看详情，点击重播按钮可重新播放动画</p>
+      
+      <button class="replay-btn" id="replayBtn">重播动画</button>
+      
+      <div class="flow-container">
+        <div class="flow-diagram" id="flowDiagram">
+          <div class="flow-step" data-step="1">
+            <span class="step-num">Step 1</span>
+            <h5 style="color: var(--color-purple);">机械粗调</h5>
+            <p>4角弹簧调平</p>
+          </div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-step" data-step="2">
+            <span class="step-num">Step 2</span>
+            <h5 style="color: var(--color-blue);">SCREWS_TILT</h5>
+            <p>精调螺丝角度</p>
+          </div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-step" data-step="3">
+            <span class="step-num">Step 3</span>
+            <h5 style="color: var(--color-teal);">ABL 探针</h5>
+            <p>自动复位 Z0</p>
+          </div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-step" data-step="4">
+            <span class="step-num">Step 4</span>
+            <h5 style="color: var(--color-green);">Mesh 网格</h5>
+            <p>软件兜床面</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-details">
+        <div class="detail-card" id="detail1">
+          <h5>Step 1: 机械粗调 <span class="badge" style="background: var(--color-purple);">第1步</span></h5>
+          <p><strong>做什么：</strong>人工拧4角螺丝，调整弹簧压力，使床面大致水平</p>
+          <p style="margin-top: 10px;"><strong>为什么：</strong>建立机械基准，消除极端倾斜，让后续步骤更准确</p>
+          <p style="margin-top: 10px;"><strong>怎么用：</strong>将 A4 纸放在喷嘴与床之间，调节螺丝使纸张刚好能移动</p>
+          <p style="margin-top: 10px; color: var(--color-teal);"><strong>KLP1 状态：</strong>V2.2 出厂已调好，平时无需再调</p>
+        </div>
+        <div class="detail-card" id="detail2">
+          <h5>Step 2: SCREWS_TILT_CALCULATE <span class="badge" style="background: var(--color-blue);">第2步</span></h5>
+          <p><strong>做什么：</strong>4角探针采样，计算螺丝旋转量，按指示人工拧螺丝</p>
+          <p style="margin-top: 10px;"><strong>为什么：</strong>消除系统性倾斜（床面整体倾斜角度），这是机械误差的主要来源</p>
+          <p style="margin-top: 10px;"><strong>怎么用：</strong>在 Klipper 控制台运行 SCREWS_TILT_CALCULATE，按结果拧螺丝</p>
+          <p style="margin-top: 10px; color: var(--color-teal);"><strong>KLP1 状态：</strong>KLP1 已配置，命令：SCREWS_TILT_CALCULATE</p>
+        </div>
+        <div class="detail-card" id="detail3">
+          <h5>Step 3: ABL 探针 <span class="badge" style="background: var(--color-teal);">第3步</span></h5>
+          <p><strong>做什么：</strong>BLTouch/Eddy 探针测量 Z 触发点，建立 Z 轴基准</p>
+          <p style="margin-top: 10px;"><strong>为什么：</strong>确定喷嘴与床面的精确距离，为 Mesh 提供基准点</p>
+          <p style="margin-top: 10px;"><strong>怎么用：</strong>运行 PROBE_CALIBRATE 或 SAFE_PROBE，保存结果</p>
+          <p style="margin-top: 10px; color: var(--color-teal);"><strong>KLP1 状态：</strong>已安装 BLTouch，配置在 printer.cfg</p>
+        </div>
+        <div class="detail-card" id="detail4">
+          <h5>Step 4: Mesh 网格补偿 <span class="badge" style="background: var(--color-green);">第4步</span></h5>
+          <p><strong>做什么：</strong>多点采样床面高度，生成高度图，软件自动补偿</p>
+          <p style="margin-top: 10px;"><strong>为什么：</strong>兜底床面不平（热变形/材质不均/长期使用变形）</p>
+          <p style="margin-top: 10px;"><strong>怎么用：</strong>运行 BED_MESH_CALIBRATE，建议 4x4 或 5x5 网格</p>
+          <p style="margin-top: 10px; color: var(--color-teal);"><strong>KLP1 状态：</strong>已配置，bed_mesh 在每次打印前自动运行</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4️⃣ KLP1 V2.2 路径推荐 -->
+    <section id="klp1">
+      <h2 class="section-title"><span class="num">3</span>KLP1 V2.2 路径推荐</h2>
+      
+      <div class="current-state">
+        <h4>当前状态</h4>
+        <p>BLTouch + Mesh = <strong style="color: var(--color-orange);">±0.1-0.15mm</strong></p>
+        <p style="margin-top: 10px; color: var(--text-secondary);">四件套已全部配置：机械粗调 → SCREWS → ABL → Mesh</p>
+      </div>
+
+      <h4 style="color: var(--color-cyan); margin: 30px 0 20px;">升级路径时间轴</h4>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="dot"></div>
+          <div class="phase">现在</div>
+          <div class="cost">¥0</div>
+          <div class="precision">±0.1-0.15mm</div>
+          <div class="result">四件套全开<br><span style="color: var(--color-green);">工业件够用</span></div>
+        </div>
+        <div class="timeline-item">
+          <div class="dot"></div>
+          <div class="phase">阶段 1</div>
+          <div class="cost">¥280</div>
+          <div class="precision">±0.08mm</div>
+          <div class="result">换 Eddy 探针<br><span style="color: var(--color-teal);">推荐升级</span></div>
+        </div>
+        <div class="timeline-item">
+          <div class="dot"></div>
+          <div class="phase">阶段 2</div>
+          <div class="cost">¥1500-2000</div>
+          <div class="precision">±0.05mm</div>
+          <div class="result">双 Z 改造 + Eddy<br><span style="color: var(--color-orange);">高投入</span></div>
+        </div>
+        <div class="timeline-item">
+          <div class="dot"></div>
+          <div class="phase">阶段 3</div>
+          <div class="cost">¥2000+</div>
+          <div class="precision">±0.05mm 稳定</div>
+          <div class="result">碳纤维横梁 + 钢架<br><span style="color: var(--color-gold);">工业级</span></div>
+        </div>
+      </div>
+
+      <div class="recommendation">
+        推荐：工业件路线 → 阶段 0 (当前) + 阶段 1 (换 Eddy) 即可达到 ±0.08mm
+      </div>
+    </section>
+
+    <!-- 5️⃣ K1 Max 路径推荐 -->
+    <section id="k1max">
+      <h2 class="section-title"><span class="num">4</span>K1 Max 路径推荐</h2>
+      
+      <div class="current-state">
+        <h4>当前状态</h4>
+        <p>CreOS 出厂 LiDAR（±0.08-0.12mm）/ 刷了 Klipper 但 bed_mesh 报错</p>
+        <p style="margin-top: 10px; color: var(--text-secondary);">需要根据你的目标选择合适的路线</p>
+      </div>
+
+      <h4 style="color: var(--color-cyan); margin: 30px 0 20px;">决策树</h4>
+      <div class="decision-tree">
+        <div class="tree-node">
+          <div class="tree-question" data-target="goal">
+            <span>你想要什么？</span>
+            <span class="tree-toggle">▶</span>
+          </div>
+          <div class="tree-branches" id="goal">
+            <div class="tree-option" data-target="route-a">
+              <div class="option-title">A. LAN 打印 + 远程监控</div>
+              <div class="option-desc">需要网络打印功能</div>
+            </div>
+            <div class="tree-option" data-target="route-b">
+              <div class="option-title">B. 只要 Z 精度</div>
+              <div class="option-desc">精度优先</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="route-detail" id="route-a">
+          <h5>路线 A: LAN 打印 + 远程监控</h5>
+          <p><strong>方案：</strong>K1Plus Community Firmware</p>
+          <p style="margin-top: 10px;"><strong>效果：</strong></p>
+          <ul style="color: var(--text-secondary); margin-left: 20px;">
+            <li>自配 K1 Max 专用固件</li>
+            <li>LiDAR 当虚拟探针使用</li>
+            <li>精度：±0.1mm</li>
+          </ul>
+          <p style="margin-top: 10px; color: var(--color-teal);"><strong>推荐度：</strong>适合需要远程操作的用户</p>
+        </div>
+
+        <div class="tree-node">
+          <div class="tree-question" data-target="precision-choice">
+            <span>B 精度选择</span>
+            <span class="tree-toggle">▶</span>
+          </div>
+          <div class="tree-branches" id="precision-choice">
+            <div class="tree-option" data-target="route-c">
+              <div class="option-title">±0.05mm 精度</div>
+              <div class="option-desc">工业件级别，需要破坏性改装</div>
+            </div>
+            <div class="tree-option" data-target="route-d">
+              <div class="option-title">±0.1mm 够用</div>
+              <div class="option-desc">普通工业件打印</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="route-detail" id="route-c">
+          <h5>路线 C: 加装 BLTouch/Eddy</h5>
+          <p><strong>效果：</strong>精度提升到 ±0.05mm</p>
+          <p style="margin-top: 10px;"><strong style="color: #e74c3c;">代价：</strong></p>
+          <ul style="color: var(--text-secondary); margin-left: 20px;">
+            <li>破坏性改装</li>
+            <li>需拆机走线</li>
+            <li>投入较大</li>
+          </ul>
+          <p style="margin-top: 10px; color: var(--color-orange);"><strong>建议：</strong>慎重考虑，K1 Max 单 Z 结构改善有限</p>
+        </div>
+
+        <div class="route-detail" id="route-d">
+          <h5>路线 D: 退回 CreOS 出厂</h5>
+          <p><strong>效果：</strong>恢复出厂设置，使用原厂 LiDAR</p>
+          <p style="margin-top: 10px;"><strong>优点：</strong></p>
+          <ul style="color: var(--text-secondary); margin-left: 20px;">
+            <li>最省事</li>
+            <li>出厂精度够用</li>
+            <li>LiDAR 自动调平</li>
+          </ul>
+          <p style="margin-top: 10px;"><strong>缺点：</strong>失去 LAN 打印功能</p>
+          <p style="margin-top: 10px; color: var(--color-green);"><strong>推荐度：</strong>不需要远程打印的首选</p>
+        </div>
+      </div>
+
+      <h4 style="color: var(--color-cyan); margin: 30px 0 20px;">三条路线对比</h4>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>路线</th>
+            <th>精度</th>
+            <th>工作量</th>
+            <th>适合场景</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>A: K1Plus Community</td>
+            <td>±0.1mm</td>
+            <td>中等</td>
+            <td>需要 LAN 打印 + 远程监控</td>
+          </tr>
+          <tr>
+            <td>C: 加装 BLTouch/Eddy</td>
+            <td class="highlight">±0.05mm</td>
+            <td>大（破坏性改装）</td>
+            <td>追求最高精度，放弃原厂保修</td>
+          </tr>
+          <tr>
+            <td>D: 退回 CreOS 出厂</td>
+            <td>±0.08-0.12mm</td>
+            <td>小</td>
+            <td>不需要 LAN，只要正常打印</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 6️⃣ 调平精度 vs Z 架构 -->
+    <section id="z-arch">
+      <h2 class="section-title"><span class="num">5</span>调平精度 vs Z 架构</h2>
+      
+      <div class="recommendation" style="background: linear-gradient(135deg, var(--color-purple), var(--color-blue));">
+        关键论断：单 Z ±0.1mm | 双 Z ±0.05mm | 4Z ±0.03mm
+      </div>
+
+      <h4 style="color: var(--color-cyan); margin: 30px 0 20px;">主流机器对比</h4>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>机器</th>
+            <th>Z 架构</th>
+            <th>探针</th>
+            <th>实测精度</th>
+            <th>价格</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>拓竹 A1</td>
+            <td>单 Z 皮带</td>
+            <td>微动 + Lidar</td>
+            <td>±0.08-0.12mm</td>
+            <td>¥2500</td>
+          </tr>
+          <tr>
+            <td>创想 K1 Max</td>
+            <td>单 Z 皮带</td>
+            <td>微动 + LiDAR</td>
+            <td>±0.08-0.12mm</td>
+            <td>¥1588</td>
+          </tr>
+          <tr>
+            <td>KLP1 V2.2</td>
+            <td>单 Z + 双丝杠（同步带）</td>
+            <td>BLTouch</td>
+            <td>±0.1-0.15mm</td>
+            <td>¥1500</td>
+          </tr>
+          <tr>
+            <td>拓竹 X1C</td>
+            <td class="highlight">双 Z 丝杠</td>
+            <td>Eddy 涡流</td>
+            <td class="highlight">±0.02-0.05mm</td>
+            <td>¥7000</td>
+          </tr>
+          <tr>
+            <td>Voron 2.4</td>
+            <td class="highlight">双 Z 丝杠</td>
+            <td>涡流/Voron Tap</td>
+            <td class="highlight">±0.05-0.08mm</td>
+            <td>¥6000</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="method-card" style="margin-top: 30px; border-color: var(--color-gold);">
+        <h4 style="color: var(--color-gold);">达到 0.05mm 精度的 3 大前提</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 15px;">
+          <div>
+            <div style="color: var(--color-purple); font-weight: 600;">1. Z 架构</div>
+            <div style="color: var(--text-secondary);">独立双电机驱动</div>
+          </div>
+          <div>
+            <div style="color: var(--color-blue); font-weight: 600;">2. 探针</div>
+            <div style="color: var(--text-secondary);">Eddy 涡流 / Voron Tap</div>
+          </div>
+          <div>
+            <div style="color: var(--color-green); font-weight: 600;">3. 机械刚性</div>
+            <div style="color: var(--text-secondary);">钢架 / 碳纤维横梁</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7️⃣ FAQ + 总结 -->
+    <section id="faq">
+      <h2 class="section-title"><span class="num">6</span>FAQ + 总结</h2>
+      
+      <h4 style="color: var(--color-cyan); margin-bottom: 20px;">常见问题</h4>
+      
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>Q1: 调平方式多久校准一次？</span>
+          <span class="faq-toggle">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p><strong>Mesh：</strong>每次打印前自动运行</p>
+          <p><strong>SCREWS_TILT：</strong>每周一次或更换耗材/热床后</p>
+          <p><strong>机械粗调：</strong>每月检查一次或搬家/震动后</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>Q2: bed_mesh 跑一半就 Shutdown 怎么办？</span>
+          <span class="faq-toggle">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p>这是 K1 Max 等弱性能主板的常见问题。解决方案：</p>
+          <ul style="margin-left: 20px; margin-top: 10px;">
+            <li>删除 mesh_pps 参数</li>
+            <li>改用 LAGRANGE 插值算法</li>
+            <li>调整 mesh_min/max：从 30,30 改为 270,270（扩大范围减少点数）</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>Q3: 拓竹 A1 的 Lidar 跟 K1 Max 的 LiDAR 一样吗？</span>
+          <span class="faq-toggle">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p><strong>原理类似：</strong>都是激光测距</p>
+          <p><strong>主要区别：</strong></p>
+          <ul style="margin-left: 20px; margin-top: 10px;">
+            <li>床面尺寸：A1 是 256×256mm，K1 Max 是 300×300mm</li>
+            <li>AI 算法：创想三维 AI vs 拓竹 AI</li>
+            <li>集成度：拓竹深度集成，A1 自动校准更流畅</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>Q4: SCREWS_TILT_CALCULATE 跟 Mesh 哪个先做？</span>
+          <span class="faq-toggle">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p><strong>先 SCREWS，后 Mesh：</strong></p>
+          <ol style="margin-left: 20px; margin-top: 10px;">
+            <li>SCREWS_TILT_CALCULATE 消除系统性倾斜（床面整体倾斜）</li>
+            <li>Mesh 网格补偿床面局部不平（凹陷/凸起）</li>
+          </ol>
+          <p style="margin-top: 10px;">顺序不能颠倒，否则 Mesh 会把倾斜也补偿进去，导致第一层不均匀。</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <span>Q5: KLP1 V2.2 升级到 0.05mm 值不值？</span>
+          <span class="faq-toggle">▼</span>
+        </div>
+        <div class="faq-answer">
+          <p><strong>取决于你的需求：</strong></p>
+          <ul style="margin-left: 20px; margin-top: 10px;">
+            <li>普通工业件：±0.1mm 够用，当前四件套已满足</li>
+            <li>高精度件：±0.05mm 需要 ¥1500-2000 改造（双Z + Eddy）</li>
+            <li>顶级需求：换 X1C 或 Voron 2.4 更划算</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="summary-box">
+        <h4>总结</h4>
+        <p style="color: var(--text-secondary); line-height: 1.8;">
+          调平 4 件套是工业件打印的必备组合：<br>
+          <strong style="color: var(--color-purple);">机械粗调</strong> → 
+          <strong style="color: var(--color-blue);">SCREWS_TILT</strong> → 
+          <strong style="color: var(--color-teal);">ABL 探针</strong> → 
+          <strong style="color: var(--color-green);">Mesh 网格</strong><br><br>
+          <strong>KLP1 V2.2：</strong>四件套已全，升级 Eddy 探针可达 ±0.08mm<br>
+          <strong>K1 Max：</strong>根据需求选择路线 A/B/C，推荐退回出厂或刷 K1Plus
+        </p>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <p>教程 #60 | 3D 打印机调平方式完整对比</p>
+    <p style="margin-top: 10px;">
+      <a href="https://github.com/FullPeak-andy/3D-Printing-Learning-Materials" target="_blank">GitHub 仓库</a>
+      | 由 <strong>Andy</strong> 制作
+    </p>
+  </footer>
+
+  <script>
+    // Tab Switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.dataset.tab;
+        
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        btn.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+
+    // 4-Piece Flow Animation
+    const flowSteps = document.querySelectorAll('.flow-step');
+    const detailCards = document.querySelectorAll('.detail-card');
+    
+    function playFlowAnimation() {
+      flowSteps.forEach((step, i) => {
+        step.classList.remove('active');
+        setTimeout(() => {
+          step.classList.add('active');
+          detailCards[i].classList.add('show');
+        }, i * 600);
+      });
+      
+      detailCards.forEach((card, i) => {
+        if (i > 0) {
+          setTimeout(() => {
+            detailCards[i-1].classList.remove('show');
+          }, i * 600);
+        }
+      });
+    }
+    
+    // Click to show detail
+    flowSteps.forEach((step, i) => {
+      step.addEventListener('click', () => {
+        detailCards.forEach(c => c.classList.remove('show'));
+        detailCards[i].classList.add('show');
+      });
+    });
+    
+    // Replay button
+    document.getElementById('replayBtn').addEventListener('click', playFlowAnimation);
+    
+    // Initial animation on load
+    setTimeout(playFlowAnimation, 500);
+
+    // Decision Tree Toggle
+    document.querySelectorAll('.tree-question').forEach(question => {
+      question.addEventListener('click', () => {
+        const target = question.dataset.target;
+        const branches = document.getElementById(target);
+        const toggle = question.querySelector('.tree-toggle');
+        
+        branches.classList.toggle('show');
+        toggle.classList.toggle('open');
+        question.classList.toggle('active');
+      });
+    });
+
+    // Route Options
+    document.querySelectorAll('.tree-option').forEach(option => {
+      option.addEventListener('click', () => {
+        const target = option.dataset.target;
+        const detail = document.getElementById(target);
+        
+        if (detail) {
+          document.querySelectorAll('.route-detail').forEach(d => d.classList.remove('show'));
+          detail.classList.add('show');
+        }
+      });
+    });
+
+    // FAQ Toggle
+    document.querySelectorAll('.faq-question').forEach(question => {
+      question.addEventListener('click', () => {
+        const answer = question.nextElementSibling;
+        const toggle = question.querySelector('.faq-toggle');
+        
+        answer.classList.toggle('show');
+        toggle.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>
